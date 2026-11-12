@@ -1,5 +1,26 @@
 # CHANGELOG
 
+## 0.12.2 — 2026-11-13
+
+补上冻结基线功能的测试。README 与 api_guide 都写了 freeze/compare/list，
+但此前**零测试覆盖**。
+
+### 端到端验证
+三种操作全部跑通。核心行为确认：
+
+| 场景 | comparable | deltas |
+|---|---|---|
+| 同一 config_hash | true | 逐项 delta |
+| 改一个旋钮 | **false** | **null**（并列出 changed_fields） |
+
+**不可比时拒绝给 delta** 是整个机制的意义——若悄悄给差值，
+读者会拿两次不可比的运行做比较。
+
+### 新增
+`tests/test_compare_baseline.py`（7 例），含"异配置必须拒绝"。
+198 passed / 1 skipped；claims 71/71。
+
+
 ## 0.12.1 — 2026-11-13
 
 样本外复现上轮的 T+1 拆解结论。

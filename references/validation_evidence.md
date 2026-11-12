@@ -59,7 +59,7 @@ python3 -m pytest tests/ -q -m slow         # 区分度对照，约 2 分钟
 
 | 项 | 结果 |
 |---|---|
-| 用例总数 | 192（191 通过 + 1 跳过） |
+| 用例总数 | 199（198 通过 + 1 跳过） |
 | 失败 | 0 |
 | 环境 | Python 3.12.12 / 3.11.16 |
 | 全量耗时 | 快测约 47 秒；慢测（区分度对照）另约 2 分钟 |
@@ -77,6 +77,7 @@ python3 -m pytest tests/ -q -m slow         # 区分度对照，约 2 分钟
 | `test_validation_claims.py` | 9 | **文档数字对账**、防漂移、区分度对照、**陈旧数字扫描** |
 | `test_data_quality_audit.py` | 6 | 板块分类、涨跌停口径、离线不把"未核验"当 0、报告回显 |
 | `test_trade_audit.py` | 4 | **逐笔价格/算术反查**、跨日覆盖、故意改价必被抓 |
+| `test_compare_baseline.py` | 7 | **冻结基线**、同配置给 delta、异配置拒绝、结构化错误 |
 | `test_value_decomposition.py` | 4 | **T+1 强制隔夜**、拆解前提、summary 形状 |
 | `test_credentials.py` | 6 | **引号去除**、别名回退、缺凭证结构化报错、非法 URL 拒绝 |
 | `test_ci_config.py` | 4 | **CI 配置合法**、步骤齐全、build 先于 tests |
@@ -156,6 +157,44 @@ Welch 的分母用错，都会让所有"显著"失去意义。
 
 > 这些验证的是"实现是否符合统计定义"，不是"统计方法是否适用于本数据"。
 > 后者由 §5 的覆盖率闸门与 §4.5 的样本外复现共同约束。
+
+---
+
+## 1.0c 冻结基线（freeze / compare / list）
+
+README 与 `api_guide.md` 都写了这个功能，但此前**没有任何测试覆盖**。
+本轮端到端跑通三种操作：
+
+```bash
+python3 scripts/compare_baseline.py freeze output/report.json --name t1
+python3 scripts/compare_baseline.py list
+python3 scripts/compare_baseline.py compare output/report.json --against baselines/t1.json
+```
+
+### 核心行为：不可比时拒绝给 delta
+
+| 场景 | `comparable` | `deltas` | 说明 |
+|---|---|---|---|
+| 同一 config_hash | `true` | 逐项 delta | 可比 |
+| 改一个旋钮（`wait_bars`） | **`false`** | **`null`** | 列出 `changed_fields: ["semantics_hash"]` |
+
+实测（改 `wait_bars` 后与基线比较）：
+
+```json
+{
+  "comparable": false,
+  "changed_fields": ["semantics_hash"],
+  "deltas": null,
+  "note": "config_hash 不一致，差异不可解读；请确认语义、夹具或日志来源是否变化"
+}
+```
+
+这是整个机制的意义所在——若它悄悄给出一个差值，读者会拿两次**不可比**的运行
+做比较，还以为在比同一件事。
+
+### 后补的测试
+`tests/test_compare_baseline.py`（7 例）：freeze 落盘、同配置给 delta、
+**异配置拒绝 delta**、list 元数据、缺文件与坏 JSON 的结构化错误。
 
 ---
 

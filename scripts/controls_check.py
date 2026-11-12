@@ -113,16 +113,23 @@ def run_controls(bars_dir: Path, ref_dir: Path) -> Dict[str, Any]:
                            run_attribution=False)
             ac = out["alignment_conclusion"]
             verdict = ac["verdict"]
+            divergent = out["ledger"]["aggregate"]["total"]["divergent"]
+            # 空转对照：改了旋钮却一条差异都没有，说明这个样本量下
+            # 该旋钮根本不改变任何交易。这不是"判定器正确"，而是
+            # **对照实验没有生效**——必须报出来，否则是虚假的通过。
+            vacuous = divergent == 0
             results.append({
                 "case": ctrl["knob"],
                 "knob": ctrl["knob"],
                 "value": ctrl["value"],
                 "verdict": verdict,
                 "match_rate": ac["match_rate"],
-                "divergent": out["ledger"]["aggregate"]["total"]["divergent"],
+                "divergent": divergent,
                 "log_source": out["provenance"]["log_source"],
-                "ok": verdict not in ctrl["expect_not"],
-                "why": ctrl["why"],
+                "ok": verdict not in ctrl["expect_not"] and not vacuous,
+                "vacuous": vacuous,
+                "why": ctrl["why"] if not vacuous else
+                       "该样本量下此旋钮不改变任何交易，对照未生效",
             })
 
     failed = [r for r in results if not r["ok"]]
@@ -181,14 +188,15 @@ def main(argv: List[str] | None = None) -> int:
     parser.add_argument("--json", action="store_true")
     parser.add_argument(
         "--quick", action="store_true",
-        help="只用前 3 个交易日的标的做一次快速验证（CI 用，约 30 秒）",
+        help="用缩小的子集做快速验证（CI 用）。子集必须足够大，"
+             "让每个对照旋钮都能改变交易，否则会报 vacuous。",
     )
     args = parser.parse_args(argv)
 
     bars_dir = Path(args.bars_dir)
     ref_dir = Path(args.ref_dir)
     if args.quick:
-        bars_dir, ref_dir = _subset(bars_dir, ref_dir, days=3, max_symbols=120)
+        bars_dir, ref_dir = _subset(bars_dir, ref_dir, days=5, max_symbols=300)
 
     result = run_controls(bars_dir, ref_dir)
 

@@ -35,6 +35,7 @@ from scripts.fetch_data import DEFAULT_SYMBOLS, FetchError, _client, fetch  # no
 
 
 def _pick_universe(client: Any, date: str, limit: int) -> List[str]:
+    """单日抽样（保留供只构建一天时使用）。"""
     frame = client.get_trade_list(date=date, exchange="SH")
     if frame is None or len(frame) == 0:
         return list(DEFAULT_SYMBOLS)
@@ -45,6 +46,34 @@ def _pick_universe(client: Any, date: str, limit: int) -> List[str]:
         return symbols
     step = len(symbols) / limit
     return [symbols[int(i * step)] for i in range(limit)]
+
+
+def _pick_fixed_universe(client: Any, dates: List[str], limit: int) -> List[str]:
+    """构造**全期固定**的标的池。
+
+    为什么必须固定：跨日持仓的前提是同一只股票在相邻两个交易日都有数据。
+    若每天各自按当日 trade_list 抽样，池子每天都在变（实测相邻日重合度
+    最低只有 18.6%），昨天买的股票今天可能根本不在样本里——跨日逻辑
+    形同虚设，T+1 相关结论也就失去基础。
+
+    做法：取所有日期 trade_list 的**交集**（全期都能交易的标的），
+    再按代码排序等距抽样。交集本身也保证了没有中途退市/停牌断档。
+    """
+    common: set[str] | None = None
+    for date in dates:
+        frame = client.get_trade_list(date=date, exchange="SH")
+        if frame is None or len(frame) == 0:
+            continue
+        symbols = {str(s) for s in frame["symbol"].tolist()}
+        common = symbols if common is None else (common & symbols)
+    if not common:
+        return list(DEFAULT_SYMBOLS)
+
+    ordered = sorted(common)
+    if len(ordered) <= limit:
+        return ordered
+    step = len(ordered) / limit
+    return [ordered[int(i * step)] for i in range(limit)]
 
 
 def _fingerprint(paths: List[Path]) -> str:
@@ -156,8 +185,17 @@ def main(argv: List[str] | None = None) -> int:
 
     dates = [d.strip() for d in args.date.split(",") if d.strip()]
     try:
+        # 多日构建必须用全期固定标的池，否则跨日持仓无从谈起
+        selected = args.symbols
+        if not selected:
+            if len(dates) > 1:
+                selected = _pick_fixed_universe(_client(), dates, args.universe)
+                print(f"固定标的池：{len(selected)} 只（{dates[0]}–{dates[-1]} 全期可交易）")
+            else:
+                selected = None  # 单日仍走 build() 内部抽样
+
         manifests = [
-            build(date, args.symbols, args.universe, args.logged_profile)
+            build(date, selected, args.universe, args.logged_profile)
             for date in dates
         ]
         # 数据拉完后统一生成一次日志（跨日持仓需要看到全部交易日）

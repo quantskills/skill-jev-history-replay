@@ -209,3 +209,26 @@ def test_consistent_gate_documented():
     assert gate["min_rate"] == 0.98
     assert gate["max_divergent_abs"] == 0
     assert gate["max_divergent_ratio"] == 0.0
+
+
+def test_low_coverage_but_full_sample_significant_uses_full_sample():
+    """覆盖率不足时，若全样本 Welch 显著，应采用全样本结论而非一律 inconclusive。"""
+    base = _replay([0.0] * 1000)
+    cur = _replay([-0.05, 0.05] * 15)
+    out = report.build_value_assessment(base, cur, min_cycles=20)
+    dc = out["decision_changes"]
+    assert dc["paired_coverage"] < 0.10
+    w = out["effect_size"]["full_sample_welch"]
+    if w["p"] is not None and w["p"] < 0.05:
+        assert out["verdict"]["verdict"] in ("positive", "negative")
+        assert "全样本" in out["verdict"]["reason"]
+    else:
+        assert out["verdict"]["verdict"] == "inconclusive"
+
+
+def test_low_coverage_and_full_sample_flat_stays_inconclusive():
+    """覆盖率不足且全样本也不显著时，必须 inconclusive。"""
+    base = _replay([0.0] * 1000)
+    cur = _replay([0.0] * 30)
+    out = report.build_value_assessment(base, cur, min_cycles=20)
+    assert out["verdict"]["verdict"] == "inconclusive"

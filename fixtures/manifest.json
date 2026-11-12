@@ -1,18 +1,17 @@
 {
   "date": "20261112",
   "prev_date": "20261111",
-  "symbol_count": 500,
-  "bar_count": 120000,
-  "log_record_count": 2049,
+  "symbol_count": 300,
+  "bar_count": 72000,
+  "log_record_count": 0,
   "logged_profile": "jev_assumed",
-  "logged_semantics_hash": "91fecace6d6c78b0",
-  "fixture_fingerprint": "20cded18599c6218",
+  "fixture_fingerprint": "250b7572f2664790",
   "provenance": {
     "bars": "panda-data==1.0.6 get_stock_min / get_stock_daily，仅生成阶段调用",
     "logs": "synthetic：由 log_synth 按 logged_profile 生成，非 JEV 真实输出"
   },
   "data_quality": {
-    "series_count": 7000,
+    "series_count": 4200,
     "date_range": [
       "20261026",
       "20261112"
@@ -20,33 +19,33 @@
     "trading_days": 14,
     "checks": {
       "limit_up_touch": {
-        "count": 157,
-        "share": 0.0224,
+        "count": 74,
+        "share": 0.0176,
         "note": "当日最高价触及所在板块涨停价；重放仍会在该价位照常成交"
       },
       "limit_down_touch": {
-        "count": 45,
+        "count": 27,
         "share": 0.0064,
         "note": "当日最低价触及跌停价；跌停时卖出可能实际无法成交"
       },
       "board_mix": {
         "chinext": {
-          "count": 1898,
-          "share": 0.2711
+          "count": 1134,
+          "share": 0.27
         },
         "default": {
-          "count": 4277,
-          "share": 0.611
+          "count": 2576,
+          "share": 0.6133
         },
         "star": {
-          "count": 825,
-          "share": 0.1179
+          "count": 490,
+          "share": 0.1167
         }
       },
       "st": {
-        "count": 294,
-        "share": 0.042,
-        "symbols": 57,
+        "count": 196,
+        "share": 0.0467,
+        "symbols": 14,
         "note": "ST 标的有 5% 涨跌幅限制与特殊交易规则，本 skill 未做区分",
         "source": "panda_data.get_st_list"
       },
@@ -59,14 +58,14 @@
       }
     },
     "unmodeled_share": {
-      "st_or_suspended": 0.042,
-      "limit_touch": 0.0289
+      "st_or_suspended": 0.0467,
+      "limit_touch": 0.024
     },
     "caveat": "本 skill 不对这些状态做特殊处理：ST/停牌/涨跌停标的照常产生信号与成交。下面的占比就是结论的适用范围折扣——占比越高，结论越不能直接外推到实盘。",
-    "overall_unmodeled_upper_bound": 0.042,
+    "overall_unmodeled_upper_bound": 0.0467,
     "verdict": {
       "level": "moderate",
-      "reason": "未建模状态占比 4.20%，属可接受但需声明的范围"
+      "reason": "未建模状态占比 4.67%，属可接受但需声明的范围"
     }
   }
 }

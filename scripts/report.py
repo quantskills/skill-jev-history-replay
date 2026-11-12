@@ -44,15 +44,52 @@ def build_value_assessment(baseline_replay: Dict[str, Any],
     min_coverage = 0.10
     low_coverage = coverage < min_coverage
 
+    # 全样本 Welch 检验**不依赖配对**，因此不受覆盖率影响。
+    # 覆盖率闸门只约束配对检验；若配对样本不足以代表全样本，
+    # 但全样本检验本身显著，就用全样本结论——否则会把一个
+    # 有效证据错误地否掉。
+    full_sample = metrics.welch_test(
+        metrics.all_closed_returns(baseline_replay),
+        metrics.all_closed_returns(current_replay),
+    )
+    full_p = full_sample.get("p")
+    full_diff = full_sample.get("diff")
+    full_significant = (
+        full_p is not None and full_p < 0.05
+        and full_diff is not None and full_diff != 0
+        and full_sample.get("n_a", 0) >= min_cycles
+        and full_sample.get("n_b", 0) >= min_cycles
+    )
+
     comparable = (n >= min_cycles and cur_cycles > 0 and base_cycles > 0
                   and not low_coverage)
     if not comparable and low_coverage and n >= min_cycles:
-        verdict = "inconclusive"
-        reason = (
-            f"配对覆盖率仅 {coverage:.2%}（{n}/{base_cycles}），"
-            f"低于 {min_coverage:.0%} 门槛：两套语义的交易集合差异过大，"
-            "配对检验只覆盖重叠部分的少数周期，不能代表全样本"
-        )
+        if full_significant:
+            # 配对覆盖不足，但全样本检验显著：采用全样本结论
+            if full_diff < 0:
+                verdict = "negative"
+                reason = (
+                    f"配对覆盖率仅 {coverage:.2%}，配对检验不可外推；"
+                    f"改用不依赖配对的全样本 Welch 检验（{full_sample['n_a']:,} vs "
+                    f"{full_sample['n_b']:,}），均值差 {full_diff:.4%}，"
+                    f"p={full_p} — 显著更差"
+                )
+            else:
+                verdict = "positive"
+                reason = (
+                    f"配对覆盖率仅 {coverage:.2%}，配对检验不可外推；"
+                    f"改用不依赖配对的全样本 Welch 检验（{full_sample['n_a']:,} vs "
+                    f"{full_sample['n_b']:,}），均值差 {full_diff:.4%}，"
+                    f"p={full_p} — 显著更优"
+                )
+        else:
+            verdict = "inconclusive"
+            reason = (
+                f"配对覆盖率仅 {coverage:.2%}（{n}/{base_cycles}），"
+                f"低于 {min_coverage:.0%} 门槛：两套语义的交易集合差异过大，"
+                "配对检验只覆盖重叠部分的少数周期，不能代表全样本；"
+                f"全样本 Welch 检验也不显著（p={full_p}）"
+            )
     elif not comparable:
         verdict = "inconclusive"
         reason = f"配对周期数 {n} < min_cycles={min_cycles}，或某一侧无成交"
@@ -84,11 +121,6 @@ def build_value_assessment(baseline_replay: Dict[str, Any],
         )
 
     delta_stats = metrics.paired_delta_ci(deltas)
-    # 全样本检验：不依赖配对，不受覆盖率影响，作为独立佐证。
-    full_sample = metrics.welch_test(
-        metrics.all_closed_returns(baseline_replay),
-        metrics.all_closed_returns(current_replay),
-    )
     return {
         "baseline": {
             "profile": "naive_literal",
@@ -135,7 +167,7 @@ def build_value_assessment(baseline_replay: Dict[str, Any],
         "verdict": {
             "verdict": verdict,
             "reason": reason,
-            "rule": "配对周期数 >= min_cycles、配对覆盖率 >= 10%，且符号检验双侧 p<0.05：胜多于负 → positive，负多于胜 → negative；样本不足、覆盖率不足或胜/负不显著 → inconclusive。均值差与全样本 Welch 检验只作佐证，不单独决定方向",
+            "rule": "优先用配对检验：配对周期数 >= min_cycles、覆盖率 >= 10% 且符号检验 p<0.05。若覆盖率不足但全样本 Welch 检验显著（p<0.05 且两侧样本 >= min_cycles），采用全样本结论——它不依赖配对，不受覆盖率影响。两者都不满足 → inconclusive",
         },
     }
 

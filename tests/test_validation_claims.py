@@ -85,21 +85,31 @@ def test_claims_are_internally_consistent(report):
 def test_verdict_discriminates_semantic_difference(tmp_path):
     """阳性/阴性对照：判定器必须随语义差异变化，而不是永远 inconclusive。
 
-    只跑 2 天 / 60 标的的微缩版，控制测试时长；完整版见
-    `python3 scripts/controls_check.py`。
+    用 5 天 / 300 标的的子集，控制测试时长的同时保证每个旋钮都能产生差异；
+    完整版见 `python3 scripts/controls_check.py`。
+
+    子集不能太小：2 天 / 60 标的时 exit_eval 与 signal_gain_pct 产生 0 条差异，
+    对照变成空转（vacuous），测不出任何东西。
+    
     """
     from scripts.controls_check import _subset, run_controls
 
     bars_dir = REPO_ROOT / "fixtures" / "bars"
     ref_dir = REPO_ROOT / "fixtures" / "reference"
-    sub_bars, sub_ref = _subset(bars_dir, ref_dir, days=2, max_symbols=60)
+    sub_bars, sub_ref = _subset(bars_dir, ref_dir, days=5, max_symbols=300)
     result = run_controls(sub_bars, sub_ref)
 
     assert result["failed"] == [], (
         "判定器未能区分语义差异：\n"
-        + "\n".join(f"  {r['case']}: {r['verdict']} — {r['why']}"
-                    for r in result["failed"])
+        + "\n".join(f"  {r['case']}: {r['verdict']} (div={r['divergent']}) "
+                    f"— {r['why']}" for r in result["failed"])
     )
+    # 每个阴性对照都必须真的产生差异，否则是空转
+    for r in result["results"]:
+        if r["knob"] is not None:
+            assert r["divergent"] > 0, (
+                f"{r['knob']} 对照产生 0 条差异——样本不足，对照未生效"
+            )
 
     by_case = {r["case"]: r for r in result["results"]}
     # 阳性对照：完全一致必须 consistent 且零冲突

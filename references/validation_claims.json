@@ -2,41 +2,42 @@
   "_comment": "验证文档声称的数字。scripts/verify_claims.py 会逐项与 output/report.json 核对；改代码后若数字漂移，CI 会失败。",
   "fixture": {
     "dates": 14,
-    "symbol_count": 500,
-    "series_count": 7000,
-    "bar_count": 1680000
+    "symbol_count": 300,
+    "series_count": 4200,
+    "bar_count": 1008000,
+    "universe_policy": "全期固定（14 日 trade_list 交集，按代码排序等距抽样）"
   },
   "axes": {
     "condition": {
-      "comparable": 46642,
+      "comparable": 28754,
       "match_rate": 1.0
     },
     "signal": {
-      "comparable": 2480,
+      "comparable": 1496,
       "match_rate": 1.0
     },
     "wait": {
-      "comparable": 2480,
+      "comparable": 1496,
       "match_rate": 1.0
     },
     "entry": {
-      "comparable": 2480,
+      "comparable": 1496,
       "match_rate": 1.0
     },
     "exit": {
-      "comparable": 4028,
-      "match_rate": 0.8751,
+      "comparable": 2844,
+      "match_rate": 0.8667,
       "statuses": {
-        "open_position": 466
+        "open_position": 74
       }
     }
   },
   "total": {
-    "comparable": 58110,
-    "divergent": 503,
-    "one_sided": 1633824,
-    "match": 57607,
-    "match_rate": 0.9913
+    "comparable": 36086,
+    "divergent": 379,
+    "one_sided": 979320,
+    "match": 35707,
+    "match_rate": 0.9895
   },
   "attribution": {
     "verdict": "single_knob",
@@ -48,23 +49,23 @@
     "verdict": "inconclusive"
   },
   "value_assessment": {
-    "verdict": "inconclusive",
-    "paired_coverage": 0.0374,
-    "welch_p": 0.350006
+    "verdict": "negative",
+    "paired_coverage": 0.0437,
+    "welch_p": 7e-06
   },
   "provenance": {
     "log_source": "synthetic"
   },
   "summary": {
-    "signal_count": 2480,
-    "closed_cycles": 2014
+    "signal_count": 1496,
+    "closed_cycles": 1422
   },
   "data_quality": {
-    "st_share": 0.042,
+    "st_share": 0.0467,
     "suspended_share": 0.0,
-    "limit_up_touch_share": 0.0224,
+    "limit_up_touch_share": 0.0176,
     "limit_down_touch_share": 0.0064,
-    "overall_unmodeled_upper_bound": 0.042,
+    "overall_unmodeled_upper_bound": 0.0467,
     "verdict_level": "moderate"
   }
 }

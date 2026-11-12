@@ -99,6 +99,39 @@ def test_code_defaults_match_yaml_config():
     assert diffs == [], f"默认值与 YAML 不一致：{diffs}"
 
 
+def test_config_rejects_unknown_override_key():
+    """`config` 覆盖里的未知键必须报错，不能静默忽略。
+
+    `input_data` 对未知字段一直报 `unknown_field`（"刻意不做静默忽略"），
+    但 `config` 曾把拼错的键默默合并进去：写 `time_tolerence_minutes: 5`
+    时真正生效的仍是默认值 1，评测跑完看着正常、结果却与预期不符。
+    """
+    from scripts import config as cfg
+
+    with pytest.raises(cfg.ConfigError) as exc:
+        cfg.load_config(overrides={"time_tolerence_minutes": 5})
+    assert exc.value.code == "unknown_config"
+    assert "time_tolerence_minutes" in exc.value.message
+
+
+def test_config_accepts_every_documented_key():
+    """api_guide 列出的 config 键必须全部被接受并生效。"""
+    from scripts import config as cfg
+
+    documented = {
+        "time_tolerance_minutes": 2,
+        "price_tolerance_bps": 7,
+        "min_cycles": 25,
+        "explained_rate_threshold": 0.9,
+        "max_inline_rows": 10,
+        "logged_profile": "naive_literal",
+        "log_source": "synthetic",
+    }
+    resolved = cfg.load_config(overrides=documented)
+    for key, value in documented.items():
+        assert resolved[key] == value, f"{key} 未生效：{resolved[key]} != {value}"
+
+
 def test_missing_pyyaml_is_reported():
     """缺 pyyaml 属有意降级，但必须留下可查的警告，不能静默。"""
     import builtins

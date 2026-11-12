@@ -66,13 +66,13 @@ python3 -m pytest tests/ -q -m slow         # 区分度对照，约 2 分钟
 
 | 文件 | 用例数 | 覆盖 |
 |---|---|---|
-| `test_semantics.py` | 13 | 旋钮取值校验、哈希敏感性、**默认值与 YAML 一致**、降级可见 |
+| `test_semantics.py` | 15 | 旋钮取值校验、哈希敏感性、**默认值与 YAML 一致**、降级可见、**config 未知键必报错**、**文档所列 config 键全部生效** |
 | `test_data_loader.py` | 18 | 格式容错、gzip、字段校验、重复检测、**分钟缺口与午休排除** |
 | `test_replayer.py` | 18 | 条件判断、连续性、等待/入场、四条退出路径、T+1、时间边界 |
 | `test_cross_day.py` | 6 | 跨日持仓传递、未平仓如实上报、单日行为不变 |
-| `test_aligner.py` | 15 | 五轴对齐、配对唯一性、单边缺失、差异分类、容差分离 |
+| `test_aligner.py` | 16 | 五轴对齐、配对唯一性、单边缺失、差异分类、容差分离、**每轴 match/divergent 必须存在** |
 | `test_attribution.py` | 11 | 单旋钮解释率、视图一致性、**多旋钮漏报成因** |
-| `test_report.py` | 26 | verdict 判定、覆盖率门槛、零冲突门槛、Welch 检验 |
+| `test_report.py` | 27 | verdict 判定、覆盖率门槛、零冲突门槛、Welch 检验、**p 值不得被舍入为 0** |
 | `test_end_to_end.py` | 11 | 输入校验、来源判定、产物落盘、确定性 |
 | `test_validation_claims.py` | 13 | **文档数字对账**、防漂移、区分度对照、**陈旧数字扫描** |
 | `test_data_quality_audit.py` | 6 | 板块分类、涨跌停口径、离线不把"未核验"当 0、报告回显 |
@@ -958,7 +958,7 @@ python3 scripts/value_decomposition.py \
 
 ---
 
-## 6. 验证中发现并修复的缺陷（26 项）
+## 6. 验证中发现并修复的缺陷（29 项）
 
 以下都不是构造的测试用例，而是在真实数据上跑出来的：
 
@@ -990,6 +990,9 @@ python3 scripts/value_decomposition.py \
 | 24 | **证据文档逐文件用例数与实际不符** | 8 个文件错（如 `test_report.py` 写 24 实为 26） | 按 `pytest --collect-only` 全部改正 + 加防漂移测试 |
 | 25 | **README 目录树漏列脚本** | 中文漏 7 个、英文漏 12 个；两份都漏 `validation_evidence.md` | 补全 + `test_readme_trees_list_every_script` |
 | 26 | **夹具压缩包不可重现** | `gzip.open(...,"wb")` 把当前时间写进头部，同一份数据每次重建字节流不同 → `fixture_fingerprint` 每次都变，"冻结夹具"名不副实、`compare_baseline` 无故报不可比 | 改用 `GzipFile(..., mtime=0)` + `test_bar_gzip_is_reproducible` |
+| 27 | **`config` 静默接受拼错的键** | `input_data` 对未知字段报 `unknown_field`（"刻意不做静默忽略"），`config` 却把 `time_tolerence_minutes: 5` 悄悄合并进去、真正生效的仍是默认值 1，评测跑完看着正常却与预期不符 | `load_config` 校验未知键抛 `ConfigError("unknown_config")`；补 `test_config_rejects_unknown_override_key` 与 `test_config_accepts_every_documented_key` |
+| 28 | **`ledger.aggregate.by_axis` 各轴键集不一致** | 文档写"每个轴：match / divergent / one_sided"，但只有 exit 轴出现 `divergent`；按 `row["divergent"]` 取值会在四个轴上 KeyError，`comparable == match + divergent` 也无从校验 | 每轴固定输出 `match`/`divergent`（零也写）+ `test_every_axis_exposes_match_and_divergent_even_when_zero` |
+| 29 | **`sign_test_p` 被舍入成 0.0** | n=1,211 时精确二项 p=3.0e-12，`round(p, 6)` 压成 `0.0`，读者会当成"p 恰为 0"——统计上不可能，也会误判证据强度 | 改用 `float(f"{p:.4g}")` 保留科学计数法 + `test_sign_test_p_never_rounds_to_zero` |
 
 ---
 

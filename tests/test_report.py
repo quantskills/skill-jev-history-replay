@@ -115,6 +115,25 @@ def test_sign_test_symmetric():
     assert metrics.sign_test_p(10, 0) < metrics.sign_test_p(7, 3)
 
 
+def test_sign_test_p_never_rounds_to_zero():
+    """报告里的 `sign_test_p` 不能因为四舍五入变成 0.0。
+
+    精确二项检验在 n≈1200 时 p 可以到 1e-12。此前用 `round(p, 6)`
+    把它压成 `0.0`，读者会以为"p 恰为 0"——统计上不可能，
+    也会误判证据强度。小值必须以科学计数法保留。
+    """
+    from scripts import metrics
+
+    exact = metrics.sign_test_p(484, 727)
+    assert exact is not None and exact > 0, "精确 p 值不该为 0"
+    assert exact < 1e-6, "这个样本量下应是小概率"
+
+    # 报告侧的序列化方式必须保住这个量级
+    reported = float(f"{exact:.4g}")
+    assert reported > 0, f"序列化后变成 {reported}，应保留科学计数法"
+    assert reported < 1e-6
+
+
 def test_sign_test_no_samples():
     assert metrics.sign_test_p(0, 0) is None
 

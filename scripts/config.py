@@ -63,6 +63,16 @@ REFERENCE_SEMANTICS: Dict[str, Any] = {
 _LOAD_YAML_WARNINGS: list[str] = []
 
 
+class ConfigError(ValueError):
+    """配置错误。与 `run_eval.ReplayError` 分开定义以避免循环导入。"""
+
+    def __init__(self, code: str, message: str, hint: str = "") -> None:
+        super().__init__(message)
+        self.code = code
+        self.message = message
+        self.hint = hint
+
+
 def load_warnings() -> list[str]:
     """返回本次进程内配置加载过程中的降级原因。"""
     return list(_LOAD_YAML_WARNINGS)
@@ -128,7 +138,13 @@ def load_config(
     config_path: str | Path | None = None,
     overrides: Dict[str, Any] | None = None,
 ) -> Dict[str, Any]:
-    """合并配置：overrides > 环境变量 > YAML > 默认值。"""
+    """合并配置：overrides > 环境变量 > YAML > 默认值。
+
+    `overrides` 里的未知键会抛 `ConfigError`。`input_data` 对未知字段
+    坚持报 `unknown_field`（"刻意不做静默忽略"），`config` 却曾静默接受
+    拼错的键——写 `time_tolerence_minutes: 5` 会悄悄用回默认值 1，
+    评测结果看似正常却与预期不符。两边口径必须一致。
+    """
     config = copy.deepcopy(_DEFAULTS)
 
     if config_path is None:
@@ -151,6 +167,13 @@ def load_config(
             config[key] = env_val
 
     if overrides:
+        unknown = set(overrides) - set(_DEFAULTS)
+        if unknown:
+            raise ConfigError(
+                "unknown_config",
+                f"未知配置键：{sorted(unknown)}",
+                hint=f"允许的键：{sorted(_DEFAULTS)}",
+            )
         config = _deep_merge(config, overrides)
 
     return config

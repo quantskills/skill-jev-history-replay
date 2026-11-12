@@ -39,6 +39,10 @@ report = run(input_data, config=None)
 
 优先级：`run(config=...)` > 环境变量 `JEV_*` > `config/replay_config.yaml` > 内置默认值。
 
+`config` 里的未知键与 `input_data` 口径一致，同样抛 `ConfigError(code="unknown_config")`。
+键名拼错（如 `time_tolerence_minutes`）不会被静默忽略——否则评测照跑，
+用的却是默认值，结果与预期不符。
+
 ---
 
 ## 2. 返回值
@@ -55,8 +59,10 @@ report = run(input_data, config=None)
   "value_assessment": {...},
   "applicability": {...},
   "semantics": {...},
+  "logged_semantics": {...},   # 日志侧实际使用的语义档位（合成模式下用于追溯）
   "summary": {...},
-  "artifacts": {"report": "...", "ledger": "..."},
+  "per_day": {"20261112": {"comparable": 1478, "divergent": 23}, ...},
+  "artifacts": {"report": "...", "ledger": "..."},  # 仅 run() 返回，不写进 report.json
 }
 ```
 
@@ -92,9 +98,13 @@ report = run(input_data, config=None)
 | `baseline_divergences` | 当前配置差异总数 |
 | `trial_divergences` | 换旋钮后的差异总数（含可比项损失） |
 | `lost_comparable` | 因换旋钮而失去的比对数 |
+| `comparable_retention` | 试换后可比项占基线的比例（`trial_comparable / baseline_comparable`）。**可大于 1**——换旋钮后可比项变多了，例如 `breakout_field` 会带来 1.002 |
 | `alignment_preserved` | 可比项是否未减少 |
 | `explained` / `explained_rate` | 解释掉的差异数 / 比例 |
-| `skipped` / `reason` | 替代值非法时跳过 |
+| `skipped` | 替代值非法时跳过 |
+| `reason` | **仅 `skipped=true` 时出现**，说明跳过原因（如 `breakout_window` 无法再折半时） |
+
+> `reason` 不是每条都有——正常运行时不出现该键。取值请用 `.get("reason")`。
 
 **守卫规则**：`alignment_preserved=false` 时 `explained` 强制为 0。
 否则一个把配对全部打散的旋钮会假装"解释了全部差异"。

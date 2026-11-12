@@ -462,6 +462,12 @@ def aggregate_rows(rows_by_symbol: Dict[str, List[Dict[str, Any]]]) -> Dict[str,
         )
         per_axis[axis] = {
             **counts,
+            # `match` / `divergent` 必须始终存在（零也写），否则某轴恰好
+            # 没有冲突时这个键会整个消失。文档写的是"每个轴：match /
+            # divergent / one_sided"，读者按 `row["divergent"]` 取值会
+            # 在四个轴上直接 KeyError。
+            "match": counts.get("match", 0),
+            "divergent": counts.get("divergent", 0),
             "one_sided": one_sided,
             "comparable": comparable,
             "match_rate": (

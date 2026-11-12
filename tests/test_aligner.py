@@ -145,6 +145,30 @@ def test_aggregate_empty_is_none_rate():
     agg = aggregate_rows({"S": []})
     assert agg["total"]["match_rate"] is None
 
+
+def test_every_axis_exposes_match_and_divergent_even_when_zero():
+    """每个轴都必须给出 `match` / `divergent`，零也要写。
+
+    文档写的是"每个轴：match / divergent / one_sided"。但 `by_axis`
+    原先只存真实出现过的状态名——某轴恰好没有冲突时 `divergent`
+    这个键整个消失，读者按 `row["divergent"]` 取值会直接 KeyError，
+    而 `comparable == match + divergent` 也无法校验。
+    """
+    rows = {"S": [
+        {"axis": "condition", "symbol": "S", "time": "09:31", "status": "match"},
+        {"axis": "signal", "symbol": "S", "time": "09:31", "status": "jev_missing"},
+    ]}
+    by_axis = aggregate_rows(rows)["by_axis"]
+    for axis in ("condition", "signal", "wait", "entry", "exit"):
+        row = by_axis[axis]
+        assert "match" in row, f"{axis} 轴缺 match"
+        assert "divergent" in row, f"{axis} 轴缺 divergent"
+        assert "one_sided" in row, f"{axis} 轴缺 one_sided"
+        assert row["comparable"] == row["match"] + row["divergent"]
+        if row["comparable"]:
+            assert abs(row["match_rate"] - row["match"] / row["comparable"]) < 1e-3
+
+
 def test_pairing_tolerance_exceeds_verdict_tolerance():
     """配对容差必须大于判定容差，否则"差 2 分钟"会被误记成单边缺失。"""
     from scripts.aligner import _pair_cycles

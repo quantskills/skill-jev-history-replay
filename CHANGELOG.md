@@ -1,5 +1,58 @@
 # CHANGELOG
 
+## 0.12.6 — 2026-11-13
+
+这一轮核对**文档字段表**与**实际产物**是否一致。查出 3 个真实缺陷。
+
+### 缺陷 27：`config` 静默接受拼错的键
+
+`input_data` 对未知字段一直报 `unknown_field`（注释写明"刻意不做静默忽略"），
+但 `config` 把拼错的键默默 `_deep_merge` 进去：
+
+```python
+run({}, config={"time_tolerence_minutes": 5})   # 拼错
+# 实际生效的仍是默认值 1，评测跑完看着正常，结果却与预期不符
+```
+
+修复：`load_config` 校验未知键，抛 `ConfigError(code="unknown_config")`。
+`ConfigError` 定义在 `config.py` 内以免循环导入。
+
+### 缺陷 28：`ledger.aggregate.by_axis` 各轴键集不一致
+
+api_guide 写"每个轴：`match` / `divergent` / `one_sided`"，但实际
+**只有 exit 轴**有 `divergent`——其余四轴零冲突时该键整个消失。
+按文档写 `row["divergent"]` 会直接 KeyError，`comparable == match + divergent`
+也无从校验。
+
+修复：每轴固定输出 `match` / `divergent`（零也写）。
+实测修正后五轴均满足 `comparable == match + divergent`。
+
+### 缺陷 29：`sign_test_p` 被舍入成 0.0
+
+符号检验 wins=484 / losses=727（n=1,211），精确二项 p = **3.0e-12**，
+但报告用 `round(p, 6)` 把它压成 `0.0`。读者会当成"p 恰为 0"——
+统计上不可能，也会误判证据强度。
+
+修复：改用 `float(f"{p:.4g}")`，小值保留科学计数法。
+
+### 核对通过的项（无需改动）
+- api_guide 列出的 7 个 config 键全部实传入 `run(config=...)` 并确认生效
+- `summary` 的 11 个字段、`alignment_conclusion`、`value_assessment`
+  各子块字段与文档一致
+- 15 个顶层返回字段齐全（`artifacts` 属 `run()` 返回值，不在 `report.json`，
+  文档该节标题正是「返回值」，无误）
+
+### 文档更新
+- api_guide 补充 `config` 未知键的处理口径
+- api_guide 补 `comparable_retention`，并说明**可大于 1**（`breakout_field` 实测 1.002）
+- api_guide 标明 `reason` 仅在 `skipped=true` 时出现（原表列为常驻字段，误导）
+- 缺陷台账 26 → 29 项
+
+### 结果
+`verify_claims` 71/71；全量测试全部通过。
+
+---
+
 ## 0.12.5 — 2026-11-13
 
 按验证文档用**真实 panda 数据**跑了一整套验收，查出两个缺陷。

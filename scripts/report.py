@@ -153,7 +153,10 @@ def build_value_assessment(baseline_replay: Dict[str, Any],
             "paired_net_pct_delta": delta_stats,
             "full_sample_welch": full_sample,
             "win_loss": {"wins": wins, "losses": losses, "ties": n - wins - losses},
-            "sign_test_p": None if p_value is None else round(p_value, 6),
+            # 不能 round(p, 6)：精确二项检验在 n≈1200 时 p 可到 1e-12，
+            # 四舍五入会变成 0.0，读者会当成"p 恰为 0"（统计上不可能）。
+            # 保留有效数字，小值走科学计数法。
+            "sign_test_p": None if p_value is None else float(f"{p_value:.4g}"),
             "magnitude_note": "符号检验判断方向（多数周期是否改善），均值差判断幅度；两者可背离——少数大幅亏损能主导均值而多数周期只小赢",
             "relative_change": (
                 round(

@@ -1,5 +1,51 @@
 # CHANGELOG
 
+## 0.12.5 — 2026-11-13
+
+按验证文档用**真实 panda 数据**跑了一整套验收，查出两个缺陷。
+
+### 缺陷 23：多日 manifest 只打印、从不落盘
+
+`fixtures/manifest.json` 长期描述的是「最后一天」而不是整套夹具：
+
+| 字段 | manifest 声称 | 磁盘实际 |
+|---|---|---|
+| `bar_count` | 72,000 | **1,008,000** |
+| `log_record_count` | 0 | **34,590** |
+| `dates` | 不存在 | 14 个交易日 |
+
+根因：`build()` 每构建一天都会覆盖写一次 `manifest.json`，
+而 `main()` 把合并后的多日 manifest **只 `print` 没写盘**。
+报告里的 `provenance.fixture_manifest` 直接引用它，等于对外错报夹具规模。
+
+### 缺陷 26：夹具压缩包不可重现
+
+`gzip.open(..., "wb")` 会把**当前时间**写进 gzip 头。同一份数据每次重建
+都得到不同字节流，`fixture_fingerprint` 每次都变——「冻结夹具」名不副实，
+`compare_baseline` 还会无故报不可比。改用 `GzipFile(..., mtime=0)`。
+
+实测：`250b7572` → `685dec07`（重建后）→ 修复后连压两次都是 `8f140eb4`。
+解压后的 K 线内容三次完全一致，只有 gzip 头不同。
+
+### 修复
+- `main()` 合并结果写盘；`build()` 改用 `mtime=0` 压缩
+- 新增 `test_manifest_describes_the_actual_fixtures`：以磁盘实际
+  K 线根数、日志条数、日期列表反查 manifest（实测能抓出 72000 vs 1008000）
+- 新增 `test_bar_gzip_is_reproducible`：gzip 头 MTIME 必须为 0
+- 按实际夹具重建 manifest 并重新压包
+
+### 顺带修正
+- 证据文档第 6 节缺陷台账从 22 项补到 26 项
+- 新增 `test_defect_ledger_count_matches_rows`：标题的「N 项」必须等于表行数且编号连续
+
+### 真实数据验收结果（未变）
+14 交易日 / 300 只全期固定标的 / 4,200 序列：合计 36,086 可比、0.9895；
+价值 negative，82.6% 由 `t_plus_1` 驱动；样本外 11 天结构性结论全部复现，
+唯显著性减弱（p 7e-06 → 0.0488）。
+`alignment_conclusion.verdict` 仍为 **inconclusive**（日志仍是合成）。
+
+---
+
 ## 0.12.4 — 2026-11-13
 
 验证「README / 证据文档里的结构性声明是否与实际一致」。

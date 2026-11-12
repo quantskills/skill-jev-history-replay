@@ -111,6 +111,30 @@ def test_readme_trees_list_every_script():
     assert problems == {}, problems
 
 
+def test_defect_ledger_count_matches_rows():
+    """证据文档第 6 节标题里的缺陷数，必须等于表里实际的行数。
+
+    这类"标题写 N 项"的描述最容易在追加条目后忘了改。
+    """
+    doc = REPO_ROOT / "references" / "validation_evidence.md"
+    text = doc.read_text(encoding="utf-8")
+
+    match = re.search(r"## 6\. 验证中发现并修复的缺陷（(\d+) 项）", text)
+    assert match, "找不到第 6 节的缺陷数标题"
+    claimed = int(match.group(1))
+
+    start = text.index("## 6. 验证中发现并修复的缺陷")
+    end = text.index("## 7. 错误路径")
+    rows = re.findall(r"^\| (\d+) \|", text[start:end], re.MULTILINE)
+
+    assert claimed == len(rows), (
+        f"标题写 {claimed} 项，表里实际 {len(rows)} 行"
+    )
+    assert [int(r) for r in rows] == list(range(1, claimed + 1)), (
+        "编号不连续或有重复"
+    )
+
+
 def test_evidence_table_lists_every_test_file():
     """`validation_evidence.md` 的测试清单必须与 `tests/` 实际文件一一对应。
 
@@ -129,7 +153,7 @@ def test_evidence_table_lists_every_test_file():
 def test_evidence_table_counts_match_collection():
     """证据文档里每个测试文件的用例数，必须等于 pytest 实际收集到的数量。
 
-    此前表格整体失真（8 个文件的数字与实际不符，总量 204 vs 实际 192），
+    此前表格整体失真（8 个文件的数字与实际不符），
     而 `verify_claims` 只对账关键指标、不检查这张表。
     这里用 pytest 自己的 `--collect-only` 作为唯一真相，
     避免"手数 def 个数"被参数化、fixture 影响。

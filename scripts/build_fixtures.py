@@ -101,7 +101,11 @@ def build(date: str, symbols: List[str] | None, universe: int,
     # 大夹具压成 .json.gz（回放器透明解压），避免仓库里放十几 MB 明文
     raw_bars_path = bars_dir / f"{date}.json"
     bars_gz_path = bars_dir / f"{date}.json.gz"
-    with open(raw_bars_path, "rb") as fh_in, gzip.open(bars_gz_path, "wb") as fh_out:
+    # mtime=0：gzip 头默认写入当前时间，会让同一份数据每次重建产生不同的
+    # 字节流，进而让 fixture_fingerprint 变化、"冻结基线"失去意义、
+    # compare_baseline 无故报不可比。固定为 0 后输出才是确定性的。
+    with open(raw_bars_path, "rb") as fh_in, \
+            gzip.GzipFile(filename="", mode="wb", fileobj=open(bars_gz_path, "wb"), mtime=0) as fh_out:
         fh_out.write(fh_in.read())
     raw_bars_path.unlink()
 
@@ -222,6 +226,12 @@ def main(argv: List[str] | None = None) -> int:
             "data_quality": dq,
             "provenance": manifests[0]["provenance"],
         }
+        # 必须落盘：`build()` 每构建一天都会写一次 manifest.json，
+        # 多日时最后留下的是**单日**版本（bar_count 只有一天、log_record_count=0）。
+        # 之前这里只 print 不写，导致仓库里的 manifest 长期描述的是最后一天。
+        (REPO_ROOT / "fixtures" / "manifest.json").write_text(
+            json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8"
+        )
     except FetchError as exc:
         print(json.dumps({
             "ok": False,

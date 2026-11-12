@@ -77,7 +77,7 @@ python3 -m pytest tests/ -q -m slow         # 区分度对照，约 2 分钟
 | `test_validation_claims.py` | 13 | **文档数字对账**、防漂移、区分度对照、**陈旧数字扫描** |
 | `test_data_quality_audit.py` | 6 | 板块分类、涨跌停口径、离线不把"未核验"当 0、报告回显 |
 | `test_trade_audit.py` | 4 | **逐笔价格/算术反查**、跨日覆盖、故意改价必被抓 |
-| `test_doc_commands.py` | 6 | **文档引用的脚本必须存在 / 可解析**、**证据表格与实际测试文件一致**、**表格用例数 = pytest 收集数**、**README 目录树列全脚本** |
+| `test_doc_commands.py` | 7 | **文档引用的脚本必须存在 / 可解析**、**证据表格与实际测试文件一致**、**表格用例数 = pytest 收集数**、**README 目录树列全脚本**、**缺陷标题数 = 表行数** |
 | `test_compare_baseline.py` | 7 | **冻结基线**、同配置给 delta、异配置拒绝、结构化错误 |
 | `test_value_decomposition.py` | 4 | **T+1 强制隔夜**、拆解前提、summary 形状 |
 | `test_credentials.py` | 6 | **引号去除**、别名回退、缺凭证结构化报错、非法 URL 拒绝 |
@@ -86,7 +86,7 @@ python3 -m pytest tests/ -q -m slow         # 区分度对照，约 2 分钟
 | `test_adapt_logs.py` | 15 | **外部日志字段映射**、布尔规范化、缺字段必失败 |
 | `test_knob_efficacy.py` | 3 | **旋钮全部接线**、指纹稳定性、含当前根必归零 |
 | `test_metrics_correctness.py` | 15 | **统计函数正确性**：精确值对比、蒙特卡洛 Type-I/覆盖率 |
-| `test_fixture_universe.py` | 2 | **14 日标的池恒定**、每条序列 K 线完整 |
+| `test_fixture_universe.py` | 4 | **14 日标的池恒定**、每条序列 K 线完整、**manifest 与实际夹具对账**、**gzip mtime=0 可重现** |
 
 ---
 
@@ -347,8 +347,11 @@ v0.4.0 据此报的 `negative` 已被撤回，现为 `inconclusive`。
 重算 gross/net，与 replayer 记录比对，**不复用 replayer 内部函数**。
 
 ```bash
-python3 scripts/trade_audit.py --sample 5000   # 全量
+python3 scripts/trade_audit.py --sample 99999   # 全量（默认只抽 200 笔）
 ```
+
+> 默认 `--sample 200`。要复现下表必须显式放大 `--sample`，
+> 否则看到的是「抽样 200、全部通过」，与「全量」不是一回事。
 
 | 项 | 结果 |
 |---|---|
@@ -955,7 +958,7 @@ python3 scripts/value_decomposition.py \
 
 ---
 
-## 6. 验证中发现并修复的缺陷（22 项）
+## 6. 验证中发现并修复的缺陷（26 项）
 
 以下都不是构造的测试用例，而是在真实数据上跑出来的：
 
@@ -983,6 +986,10 @@ python3 scripts/value_decomposition.py \
 | 20 | **代码默认值与 YAML 不一致** | 缺 pyyaml 时静默走合成模式，真实日志接入会读不到 | 逐项对齐 + 降级原因回显到报告 |
 | 21 | **标的池逐日变化** | 14 天交集仅 66 只，跨日持仓传递形同虚设 | 取全期 trade_list 交集，固定标的池 |
 | 22 | **覆盖率闸门误杀全样本证据** | 全样本 Welch p=7e-06 显著，却被覆盖率规则一并否掉 | 覆盖率只约束配对检验 |
+| 23 | **多日 manifest 只 print 不落盘** | 仓库里的 `manifest.json` 长期描述「最后一天」：`bar_count 72000`（实际 1,008,000）、`log_record_count 0`（实际 34,590）、无 `dates`；报告 `provenance.fixture_manifest` 直接对外错报 | `main()` 合并结果写盘 + `test_manifest_describes_the_actual_fixtures` 以磁盘实际内容对账 |
+| 24 | **证据文档逐文件用例数与实际不符** | 8 个文件错（如 `test_report.py` 写 24 实为 26） | 按 `pytest --collect-only` 全部改正 + 加防漂移测试 |
+| 25 | **README 目录树漏列脚本** | 中文漏 7 个、英文漏 12 个；两份都漏 `validation_evidence.md` | 补全 + `test_readme_trees_list_every_script` |
+| 26 | **夹具压缩包不可重现** | `gzip.open(...,"wb")` 把当前时间写进头部，同一份数据每次重建字节流不同 → `fixture_fingerprint` 每次都变，"冻结夹具"名不副实、`compare_baseline` 无故报不可比 | 改用 `GzipFile(..., mtime=0)` + `test_bar_gzip_is_reproducible` |
 
 ---
 

@@ -58,3 +58,76 @@ def test_every_series_has_full_bars():
         counts = Counter(r["symbol"] for r in records)
         bad = {s: c for s, c in counts.items() if c != 240}
         assert not bad, f"{path.name} 有标的分时根数异常：{list(bad.items())[:5]}"
+
+
+def test_bar_gzip_is_reproducible():
+    """夹具压缩包必须可重现：gzip 头的 mtime 必须为 0。
+
+    默认 `gzip.open(..., "wb")` 会把**当前时间**写进头部，同一份数据每次
+    重建都得到不同字节流 → `fixture_fingerprint` 每次都变 →
+    「冻结夹具」名不副实，`compare_baseline` 还会无故报不可比。
+    """
+    import struct
+
+    offenders = []
+    for path in sorted(BARS_DIR.glob("*.json.gz")):
+        head = path.read_bytes()[:10]
+        if head[:3] != b"\x1f\x8b\x08":
+            offenders.append(f"{path.name}: 不是标准 gzip")
+            continue
+        mtime = struct.unpack("<I", head[4:8])[0]
+        if mtime != 0:
+            offenders.append(f"{path.name}: MTIME={mtime}（应为 0）")
+    assert not offenders, "gzip 头带了时间戳，构建不可重现：\n" + "\n".join(offenders)
+
+
+def test_manifest_describes_the_actual_fixtures():
+    """`fixtures/manifest.json` 必须描述**实际存在**的整套夹具。
+
+    这条来自一个真实缺陷：多日构建时 `main()` 把合并后的 manifest 只 print
+    不落盘，而 `build()` 每构建一天都会覆盖写一次 manifest.json。结果是
+    仓库里的 manifest 长期停留在「最后一天」：`bar_count: 72000`
+    （实际 1,008,000）、`log_record_count: 0`（实际 34,590）、没有 `dates`。
+    报告里的 `provenance.fixture_manifest` 直接引用它，等于对外错报夹具规模。
+    """
+    manifest_path = REPO_ROOT / "fixtures" / "manifest.json"
+    if not manifest_path.exists():
+        pytest.skip("没有 manifest.json")
+
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+
+    bar_files = sorted(BARS_DIR.glob("*.json*"))
+    if not bar_files:
+        pytest.skip("没有夹具 K 线")
+    dates_on_disk = sorted(
+        re.match(r"(\d{8})", p.name).group(1) for p in bar_files
+    )
+
+    actual_bars = 0
+    for path in bar_files:
+        opener = gzip.open if path.suffix == ".gz" else open
+        with opener(path, "rt", encoding="utf-8") as fh:
+            actual_bars += len(json.load(fh))
+
+    log_files = sorted((REPO_ROOT / "fixtures" / "logs").glob("*.jsonl"))
+    actual_logs = sum(
+        sum(1 for line in p.open(encoding="utf-8") if line.strip())
+        for p in log_files
+    )
+
+    problems = []
+    if manifest.get("bar_count") != actual_bars:
+        problems.append(f"bar_count: manifest={manifest.get('bar_count')} 实际={actual_bars}")
+    if manifest.get("log_record_count") != actual_logs:
+        problems.append(
+            f"log_record_count: manifest={manifest.get('log_record_count')} 实际={actual_logs}"
+        )
+    if len(dates_on_disk) > 1:
+        if manifest.get("dates") != dates_on_disk:
+            problems.append(
+                f"dates: manifest={manifest.get('dates')} 实际={dates_on_disk}"
+            )
+    assert not problems, (
+        "manifest.json 与实际夹具不符（多日构建时合并结果未落盘？）：\n"
+        + "\n".join(f"  {p}" for p in problems)
+    )

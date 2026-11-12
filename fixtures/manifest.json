@@ -1,15 +1,84 @@
 {
-  "date": "20261112",
-  "prev_date": "20261111",
+  "dates": [
+    "20261026",
+    "20261027",
+    "20261028",
+    "20261029",
+    "20261030",
+    "20261102",
+    "20261103",
+    "20261104",
+    "20261105",
+    "20261106",
+    "20261109",
+    "20261110",
+    "20261111",
+    "20261112"
+  ],
   "symbol_count": 300,
-  "bar_count": 72000,
-  "log_record_count": 0,
+  "bar_count": 1008000,
+  "log_record_count": 34590,
   "logged_profile": "jev_assumed",
-  "fixture_fingerprint": "250b7572f2664790",
-  "provenance": {
-    "bars": "panda-data==1.0.6 get_stock_min / get_stock_daily，仅生成阶段调用",
-    "logs": "synthetic：由 log_synth 按 logged_profile 生成，非 JEV 真实输出"
-  },
+  "fixture_fingerprint": "8f140eb439982b7e",
+  "per_date": [
+    {
+      "date": "20261026",
+      "records": 1488
+    },
+    {
+      "date": "20261027",
+      "records": 1047
+    },
+    {
+      "date": "20261028",
+      "records": 3860
+    },
+    {
+      "date": "20261029",
+      "records": 1242
+    },
+    {
+      "date": "20261030",
+      "records": 1500
+    },
+    {
+      "date": "20261102",
+      "records": 4928
+    },
+    {
+      "date": "20261103",
+      "records": 2392
+    },
+    {
+      "date": "20261104",
+      "records": 3990
+    },
+    {
+      "date": "20261105",
+      "records": 4458
+    },
+    {
+      "date": "20261106",
+      "records": 988
+    },
+    {
+      "date": "20261109",
+      "records": 1483
+    },
+    {
+      "date": "20261110",
+      "records": 3051
+    },
+    {
+      "date": "20261111",
+      "records": 2745
+    },
+    {
+      "date": "20261112",
+      "records": 1418
+    }
+  ],
+  "logged_semantics_hash": "91fecace6d6c78b0",
   "data_quality": {
     "series_count": 4200,
     "date_range": [
@@ -67,5 +136,9 @@
       "level": "moderate",
       "reason": "未建模状态占比 4.67%，属可接受但需声明的范围"
     }
+  },
+  "provenance": {
+    "bars": "panda-data==1.0.6 get_stock_min / get_stock_daily，仅生成阶段调用",
+    "logs": "synthetic：由 log_synth 按 logged_profile 生成，非 JEV 真实输出"
   }
 }

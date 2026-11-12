@@ -72,6 +72,8 @@ _DEFAULTS: Dict[str, Any] = {
     "price_tolerance_bps": 5.0,
     # 归因：单旋钮消融后可解释的周期占比阈值
     "explained_rate_threshold": 0.95,
+    # 归因时消融配置必须保留的最小可比项比例（防止"配对消失"冒充"冲突消失"）
+    "min_comparable_retention": 0.05,
     # 最小周期数（不足则 verdict 只能 inconclusive）
     "min_cycles": 20,
     # 报告里最多内联多少条账本行（完整账本写 JSONL）

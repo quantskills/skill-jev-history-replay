@@ -56,7 +56,10 @@ def run_ablation(bars_by_symbol: Dict[str, Dict[str, Any]],
 
         replay = replay_all(bars_by_symbol, trial, prev_closes)
         rows_by_symbol: Dict[str, List[Dict[str, Any]]] = {}
-        for symbol, symbol_replay in replay["symbols"].items():
+        # 必须与主流程使用同一套视图（by_series，逐序列），
+        # 否则消融时的可比项口径与基线不一致，归因结果不可比。
+        views = replay.get("by_series") or replay["symbols"]
+        for symbol, symbol_replay in views.items():
             groups = log_groups_by_symbol.get(symbol) or {
                 "condition": [], "signal": [], "plan": [], "fill": []
             }
@@ -64,14 +67,33 @@ def run_ablation(bars_by_symbol: Dict[str, Dict[str, Any]],
                 symbol, symbol_replay, groups, tol_minutes, price_tolerance_bps
             )["rows"]
         total = aggregate_rows(rows_by_symbol)["total"]
-        # 待解释差异 = 真实冲突 + 因换旋钮而"丢失的可比项"。
-        # 后者必须计入，否则"把配对全打断"会被误判成"解释掉了差异"。
-        lost_comparable = max(0, baseline_comparable - total["comparable"])
-        trial_div = total["divergent"] + lost_comparable
-        # 只有在"可比项没有减少"的前提下减少的差异才算被解释。
-        # 否则一个把配对全部打断的旋钮会假装解释了所有差异（假阳性）。
-        alignment_preserved = total["comparable"] >= baseline_comparable
-        explained = max(0, baseline_div - trial_div) if alignment_preserved else 0
+        trial_comparable = total["comparable"]
+        trial_div = total["divergent"]
+        lost_comparable = max(0, baseline_comparable - trial_comparable)
+
+        # 归因要防两种错，方向相反：
+        #
+        #  A. 假阳性：旋钮把配对打散，什么也没解释，却因为分母变小而显得"差异少了"。
+        #  B. 假阴性：旋钮确实解释了差异，但它同时改变了信号集，
+        #     可比项必然减少——若一律拒绝，真实成因永远归不出来。
+        #
+        # 区分办法是看"剩余可比项是否仍足以支撑结论"。定义一个保守的可解释率：
+        #   explained_rate = 1 - trial_div / baseline_div
+        # 只有当 trial_div 明显下降（不是靠可比项消失），且剩余可比项
+        # 仍达到基线的 min_comparable_retention 时，才承认这次解释。
+        retention = (trial_comparable / baseline_comparable
+                     if baseline_comparable else 0.0)
+        min_retention = float(semantics.get("min_comparable_retention", 0.05))
+        raw_explained = baseline_div - trial_div
+        # 若 lost_comparable 本身就大于被"解释"掉的数量，说明下降主要来自
+        # 配对消失而非冲突消失——不认。
+        genuinely_explained = (
+            raw_explained > 0
+            and raw_explained > lost_comparable
+            and retention >= min_retention
+        )
+        explained = int(raw_explained) if genuinely_explained else 0
+        alignment_preserved = retention >= min_retention
         results.append({
             "knob": knob,
             "from": semantics[knob],
@@ -81,7 +103,8 @@ def run_ablation(bars_by_symbol: Dict[str, Dict[str, Any]],
             "baseline_comparable": baseline_comparable,
             "trial_divergences": trial_div,
             "lost_comparable": lost_comparable,
-            "comparable": total["comparable"],
+            "comparable": trial_comparable,
+            "comparable_retention": round(retention, 4),
             "alignment_preserved": alignment_preserved,
             "explained": explained,
             "explained_rate": (

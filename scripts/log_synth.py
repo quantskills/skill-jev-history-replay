@@ -58,10 +58,57 @@ def synthesize_logs(bars_by_symbol: Dict[str, Dict[str, Any]],
                 })
                 prev_state = state
 
-        for cycle in result["cycles"]:
-            # 只输出在本序列入场的信号；跨日带入的持仓属于前一日的信号
-            if cycle.get("carried_from_previous_day"):
+        # cycles 是"本日入场的周期"，exit_cycles 是"本日退出的周期"，
+        # 同一跨日周期会同时出现在两处，必须按对象身份去重。
+        _seen: set[int] = set()
+        cycles_here = []
+        for cycle in (list(result.get("cycles") or [])
+                      + list(result.get("exit_cycles") or [])):
+            if id(cycle) in _seen:
                 continue
+            _seen.add(id(cycle))
+            cycles_here.append(cycle)
+        for cycle in cycles_here:
+            # 一笔交易的两端分属两个记录日：
+            #   入场日（entry_series）→ signal + plan(enter)
+            #   退出日（exit_series）→ plan(exit) 卖出回执
+            # 跨日持仓在退出日必须补一条退出记录，否则退出轴永远没有可比项。
+            entry_series = cycle.get("entry_series")
+            exit_series = cycle.get("exit_series") or entry_series
+            is_entry_day = entry_series == series or entry_series is None
+            is_exit_day = exit_series == series and exit_series != entry_series
+
+            if is_exit_day:
+                if cycle.get("exit_time"):
+                    records.append({
+                        **base,
+                        "ts": cycle["exit_time"],
+                        "kind": "plan",
+                        "symbol": symbol,
+                        "plan": "exit",
+                        "entry_time": cycle.get("entry_time"),
+                        "entry_price": cycle.get("entry_price"),
+                        "exit_time": cycle.get("exit_time"),
+                        "exit_reason": cycle.get("exit_reason"),
+                        "net_return_pct": cycle.get("net_return_pct"),
+                        "cross_day": True,
+                    })
+                    records.append({
+                        **base,
+                        "ts": cycle["exit_time"],
+                        "kind": "fill",
+                        "symbol": symbol,
+                        "side": "sell",
+                        "price": cycle.get("exit_price"),
+                        "qty": cycle.get("qty"),
+                        "status": "filled",
+                        "cross_day": True,
+                    })
+                continue
+
+            if not is_entry_day:
+                continue
+
             records.append({
                 **base,
                 "ts": cycle["signal_time"],
@@ -70,6 +117,7 @@ def synthesize_logs(bars_by_symbol: Dict[str, Dict[str, Any]],
                 "signal": "buy",
                 "wait_bars": cycle.get("wait_bars"),
             })
+            same_day_exit = exit_series == entry_series
             if cycle.get("entry_time"):
                 records.append({
                     **base,
@@ -81,11 +129,13 @@ def synthesize_logs(bars_by_symbol: Dict[str, Dict[str, Any]],
                     "entry_price": cycle.get("entry_price"),
                     "wait_bars": cycle.get("wait_bars"),
                     "qty": cycle.get("qty"),
-                    "exit_time": cycle.get("exit_time"),
-                    "exit_reason": cycle.get("exit_reason"),
-                    "net_return_pct": cycle.get("net_return_pct"),
+                    # 跨日交易在入场日不写 exit（那天的 plan 只说明"今天买了"）
+                    "exit_time": cycle.get("exit_time") if same_day_exit else None,
+                    "exit_reason": cycle.get("exit_reason") if same_day_exit else None,
+                    "net_return_pct": cycle.get("net_return_pct") if same_day_exit else None,
+                    "cross_day_pending": not same_day_exit,
                 })
-            if cycle.get("entry_time") and cycle.get("exit_time"):
+            if same_day_exit and cycle.get("entry_time") and cycle.get("exit_time"):
                 tick = round(cycle["entry_price"] * 0.001, 2) or 0.01
                 records.append({
                     **base,

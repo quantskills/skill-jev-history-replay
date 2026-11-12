@@ -464,7 +464,11 @@ def replay_all(bars_by_symbol: Dict[str, Dict[str, Any]], semantics: Dict[str, A
                 # entry_series 只在第一次出现时记录（跨日对象复用同一个 dict，
                 # 不能在后一天把入场日覆盖成今天）
                 cycle.setdefault("entry_series", series)
-                cycle["exit_series"] = series
+                # exit_series 只在**真正退出**时定格。若周期当天仍是 open
+                # （被带出当日），退出日尚未确定，绝不能把今天写成退出日——
+                # 否则入场日视图会误以为退出发生在自己这天，比对时对到错误记录。
+                if cycle.get("exit_time"):
+                    cycle["exit_series"] = series
 
         if len(day_results) == 1:
             per_symbol[items[0][1]] = day_results[0]

@@ -1,0 +1,1001 @@
+{"symbol": "000001.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "000039.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "000151.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "000151.SZ", "date": "20261109", "ts": "09:31", "kind": "plan", "plan": "exit", "entry_time": "10:07", "entry_price": 10.18, "exit_time": "09:31", "exit_reason": "stop_loss", "net_return_pct": -0.0064, "cross_day": true, "_synthetic": true}
+{"symbol": "000151.SZ", "date": "20261109", "ts": "09:31", "kind": "fill", "side": "sell", "price": 10.1291, "qty": 9800, "status": "filled", "cross_day": true, "_synthetic": true}
+{"symbol": "000151.SZ", "date": "20261109", "ts": "10:06", "kind": "condition", "hit": true, "reference": 10.02, "baseline": 9.95, "gain_pct": 0.01005025, "_synthetic": true}
+{"symbol": "000151.SZ", "date": "20261109", "ts": "10:07", "kind": "condition", "hit": false, "reference": 10.05, "baseline": 9.95, "gain_pct": 0.00502513, "_synthetic": true}
+{"symbol": "000151.SZ", "date": "20261109", "ts": "10:11", "kind": "condition", "hit": true, "reference": 10.05, "baseline": 9.95, "gain_pct": 0.01105528, "_synthetic": true}
+{"symbol": "000151.SZ", "date": "20261109", "ts": "10:12", "kind": "condition", "hit": false, "reference": 10.06, "baseline": 9.95, "gain_pct": 0.0080402, "_synthetic": true}
+{"symbol": "000151.SZ", "date": "20261109", "ts": "10:55", "kind": "condition", "hit": true, "reference": 10.01, "baseline": 9.95, "gain_pct": 0.03015075, "_synthetic": true}
+{"symbol": "000151.SZ", "date": "20261109", "ts": "10:56", "kind": "condition", "hit": false, "reference": 10.32, "baseline": 9.95, "gain_pct": 0.02110553, "_synthetic": true}
+{"symbol": "000151.SZ", "date": "20261109", "ts": "14:01", "kind": "condition", "hit": true, "reference": 10.13, "baseline": 9.95, "gain_pct": 0.01909548, "_synthetic": true}
+{"symbol": "000151.SZ", "date": "20261109", "ts": "14:02", "kind": "condition", "hit": false, "reference": 10.14, "baseline": 9.95, "gain_pct": 0.01809045, "_synthetic": true}
+{"symbol": "000422.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "000524.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "000555.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "000596.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "000635.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "000635.SZ", "date": "20261109", "ts": "09:31", "kind": "plan", "plan": "exit", "entry_time": "11:21", "entry_price": 9.05, "exit_time": "09:31", "exit_reason": "take_profit", "net_return_pct": 0.0086, "cross_day": true, "_synthetic": true}
+{"symbol": "000635.SZ", "date": "20261109", "ts": "09:31", "kind": "fill", "side": "sell", "price": 9.1405, "qty": 11000, "status": "filled", "cross_day": true, "_synthetic": true}
+{"symbol": "000685.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "000720.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "000762.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "000803.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "000856.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "000856.SZ", "date": "20261109", "ts": "09:31", "kind": "plan", "plan": "exit", "entry_time": "10:40", "entry_price": 8.66, "exit_time": "09:31", "exit_reason": "stop_loss", "net_return_pct": -0.0064, "cross_day": true, "_synthetic": true}
+{"symbol": "000856.SZ", "date": "20261109", "ts": "09:31", "kind": "fill", "side": "sell", "price": 8.6167, "qty": 11500, "status": "filled", "cross_day": true, "_synthetic": true}
+{"symbol": "000898.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "000930.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "000970.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "000970.SZ", "date": "20261109", "ts": "13:32", "kind": "condition", "hit": true, "reference": 10.3, "baseline": 10.2, "gain_pct": 0.01078431, "_synthetic": true}
+{"symbol": "000970.SZ", "date": "20261109", "ts": "13:33", "kind": "condition", "hit": false, "reference": 10.31, "baseline": 10.2, "gain_pct": 0.00980392, "_synthetic": true}
+{"symbol": "000970.SZ", "date": "20261109", "ts": "14:28", "kind": "condition", "hit": true, "reference": 10.3, "baseline": 10.2, "gain_pct": 0.01078431, "_synthetic": true}
+{"symbol": "000970.SZ", "date": "20261109", "ts": "14:29", "kind": "condition", "hit": false, "reference": 10.31, "baseline": 10.2, "gain_pct": 0.00980392, "_synthetic": true}
+{"symbol": "001209.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "001238.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "001296.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "001296.SZ", "date": "20261109", "ts": "11:23", "kind": "condition", "hit": true, "reference": 19.5, "baseline": 19.18, "gain_pct": 0.01720542, "_synthetic": true}
+{"symbol": "001296.SZ", "date": "20261109", "ts": "11:24", "kind": "condition", "hit": false, "reference": 19.52, "baseline": 19.18, "gain_pct": 0.01511992, "_synthetic": true}
+{"symbol": "001296.SZ", "date": "20261109", "ts": "13:18", "kind": "condition", "hit": true, "reference": 19.49, "baseline": 19.18, "gain_pct": 0.01668405, "_synthetic": true}
+{"symbol": "001296.SZ", "date": "20261109", "ts": "13:19", "kind": "condition", "hit": false, "reference": 19.5, "baseline": 19.18, "gain_pct": 0.01668405, "_synthetic": true}
+{"symbol": "001296.SZ", "date": "20261109", "ts": "13:20", "kind": "condition", "hit": true, "reference": 19.5, "baseline": 19.18, "gain_pct": 0.01929093, "_synthetic": true}
+{"symbol": "001296.SZ", "date": "20261109", "ts": "13:21", "kind": "condition", "hit": false, "reference": 19.55, "baseline": 19.18, "gain_pct": 0.01929093, "_synthetic": true}
+{"symbol": "001296.SZ", "date": "20261109", "ts": "13:25", "kind": "condition", "hit": true, "reference": 19.56, "baseline": 19.18, "gain_pct": 0.02137643, "_synthetic": true}
+{"symbol": "001296.SZ", "date": "20261109", "ts": "13:26", "kind": "condition", "hit": false, "reference": 19.59, "baseline": 19.18, "gain_pct": 0.02137643, "_synthetic": true}
+{"symbol": "001296.SZ", "date": "20261109", "ts": "13:28", "kind": "condition", "hit": true, "reference": 19.6, "baseline": 19.18, "gain_pct": 0.02398332, "_synthetic": true}
+{"symbol": "001296.SZ", "date": "20261109", "ts": "13:29", "kind": "condition", "hit": false, "reference": 19.64, "baseline": 19.18, "gain_pct": 0.02137643, "_synthetic": true}
+{"symbol": "001296.SZ", "date": "20261109", "ts": "13:57", "kind": "condition", "hit": true, "reference": 19.55, "baseline": 19.18, "gain_pct": 0.0198123, "_synthetic": true}
+{"symbol": "001296.SZ", "date": "20261109", "ts": "13:58", "kind": "condition", "hit": false, "reference": 19.56, "baseline": 19.18, "gain_pct": 0.0198123, "_synthetic": true}
+{"symbol": "001335.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "001391.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "002017.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "002017.SZ", "date": "20261109", "ts": "11:23", "kind": "condition", "hit": true, "reference": 12.58, "baseline": 12.43, "gain_pct": 0.01287208, "_synthetic": true}
+{"symbol": "002017.SZ", "date": "20261109", "ts": "11:24", "kind": "condition", "hit": false, "reference": 12.6, "baseline": 12.43, "gain_pct": 0.01045857, "_synthetic": true}
+{"symbol": "002044.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "002044.SZ", "date": "20261109", "ts": "09:31", "kind": "plan", "plan": "exit", "entry_time": "10:34", "entry_price": 5.09, "exit_time": "09:31", "exit_reason": "stop_loss", "net_return_pct": -0.0064, "cross_day": true, "_synthetic": true}
+{"symbol": "002044.SZ", "date": "20261109", "ts": "09:31", "kind": "fill", "side": "sell", "price": 5.06455, "qty": 19600, "status": "filled", "cross_day": true, "_synthetic": true}
+{"symbol": "002073.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "002101.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "002130.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "002158.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "002158.SZ", "date": "20261109", "ts": "11:25", "kind": "condition", "hit": true, "reference": 21.13, "baseline": 20.91, "gain_pct": 0.01099952, "_synthetic": true}
+{"symbol": "002158.SZ", "date": "20261109", "ts": "11:26", "kind": "condition", "hit": false, "reference": 21.14, "baseline": 20.91, "gain_pct": 0.00908656, "_synthetic": true}
+{"symbol": "002158.SZ", "date": "20261109", "ts": "11:27", "kind": "condition", "hit": true, "reference": 21.14, "baseline": 20.91, "gain_pct": 0.01147776, "_synthetic": true}
+{"symbol": "002158.SZ", "date": "20261109", "ts": "11:28", "kind": "condition", "hit": false, "reference": 21.16, "baseline": 20.91, "gain_pct": 0.01099952, "_synthetic": true}
+{"symbol": "002158.SZ", "date": "20261109", "ts": "13:17", "kind": "condition", "hit": true, "reference": 21.18, "baseline": 20.91, "gain_pct": 0.01578192, "_synthetic": true}
+{"symbol": "002158.SZ", "date": "20261109", "ts": "13:18", "kind": "condition", "hit": false, "reference": 21.24, "baseline": 20.91, "gain_pct": 0.01578192, "_synthetic": true}
+{"symbol": "002158.SZ", "date": "20261109", "ts": "13:21", "kind": "condition", "hit": true, "reference": 21.25, "baseline": 20.91, "gain_pct": 0.01817312, "_synthetic": true}
+{"symbol": "002158.SZ", "date": "20261109", "ts": "13:22", "kind": "signal", "signal": "buy", "wait_bars": 1, "_synthetic": true}
+{"symbol": "002158.SZ", "date": "20261109", "ts": "13:23", "kind": "condition", "hit": false, "reference": 21.33, "baseline": 20.91, "gain_pct": 0.01817312, "_synthetic": true}
+{"symbol": "002158.SZ", "date": "20261109", "ts": "13:24", "kind": "plan", "plan": "enter", "entry_time": "13:24", "entry_price": 21.29, "wait_bars": 1, "qty": 4600, "exit_time": null, "exit_reason": null, "net_return_pct": null, "cross_day_pending": true, "_synthetic": true}
+{"symbol": "002158.SZ", "date": "20261109", "ts": "13:25", "kind": "condition", "hit": true, "reference": 21.33, "baseline": 20.91, "gain_pct": 0.0215208, "_synthetic": true}
+{"symbol": "002158.SZ", "date": "20261109", "ts": "13:26", "kind": "condition", "hit": false, "reference": 21.37, "baseline": 20.91, "gain_pct": 0.01960784, "_synthetic": true}
+{"symbol": "002158.SZ", "date": "20261109", "ts": "13:30", "kind": "condition", "hit": true, "reference": 21.37, "baseline": 20.91, "gain_pct": 0.02343376, "_synthetic": true}
+{"symbol": "002158.SZ", "date": "20261109", "ts": "13:31", "kind": "condition", "hit": false, "reference": 21.4, "baseline": 20.91, "gain_pct": 0.02295552, "_synthetic": true}
+{"symbol": "002158.SZ", "date": "20261109", "ts": "13:32", "kind": "condition", "hit": true, "reference": 21.42, "baseline": 20.91, "gain_pct": 0.02582496, "_synthetic": true}
+{"symbol": "002158.SZ", "date": "20261109", "ts": "13:33", "kind": "condition", "hit": false, "reference": 21.45, "baseline": 20.91, "gain_pct": 0.02247728, "_synthetic": true}
+{"symbol": "002158.SZ", "date": "20261109", "ts": "13:36", "kind": "condition", "hit": true, "reference": 21.46, "baseline": 20.91, "gain_pct": 0.02725968, "_synthetic": true}
+{"symbol": "002158.SZ", "date": "20261109", "ts": "13:37", "kind": "condition", "hit": false, "reference": 21.5, "baseline": 20.91, "gain_pct": 0.0263032, "_synthetic": true}
+{"symbol": "002184.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "002210.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "002238.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "002238.SZ", "date": "20261109", "ts": "10:01", "kind": "condition", "hit": true, "reference": 6.85, "baseline": 6.73, "gain_pct": 0.03863299, "_synthetic": true}
+{"symbol": "002238.SZ", "date": "20261109", "ts": "10:02", "kind": "condition", "hit": false, "reference": 7.02, "baseline": 6.73, "gain_pct": 0.03566122, "_synthetic": true}
+{"symbol": "002266.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "002294.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "002321.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "002321.SZ", "date": "20261109", "ts": "10:02", "kind": "condition", "hit": true, "reference": 1.84, "baseline": 1.78, "gain_pct": 0.03932584, "_synthetic": true}
+{"symbol": "002321.SZ", "date": "20261109", "ts": "10:03", "kind": "condition", "hit": false, "reference": 1.88, "baseline": 1.78, "gain_pct": 0.03932584, "_synthetic": true}
+{"symbol": "002350.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "002350.SZ", "date": "20261109", "ts": "14:48", "kind": "condition", "hit": true, "reference": 11.48, "baseline": 11.38, "gain_pct": 0.01318102, "_synthetic": true}
+{"symbol": "002350.SZ", "date": "20261109", "ts": "14:49", "kind": "condition", "hit": false, "reference": 11.53, "baseline": 11.38, "gain_pct": 0.01142355, "_synthetic": true}
+{"symbol": "002350.SZ", "date": "20261109", "ts": "14:55", "kind": "condition", "hit": true, "reference": 11.56, "baseline": 11.38, "gain_pct": 0.01845343, "_synthetic": true}
+{"symbol": "002350.SZ", "date": "20261109", "ts": "14:56", "kind": "condition", "hit": false, "reference": 11.59, "baseline": 11.38, "gain_pct": 0.01405975, "_synthetic": true}
+{"symbol": "002378.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "002404.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "002432.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "002432.SZ", "date": "20261109", "ts": "10:43", "kind": "condition", "hit": true, "reference": 52.88, "baseline": 52.2, "gain_pct": 0.01360153, "_synthetic": true}
+{"symbol": "002432.SZ", "date": "20261109", "ts": "10:44", "kind": "condition", "hit": false, "reference": 52.91, "baseline": 52.2, "gain_pct": 0.01321839, "_synthetic": true}
+{"symbol": "002432.SZ", "date": "20261109", "ts": "10:45", "kind": "condition", "hit": true, "reference": 52.91, "baseline": 52.2, "gain_pct": 0.01417625, "_synthetic": true}
+{"symbol": "002432.SZ", "date": "20261109", "ts": "10:46", "kind": "condition", "hit": false, "reference": 52.95, "baseline": 52.2, "gain_pct": 0.01360153, "_synthetic": true}
+{"symbol": "002462.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "002491.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "002491.SZ", "date": "20261109", "ts": "10:02", "kind": "condition", "hit": true, "reference": 13.96, "baseline": 13.36, "gain_pct": 0.04640719, "_synthetic": true}
+{"symbol": "002491.SZ", "date": "20261109", "ts": "10:03", "kind": "signal", "signal": "buy", "wait_bars": 1, "_synthetic": true}
+{"symbol": "002491.SZ", "date": "20261109", "ts": "10:04", "kind": "condition", "hit": false, "reference": 14.14, "baseline": 13.36, "gain_pct": 0.0501497, "_synthetic": true}
+{"symbol": "002491.SZ", "date": "20261109", "ts": "10:05", "kind": "plan", "plan": "enter", "entry_time": "10:05", "entry_price": 14.04, "wait_bars": 1, "qty": 7100, "exit_time": null, "exit_reason": null, "net_return_pct": null, "cross_day_pending": true, "_synthetic": true}
+{"symbol": "002491.SZ", "date": "20261109", "ts": "10:45", "kind": "condition", "hit": true, "reference": 13.99, "baseline": 13.36, "gain_pct": 0.0494012, "_synthetic": true}
+{"symbol": "002491.SZ", "date": "20261109", "ts": "10:46", "kind": "condition", "hit": false, "reference": 14.02, "baseline": 13.36, "gain_pct": 0.04790419, "_synthetic": true}
+{"symbol": "002491.SZ", "date": "20261109", "ts": "11:21", "kind": "condition", "hit": true, "reference": 13.98, "baseline": 13.36, "gain_pct": 0.04865269, "_synthetic": true}
+{"symbol": "002491.SZ", "date": "20261109", "ts": "11:23", "kind": "condition", "hit": false, "reference": 14.06, "baseline": 13.36, "gain_pct": 0.0494012, "_synthetic": true}
+{"symbol": "002491.SZ", "date": "20261109", "ts": "13:30", "kind": "condition", "hit": true, "reference": 13.86, "baseline": 13.36, "gain_pct": 0.03817365, "_synthetic": true}
+{"symbol": "002491.SZ", "date": "20261109", "ts": "13:31", "kind": "condition", "hit": false, "reference": 13.87, "baseline": 13.36, "gain_pct": 0.03667665, "_synthetic": true}
+{"symbol": "002491.SZ", "date": "20261109", "ts": "13:32", "kind": "condition", "hit": true, "reference": 13.87, "baseline": 13.36, "gain_pct": 0.04041916, "_synthetic": true}
+{"symbol": "002491.SZ", "date": "20261109", "ts": "13:33", "kind": "condition", "hit": false, "reference": 13.9, "baseline": 13.36, "gain_pct": 0.03817365, "_synthetic": true}
+{"symbol": "002491.SZ", "date": "20261109", "ts": "13:38", "kind": "condition", "hit": true, "reference": 13.9, "baseline": 13.36, "gain_pct": 0.04116766, "_synthetic": true}
+{"symbol": "002491.SZ", "date": "20261109", "ts": "13:39", "kind": "condition", "hit": false, "reference": 13.92, "baseline": 13.36, "gain_pct": 0.04041916, "_synthetic": true}
+{"symbol": "002523.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "002523.SZ", "date": "20261109", "ts": "13:06", "kind": "condition", "hit": true, "reference": 3.4, "baseline": 3.36, "gain_pct": 0.01488095, "_synthetic": true}
+{"symbol": "002523.SZ", "date": "20261109", "ts": "13:07", "kind": "condition", "hit": false, "reference": 3.41, "baseline": 3.36, "gain_pct": 0.01488095, "_synthetic": true}
+{"symbol": "002523.SZ", "date": "20261109", "ts": "13:10", "kind": "condition", "hit": true, "reference": 3.41, "baseline": 3.36, "gain_pct": 0.01785714, "_synthetic": true}
+{"symbol": "002523.SZ", "date": "20261109", "ts": "13:11", "kind": "signal", "signal": "buy", "wait_bars": 1, "_synthetic": true}
+{"symbol": "002523.SZ", "date": "20261109", "ts": "13:13", "kind": "condition", "hit": false, "reference": 3.48, "baseline": 3.36, "gain_pct": 0.0327381, "_synthetic": true}
+{"symbol": "002523.SZ", "date": "20261109", "ts": "13:13", "kind": "plan", "plan": "enter", "entry_time": "13:13", "entry_price": 3.47, "wait_bars": 1, "qty": 28800, "exit_time": null, "exit_reason": null, "net_return_pct": null, "cross_day_pending": true, "_synthetic": true}
+{"symbol": "002523.SZ", "date": "20261109", "ts": "14:27", "kind": "condition", "hit": true, "reference": 3.46, "baseline": 3.36, "gain_pct": 0.0327381, "_synthetic": true}
+{"symbol": "002523.SZ", "date": "20261109", "ts": "14:28", "kind": "condition", "hit": false, "reference": 3.47, "baseline": 3.36, "gain_pct": 0.0327381, "_synthetic": true}
+{"symbol": "002523.SZ", "date": "20261109", "ts": "14:54", "kind": "condition", "hit": true, "reference": 3.46, "baseline": 3.36, "gain_pct": 0.0327381, "_synthetic": true}
+{"symbol": "002523.SZ", "date": "20261109", "ts": "14:55", "kind": "condition", "hit": false, "reference": 3.47, "baseline": 3.36, "gain_pct": 0.0297619, "_synthetic": true}
+{"symbol": "002550.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "002576.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "002602.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "002634.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "002634.SZ", "date": "20261109", "ts": "09:31", "kind": "plan", "plan": "exit", "entry_time": "13:42", "entry_price": 4.17, "exit_time": "09:31", "exit_reason": "take_profit", "net_return_pct": 0.0086, "cross_day": true, "_synthetic": true}
+{"symbol": "002634.SZ", "date": "20261109", "ts": "09:31", "kind": "fill", "side": "sell", "price": 4.2117, "qty": 23900, "status": "filled", "cross_day": true, "_synthetic": true}
+{"symbol": "002660.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "002690.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "002722.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "002722.SZ", "date": "20261109", "ts": "13:16", "kind": "condition", "hit": true, "reference": 12.31, "baseline": 12.3, "gain_pct": 0.04227642, "_synthetic": true}
+{"symbol": "002722.SZ", "date": "20261109", "ts": "13:17", "kind": "condition", "hit": false, "reference": 12.95, "baseline": 12.3, "gain_pct": 0.02764228, "_synthetic": true}
+{"symbol": "002722.SZ", "date": "20261109", "ts": "14:25", "kind": "condition", "hit": true, "reference": 12.47, "baseline": 12.3, "gain_pct": 0.01463415, "_synthetic": true}
+{"symbol": "002722.SZ", "date": "20261109", "ts": "14:26", "kind": "condition", "hit": false, "reference": 12.48, "baseline": 12.3, "gain_pct": 0.01382114, "_synthetic": true}
+{"symbol": "002752.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "002783.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "002783.SZ", "date": "20261109", "ts": "13:02", "kind": "condition", "hit": true, "reference": 7.46, "baseline": 7.4, "gain_pct": 0.01216216, "_synthetic": true}
+{"symbol": "002783.SZ", "date": "20261109", "ts": "13:03", "kind": "condition", "hit": false, "reference": 7.49, "baseline": 7.4, "gain_pct": 0.01216216, "_synthetic": true}
+{"symbol": "002783.SZ", "date": "20261109", "ts": "13:11", "kind": "condition", "hit": true, "reference": 7.49, "baseline": 7.4, "gain_pct": 0.01351351, "_synthetic": true}
+{"symbol": "002783.SZ", "date": "20261109", "ts": "13:12", "kind": "condition", "hit": false, "reference": 7.5, "baseline": 7.4, "gain_pct": 0.01216216, "_synthetic": true}
+{"symbol": "002813.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "002841.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "002841.SZ", "date": "20261109", "ts": "13:30", "kind": "condition", "hit": true, "reference": 42.15, "baseline": 41.69, "gain_pct": 0.01151355, "_synthetic": true}
+{"symbol": "002841.SZ", "date": "20261109", "ts": "13:31", "kind": "condition", "hit": false, "reference": 42.18, "baseline": 41.69, "gain_pct": 0.01127369, "_synthetic": true}
+{"symbol": "002841.SZ", "date": "20261109", "ts": "13:32", "kind": "condition", "hit": true, "reference": 42.18, "baseline": 41.69, "gain_pct": 0.01439194, "_synthetic": true}
+{"symbol": "002841.SZ", "date": "20261109", "ts": "13:33", "kind": "condition", "hit": false, "reference": 42.31, "baseline": 41.69, "gain_pct": 0.01391221, "_synthetic": true}
+{"symbol": "002841.SZ", "date": "20261109", "ts": "14:01", "kind": "condition", "hit": true, "reference": 42.28, "baseline": 41.69, "gain_pct": 0.01511154, "_synthetic": true}
+{"symbol": "002841.SZ", "date": "20261109", "ts": "14:02", "kind": "condition", "hit": false, "reference": 42.32, "baseline": 41.69, "gain_pct": 0.01247302, "_synthetic": true}
+{"symbol": "002841.SZ", "date": "20261109", "ts": "14:06", "kind": "condition", "hit": true, "reference": 42.32, "baseline": 41.69, "gain_pct": 0.0153514, "_synthetic": true}
+{"symbol": "002841.SZ", "date": "20261109", "ts": "14:07", "kind": "signal", "signal": "buy", "wait_bars": 1, "_synthetic": true}
+{"symbol": "002841.SZ", "date": "20261109", "ts": "14:08", "kind": "condition", "hit": false, "reference": 42.38, "baseline": 41.69, "gain_pct": 0.01415207, "_synthetic": true}
+{"symbol": "002841.SZ", "date": "20261109", "ts": "14:09", "kind": "plan", "plan": "enter", "entry_time": "14:09", "entry_price": 42.27, "wait_bars": 1, "qty": 2300, "exit_time": null, "exit_reason": null, "net_return_pct": null, "cross_day_pending": false, "_synthetic": true}
+{"symbol": "002841.SZ", "date": "20261109", "ts": "14:40", "kind": "condition", "hit": true, "reference": 42.25, "baseline": 41.69, "gain_pct": 0.0153514, "_synthetic": true}
+{"symbol": "002841.SZ", "date": "20261109", "ts": "14:41", "kind": "condition", "hit": false, "reference": 42.35, "baseline": 41.69, "gain_pct": 0.01583113, "_synthetic": true}
+{"symbol": "002841.SZ", "date": "20261109", "ts": "14:42", "kind": "condition", "hit": true, "reference": 42.41, "baseline": 41.69, "gain_pct": 0.02062845, "_synthetic": true}
+{"symbol": "002841.SZ", "date": "20261109", "ts": "14:43", "kind": "condition", "hit": false, "reference": 42.6, "baseline": 41.69, "gain_pct": 0.02062845, "_synthetic": true}
+{"symbol": "002869.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "002869.SZ", "date": "20261109", "ts": "10:11", "kind": "condition", "hit": true, "reference": 15.7, "baseline": 15.4, "gain_pct": 0.02077922, "_synthetic": true}
+{"symbol": "002869.SZ", "date": "20261109", "ts": "10:12", "kind": "condition", "hit": false, "reference": 15.73, "baseline": 15.4, "gain_pct": 0.02142857, "_synthetic": true}
+{"symbol": "002869.SZ", "date": "20261109", "ts": "10:55", "kind": "condition", "hit": true, "reference": 15.6, "baseline": 15.4, "gain_pct": 0.01428571, "_synthetic": true}
+{"symbol": "002869.SZ", "date": "20261109", "ts": "10:56", "kind": "condition", "hit": false, "reference": 15.64, "baseline": 15.4, "gain_pct": 0.01493506, "_synthetic": true}
+{"symbol": "002869.SZ", "date": "20261109", "ts": "11:04", "kind": "condition", "hit": true, "reference": 15.64, "baseline": 15.4, "gain_pct": 0.02012987, "_synthetic": true}
+{"symbol": "002869.SZ", "date": "20261109", "ts": "11:05", "kind": "condition", "hit": false, "reference": 15.72, "baseline": 15.4, "gain_pct": 0.01753247, "_synthetic": true}
+{"symbol": "002869.SZ", "date": "20261109", "ts": "13:39", "kind": "condition", "hit": true, "reference": 15.68, "baseline": 15.4, "gain_pct": 0.01883117, "_synthetic": true}
+{"symbol": "002869.SZ", "date": "20261109", "ts": "13:40", "kind": "condition", "hit": false, "reference": 15.69, "baseline": 15.4, "gain_pct": 0.01753247, "_synthetic": true}
+{"symbol": "002869.SZ", "date": "20261109", "ts": "14:06", "kind": "condition", "hit": true, "reference": 15.65, "baseline": 15.4, "gain_pct": 0.01753247, "_synthetic": true}
+{"symbol": "002869.SZ", "date": "20261109", "ts": "14:07", "kind": "condition", "hit": false, "reference": 15.67, "baseline": 15.4, "gain_pct": 0.01623377, "_synthetic": true}
+{"symbol": "002869.SZ", "date": "20261109", "ts": "14:48", "kind": "condition", "hit": true, "reference": 15.66, "baseline": 15.4, "gain_pct": 0.01948052, "_synthetic": true}
+{"symbol": "002869.SZ", "date": "20261109", "ts": "14:49", "kind": "condition", "hit": false, "reference": 15.7, "baseline": 15.4, "gain_pct": 0.01623377, "_synthetic": true}
+{"symbol": "002897.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "002897.SZ", "date": "20261109", "ts": "11:21", "kind": "condition", "hit": true, "reference": 43.48, "baseline": 42.74, "gain_pct": 0.01988769, "_synthetic": true}
+{"symbol": "002897.SZ", "date": "20261109", "ts": "11:22", "kind": "signal", "signal": "buy", "wait_bars": 1, "_synthetic": true}
+{"symbol": "002897.SZ", "date": "20261109", "ts": "11:23", "kind": "condition", "hit": false, "reference": 43.67, "baseline": 42.74, "gain_pct": 0.02012167, "_synthetic": true}
+{"symbol": "002897.SZ", "date": "20261109", "ts": "11:24", "kind": "plan", "plan": "enter", "entry_time": "11:24", "entry_price": 43.6, "wait_bars": 1, "qty": 2200, "exit_time": null, "exit_reason": null, "net_return_pct": null, "cross_day_pending": false, "_synthetic": true}
+{"symbol": "002897.SZ", "date": "20261109", "ts": "13:29", "kind": "condition", "hit": true, "reference": 43.28, "baseline": 42.74, "gain_pct": 0.01286851, "_synthetic": true}
+{"symbol": "002897.SZ", "date": "20261109", "ts": "13:30", "kind": "condition", "hit": false, "reference": 43.3, "baseline": 42.74, "gain_pct": 0.01286851, "_synthetic": true}
+{"symbol": "002897.SZ", "date": "20261109", "ts": "13:32", "kind": "condition", "hit": true, "reference": 43.38, "baseline": 42.74, "gain_pct": 0.01731399, "_synthetic": true}
+{"symbol": "002897.SZ", "date": "20261109", "ts": "13:33", "kind": "condition", "hit": false, "reference": 43.49, "baseline": 42.74, "gain_pct": 0.01661207, "_synthetic": true}
+{"symbol": "002897.SZ", "date": "20261109", "ts": "13:35", "kind": "condition", "hit": true, "reference": 43.49, "baseline": 42.74, "gain_pct": 0.02292934, "_synthetic": true}
+{"symbol": "002897.SZ", "date": "20261109", "ts": "13:40", "kind": "condition", "hit": false, "reference": 43.92, "baseline": 42.74, "gain_pct": 0.0215255, "_synthetic": true}
+{"symbol": "002927.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "002927.SZ", "date": "20261109", "ts": "11:22", "kind": "condition", "hit": true, "reference": 13.33, "baseline": 13.2, "gain_pct": 0.01060606, "_synthetic": true}
+{"symbol": "002927.SZ", "date": "20261109", "ts": "11:23", "kind": "condition", "hit": false, "reference": 13.35, "baseline": 13.2, "gain_pct": 0.00984848, "_synthetic": true}
+{"symbol": "002956.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "002984.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "003012.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "003041.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "003041.SZ", "date": "20261109", "ts": "13:55", "kind": "condition", "hit": true, "reference": 32.57, "baseline": 32.3, "gain_pct": 0.01702786, "_synthetic": true}
+{"symbol": "003041.SZ", "date": "20261109", "ts": "13:56", "kind": "condition", "hit": false, "reference": 32.9, "baseline": 32.3, "gain_pct": 0.01424149, "_synthetic": true}
+{"symbol": "300024.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "300024.SZ", "date": "20261109", "ts": "11:22", "kind": "condition", "hit": true, "reference": 13.56, "baseline": 13.38, "gain_pct": 0.0142003, "_synthetic": true}
+{"symbol": "300024.SZ", "date": "20261109", "ts": "11:23", "kind": "signal", "signal": "buy", "wait_bars": 1, "_synthetic": true}
+{"symbol": "300024.SZ", "date": "20261109", "ts": "11:24", "kind": "condition", "hit": false, "reference": 13.58, "baseline": 13.38, "gain_pct": 0.01195815, "_synthetic": true}
+{"symbol": "300024.SZ", "date": "20261109", "ts": "11:25", "kind": "plan", "plan": "enter", "entry_time": "11:25", "entry_price": 13.55, "wait_bars": 1, "qty": 7300, "exit_time": null, "exit_reason": null, "net_return_pct": null, "cross_day_pending": false, "_synthetic": true}
+{"symbol": "300024.SZ", "date": "20261109", "ts": "13:32", "kind": "condition", "hit": true, "reference": 13.53, "baseline": 13.38, "gain_pct": 0.01270553, "_synthetic": true}
+{"symbol": "300024.SZ", "date": "20261109", "ts": "13:33", "kind": "condition", "hit": false, "reference": 13.57, "baseline": 13.38, "gain_pct": 0.01121076, "_synthetic": true}
+{"symbol": "300024.SZ", "date": "20261109", "ts": "14:31", "kind": "condition", "hit": true, "reference": 13.51, "baseline": 13.38, "gain_pct": 0.01046338, "_synthetic": true}
+{"symbol": "300024.SZ", "date": "20261109", "ts": "14:32", "kind": "condition", "hit": false, "reference": 13.52, "baseline": 13.38, "gain_pct": 0.00971599, "_synthetic": true}
+{"symbol": "300053.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "300053.SZ", "date": "20261109", "ts": "10:34", "kind": "condition", "hit": true, "reference": 11.39, "baseline": 10.78, "gain_pct": 0.06215213, "_synthetic": true}
+{"symbol": "300053.SZ", "date": "20261109", "ts": "10:35", "kind": "signal", "signal": "buy", "wait_bars": 1, "_synthetic": true}
+{"symbol": "300053.SZ", "date": "20261109", "ts": "10:36", "kind": "condition", "hit": false, "reference": 11.48, "baseline": 10.78, "gain_pct": 0.06307978, "_synthetic": true}
+{"symbol": "300053.SZ", "date": "20261109", "ts": "10:37", "kind": "plan", "plan": "enter", "entry_time": "10:37", "entry_price": 11.46, "wait_bars": 1, "qty": 8700, "exit_time": null, "exit_reason": null, "net_return_pct": null, "cross_day_pending": false, "_synthetic": true}
+{"symbol": "300053.SZ", "date": "20261109", "ts": "14:07", "kind": "condition", "hit": true, "reference": 11.13, "baseline": 10.78, "gain_pct": 0.03339518, "_synthetic": true}
+{"symbol": "300053.SZ", "date": "20261109", "ts": "14:08", "kind": "condition", "hit": false, "reference": 11.15, "baseline": 10.78, "gain_pct": 0.03246753, "_synthetic": true}
+{"symbol": "300081.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "300081.SZ", "date": "20261109", "ts": "09:31", "kind": "plan", "plan": "exit", "entry_time": "10:19", "entry_price": 3.12, "exit_time": "09:31", "exit_reason": "take_profit", "net_return_pct": 0.0086, "cross_day": true, "_synthetic": true}
+{"symbol": "300081.SZ", "date": "20261109", "ts": "09:31", "kind": "fill", "side": "sell", "price": 3.1512, "qty": 32000, "status": "filled", "cross_day": true, "_synthetic": true}
+{"symbol": "300081.SZ", "date": "20261109", "ts": "09:52", "kind": "condition", "hit": true, "reference": 3.25, "baseline": 3.1, "gain_pct": 0.0516129, "_synthetic": true}
+{"symbol": "300081.SZ", "date": "20261109", "ts": "09:53", "kind": "signal", "signal": "buy", "wait_bars": 1, "_synthetic": true}
+{"symbol": "300081.SZ", "date": "20261109", "ts": "09:54", "kind": "condition", "hit": false, "reference": 3.27, "baseline": 3.1, "gain_pct": 0.0516129, "_synthetic": true}
+{"symbol": "300081.SZ", "date": "20261109", "ts": "09:55", "kind": "plan", "plan": "enter", "entry_time": "09:55", "entry_price": 3.26, "wait_bars": 1, "qty": 30600, "exit_time": null, "exit_reason": null, "net_return_pct": null, "cross_day_pending": false, "_synthetic": true}
+{"symbol": "300081.SZ", "date": "20261109", "ts": "10:19", "kind": "condition", "hit": true, "reference": 3.26, "baseline": 3.1, "gain_pct": 0.05483871, "_synthetic": true}
+{"symbol": "300081.SZ", "date": "20261109", "ts": "10:20", "kind": "condition", "hit": false, "reference": 3.27, "baseline": 3.1, "gain_pct": 0.05483871, "_synthetic": true}
+{"symbol": "300081.SZ", "date": "20261109", "ts": "11:24", "kind": "condition", "hit": true, "reference": 3.23, "baseline": 3.1, "gain_pct": 0.04516129, "_synthetic": true}
+{"symbol": "300081.SZ", "date": "20261109", "ts": "11:25", "kind": "condition", "hit": false, "reference": 3.24, "baseline": 3.1, "gain_pct": 0.04516129, "_synthetic": true}
+{"symbol": "300081.SZ", "date": "20261109", "ts": "13:22", "kind": "condition", "hit": true, "reference": 3.25, "baseline": 3.1, "gain_pct": 0.05806452, "_synthetic": true}
+{"symbol": "300081.SZ", "date": "20261109", "ts": "13:23", "kind": "condition", "hit": false, "reference": 3.28, "baseline": 3.1, "gain_pct": 0.05806452, "_synthetic": true}
+{"symbol": "300081.SZ", "date": "20261109", "ts": "13:26", "kind": "condition", "hit": true, "reference": 3.29, "baseline": 3.1, "gain_pct": 0.07419355, "_synthetic": true}
+{"symbol": "300081.SZ", "date": "20261109", "ts": "13:27", "kind": "condition", "hit": false, "reference": 3.36, "baseline": 3.1, "gain_pct": 0.08064516, "_synthetic": true}
+{"symbol": "300081.SZ", "date": "20261109", "ts": "14:25", "kind": "condition", "hit": true, "reference": 3.31, "baseline": 3.1, "gain_pct": 0.07096774, "_synthetic": true}
+{"symbol": "300081.SZ", "date": "20261109", "ts": "14:26", "kind": "condition", "hit": false, "reference": 3.32, "baseline": 3.1, "gain_pct": 0.06451613, "_synthetic": true}
+{"symbol": "300111.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "300111.SZ", "date": "20261109", "ts": "10:39", "kind": "condition", "hit": true, "reference": 3.41, "baseline": 3.29, "gain_pct": 0.03951368, "_synthetic": true}
+{"symbol": "300111.SZ", "date": "20261109", "ts": "10:40", "kind": "condition", "hit": false, "reference": 3.42, "baseline": 3.29, "gain_pct": 0.03647416, "_synthetic": true}
+{"symbol": "300111.SZ", "date": "20261109", "ts": "10:49", "kind": "condition", "hit": true, "reference": 3.42, "baseline": 3.29, "gain_pct": 0.06990881, "_synthetic": true}
+{"symbol": "300111.SZ", "date": "20261109", "ts": "10:50", "kind": "condition", "hit": false, "reference": 3.55, "baseline": 3.29, "gain_pct": 0.07294833, "_synthetic": true}
+{"symbol": "300111.SZ", "date": "20261109", "ts": "13:02", "kind": "condition", "hit": true, "reference": 3.48, "baseline": 3.29, "gain_pct": 0.06079027, "_synthetic": true}
+{"symbol": "300111.SZ", "date": "20261109", "ts": "13:03", "kind": "signal", "signal": "buy", "wait_bars": 1, "_synthetic": true}
+{"symbol": "300111.SZ", "date": "20261109", "ts": "13:04", "kind": "condition", "hit": false, "reference": 3.52, "baseline": 3.29, "gain_pct": 0.06382979, "_synthetic": true}
+{"symbol": "300111.SZ", "date": "20261109", "ts": "13:05", "kind": "plan", "plan": "enter", "entry_time": "13:05", "entry_price": 3.5, "wait_bars": 1, "qty": 28500, "exit_time": null, "exit_reason": null, "net_return_pct": null, "cross_day_pending": false, "_synthetic": true}
+{"symbol": "300111.SZ", "date": "20261109", "ts": "14:44", "kind": "condition", "hit": true, "reference": 3.46, "baseline": 3.29, "gain_pct": 0.05471125, "_synthetic": true}
+{"symbol": "300111.SZ", "date": "20261109", "ts": "14:45", "kind": "condition", "hit": false, "reference": 3.47, "baseline": 3.29, "gain_pct": 0.05167173, "_synthetic": true}
+{"symbol": "300140.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "300167.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "300195.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "300224.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "300224.SZ", "date": "20261109", "ts": "13:24", "kind": "condition", "hit": true, "reference": 13.71, "baseline": 13.14, "gain_pct": 0.04642314, "_synthetic": true}
+{"symbol": "300224.SZ", "date": "20261109", "ts": "13:25", "kind": "condition", "hit": false, "reference": 13.77, "baseline": 13.14, "gain_pct": 0.04718417, "_synthetic": true}
+{"symbol": "300224.SZ", "date": "20261109", "ts": "14:01", "kind": "condition", "hit": true, "reference": 13.71, "baseline": 13.14, "gain_pct": 0.04414003, "_synthetic": true}
+{"symbol": "300224.SZ", "date": "20261109", "ts": "14:02", "kind": "condition", "hit": false, "reference": 13.72, "baseline": 13.14, "gain_pct": 0.04261796, "_synthetic": true}
+{"symbol": "300250.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "300279.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "300308.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "300308.SZ", "date": "20261109", "ts": "09:52", "kind": "condition", "hit": true, "reference": 453.04, "baseline": 448.0, "gain_pct": 0.01444196, "_synthetic": true}
+{"symbol": "300308.SZ", "date": "20261109", "ts": "09:53", "kind": "condition", "hit": false, "reference": 455.59, "baseline": 448.0, "gain_pct": 0.00892857, "_synthetic": true}
+{"symbol": "300308.SZ", "date": "20261109", "ts": "09:58", "kind": "condition", "hit": true, "reference": 455.59, "baseline": 448.0, "gain_pct": 0.01897321, "_synthetic": true}
+{"symbol": "300308.SZ", "date": "20261109", "ts": "09:59", "kind": "condition", "hit": false, "reference": 457.49, "baseline": 448.0, "gain_pct": 0.01584821, "_synthetic": true}
+{"symbol": "300308.SZ", "date": "20261109", "ts": "10:00", "kind": "condition", "hit": true, "reference": 457.49, "baseline": 448.0, "gain_pct": 0.02232143, "_synthetic": true}
+{"symbol": "300308.SZ", "date": "20261109", "ts": "10:01", "kind": "signal", "signal": "buy", "wait_bars": 1, "_synthetic": true}
+{"symbol": "300308.SZ", "date": "20261109", "ts": "10:02", "kind": "condition", "hit": false, "reference": 460.87, "baseline": 448.0, "gain_pct": 0.02625, "_synthetic": true}
+{"symbol": "300308.SZ", "date": "20261109", "ts": "10:03", "kind": "condition", "hit": true, "reference": 460.9, "baseline": 448.0, "gain_pct": 0.03125, "_synthetic": true}
+{"symbol": "300308.SZ", "date": "20261109", "ts": "10:03", "kind": "plan", "plan": "enter", "entry_time": "10:03", "entry_price": 459.76, "wait_bars": 1, "qty": 200, "exit_time": null, "exit_reason": null, "net_return_pct": null, "cross_day_pending": false, "_synthetic": true}
+{"symbol": "300308.SZ", "date": "20261109", "ts": "10:07", "kind": "condition", "hit": false, "reference": 470.11, "baseline": 448.0, "gain_pct": 0.04236607, "_synthetic": true}
+{"symbol": "300308.SZ", "date": "20261109", "ts": "10:13", "kind": "condition", "hit": true, "reference": 470.28, "baseline": 448.0, "gain_pct": 0.05305804, "_synthetic": true}
+{"symbol": "300308.SZ", "date": "20261109", "ts": "10:15", "kind": "condition", "hit": false, "reference": 474.58, "baseline": 448.0, "gain_pct": 0.05703125, "_synthetic": true}
+{"symbol": "300308.SZ", "date": "20261109", "ts": "10:45", "kind": "condition", "hit": true, "reference": 467.86, "baseline": 448.0, "gain_pct": 0.04821429, "_synthetic": true}
+{"symbol": "300308.SZ", "date": "20261109", "ts": "10:46", "kind": "condition", "hit": false, "reference": 469.6, "baseline": 448.0, "gain_pct": 0.04435268, "_synthetic": true}
+{"symbol": "300308.SZ", "date": "20261109", "ts": "13:24", "kind": "condition", "hit": true, "reference": 458.66, "baseline": 448.0, "gain_pct": 0.02537946, "_synthetic": true}
+{"symbol": "300308.SZ", "date": "20261109", "ts": "13:25", "kind": "condition", "hit": false, "reference": 459.93, "baseline": 448.0, "gain_pct": 0.02455357, "_synthetic": true}
+{"symbol": "300308.SZ", "date": "20261109", "ts": "13:30", "kind": "condition", "hit": true, "reference": 459.93, "baseline": 448.0, "gain_pct": 0.02790179, "_synthetic": true}
+{"symbol": "300308.SZ", "date": "20261109", "ts": "13:31", "kind": "condition", "hit": false, "reference": 460.89, "baseline": 448.0, "gain_pct": 0.02767857, "_synthetic": true}
+{"symbol": "300308.SZ", "date": "20261109", "ts": "13:32", "kind": "condition", "hit": true, "reference": 460.98, "baseline": 448.0, "gain_pct": 0.03167411, "_synthetic": true}
+{"symbol": "300308.SZ", "date": "20261109", "ts": "13:33", "kind": "condition", "hit": false, "reference": 462.48, "baseline": 448.0, "gain_pct": 0.03129464, "_synthetic": true}
+{"symbol": "300308.SZ", "date": "20261109", "ts": "13:37", "kind": "condition", "hit": true, "reference": 462.87, "baseline": 448.0, "gain_pct": 0.03508929, "_synthetic": true}
+{"symbol": "300308.SZ", "date": "20261109", "ts": "13:39", "kind": "condition", "hit": false, "reference": 465.99, "baseline": 448.0, "gain_pct": 0.03819196, "_synthetic": true}
+{"symbol": "300339.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "300370.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "300400.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "300400.SZ", "date": "20261109", "ts": "10:42", "kind": "condition", "hit": true, "reference": 23.07, "baseline": 22.7, "gain_pct": 0.01674009, "_synthetic": true}
+{"symbol": "300400.SZ", "date": "20261109", "ts": "10:43", "kind": "condition", "hit": false, "reference": 23.08, "baseline": 22.7, "gain_pct": 0.01409692, "_synthetic": true}
+{"symbol": "300400.SZ", "date": "20261109", "ts": "10:44", "kind": "condition", "hit": true, "reference": 23.1, "baseline": 22.7, "gain_pct": 0.01938326, "_synthetic": true}
+{"symbol": "300400.SZ", "date": "20261109", "ts": "10:45", "kind": "signal", "signal": "buy", "wait_bars": 1, "_synthetic": true}
+{"symbol": "300400.SZ", "date": "20261109", "ts": "10:47", "kind": "condition", "hit": false, "reference": 23.37, "baseline": 22.7, "gain_pct": 0.02951542, "_synthetic": true}
+{"symbol": "300400.SZ", "date": "20261109", "ts": "10:47", "kind": "plan", "plan": "enter", "entry_time": "10:47", "entry_price": 23.35, "wait_bars": 1, "qty": 4200, "exit_time": null, "exit_reason": null, "net_return_pct": null, "cross_day_pending": false, "_synthetic": true}
+{"symbol": "300400.SZ", "date": "20261109", "ts": "11:22", "kind": "condition", "hit": true, "reference": 23.38, "baseline": 22.7, "gain_pct": 0.03480176, "_synthetic": true}
+{"symbol": "300400.SZ", "date": "20261109", "ts": "11:23", "kind": "condition", "hit": false, "reference": 23.5, "baseline": 22.7, "gain_pct": 0.030837, "_synthetic": true}
+{"symbol": "300426.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "300426.SZ", "date": "20261109", "ts": "10:01", "kind": "condition", "hit": true, "reference": 9.95, "baseline": 9.76, "gain_pct": 0.02561475, "_synthetic": true}
+{"symbol": "300426.SZ", "date": "20261109", "ts": "10:02", "kind": "condition", "hit": false, "reference": 10.06, "baseline": 9.76, "gain_pct": 0.02459016, "_synthetic": true}
+{"symbol": "300426.SZ", "date": "20261109", "ts": "10:11", "kind": "condition", "hit": true, "reference": 10.08, "baseline": 9.76, "gain_pct": 0.04098361, "_synthetic": true}
+{"symbol": "300426.SZ", "date": "20261109", "ts": "10:12", "kind": "signal", "signal": "buy", "wait_bars": 1, "_synthetic": true}
+{"symbol": "300426.SZ", "date": "20261109", "ts": "10:13", "kind": "condition", "hit": false, "reference": 10.23, "baseline": 9.76, "gain_pct": 0.03995902, "_synthetic": true}
+{"symbol": "300426.SZ", "date": "20261109", "ts": "10:14", "kind": "plan", "plan": "enter", "entry_time": "10:14", "entry_price": 10.17, "wait_bars": 1, "qty": 9800, "exit_time": null, "exit_reason": null, "net_return_pct": null, "cross_day_pending": false, "_synthetic": true}
+{"symbol": "300453.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "300479.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "300506.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "300534.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "300534.SZ", "date": "20261109", "ts": "09:55", "kind": "condition", "hit": true, "reference": 10.08, "baseline": 9.88, "gain_pct": 0.02327935, "_synthetic": true}
+{"symbol": "300534.SZ", "date": "20261109", "ts": "09:56", "kind": "condition", "hit": false, "reference": 10.11, "baseline": 9.88, "gain_pct": 0.02327935, "_synthetic": true}
+{"symbol": "300534.SZ", "date": "20261109", "ts": "09:57", "kind": "condition", "hit": true, "reference": 10.11, "baseline": 9.88, "gain_pct": 0.0242915, "_synthetic": true}
+{"symbol": "300534.SZ", "date": "20261109", "ts": "09:58", "kind": "condition", "hit": false, "reference": 10.14, "baseline": 9.88, "gain_pct": 0.02226721, "_synthetic": true}
+{"symbol": "300534.SZ", "date": "20261109", "ts": "10:50", "kind": "condition", "hit": true, "reference": 10.1, "baseline": 9.88, "gain_pct": 0.02327935, "_synthetic": true}
+{"symbol": "300534.SZ", "date": "20261109", "ts": "10:51", "kind": "condition", "hit": false, "reference": 10.11, "baseline": 9.88, "gain_pct": 0.02125506, "_synthetic": true}
+{"symbol": "300534.SZ", "date": "20261109", "ts": "13:05", "kind": "condition", "hit": true, "reference": 10.15, "baseline": 9.88, "gain_pct": 0.04554656, "_synthetic": true}
+{"symbol": "300534.SZ", "date": "20261109", "ts": "13:06", "kind": "condition", "hit": false, "reference": 10.38, "baseline": 9.88, "gain_pct": 0.04048583, "_synthetic": true}
+{"symbol": "300534.SZ", "date": "20261109", "ts": "13:07", "kind": "condition", "hit": true, "reference": 10.38, "baseline": 9.88, "gain_pct": 0.05566802, "_synthetic": true}
+{"symbol": "300534.SZ", "date": "20261109", "ts": "13:08", "kind": "condition", "hit": false, "reference": 10.53, "baseline": 9.88, "gain_pct": 0.04757085, "_synthetic": true}
+{"symbol": "300534.SZ", "date": "20261109", "ts": "13:13", "kind": "condition", "hit": true, "reference": 10.53, "baseline": 9.88, "gain_pct": 0.0708502, "_synthetic": true}
+{"symbol": "300534.SZ", "date": "20261109", "ts": "13:14", "kind": "condition", "hit": false, "reference": 10.6, "baseline": 9.88, "gain_pct": 0.0597166, "_synthetic": true}
+{"symbol": "300534.SZ", "date": "20261109", "ts": "14:42", "kind": "condition", "hit": true, "reference": 10.12, "baseline": 9.88, "gain_pct": 0.02530364, "_synthetic": true}
+{"symbol": "300534.SZ", "date": "20261109", "ts": "14:43", "kind": "condition", "hit": false, "reference": 10.13, "baseline": 9.88, "gain_pct": 0.0242915, "_synthetic": true}
+{"symbol": "300534.SZ", "date": "20261109", "ts": "14:49", "kind": "condition", "hit": true, "reference": 10.13, "baseline": 9.88, "gain_pct": 0.02732794, "_synthetic": true}
+{"symbol": "300534.SZ", "date": "20261109", "ts": "14:50", "kind": "signal", "signal": "buy", "wait_bars": 1, "_synthetic": true}
+{"symbol": "300534.SZ", "date": "20261109", "ts": "14:51", "kind": "condition", "hit": false, "reference": 10.17, "baseline": 9.88, "gain_pct": 0.02732794, "_synthetic": true}
+{"symbol": "300534.SZ", "date": "20261109", "ts": "14:52", "kind": "plan", "plan": "enter", "entry_time": "14:52", "entry_price": 10.15, "wait_bars": 1, "qty": 0, "exit_time": null, "exit_reason": null, "net_return_pct": null, "cross_day_pending": false, "_synthetic": true}
+{"symbol": "300534.SZ", "date": "20261109", "ts": "15:00", "kind": "condition", "hit": true, "reference": 10.17, "baseline": 9.88, "gain_pct": 0.03441296, "_synthetic": true}
+{"symbol": "300561.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "300589.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "300589.SZ", "date": "20261109", "ts": "10:35", "kind": "condition", "hit": true, "reference": 12.63, "baseline": 12.34, "gain_pct": 0.02431118, "_synthetic": true}
+{"symbol": "300589.SZ", "date": "20261109", "ts": "10:36", "kind": "condition", "hit": false, "reference": 12.64, "baseline": 12.34, "gain_pct": 0.02106969, "_synthetic": true}
+{"symbol": "300615.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "300615.SZ", "date": "20261109", "ts": "11:21", "kind": "condition", "hit": true, "reference": 10.69, "baseline": 10.57, "gain_pct": 0.01419111, "_synthetic": true}
+{"symbol": "300615.SZ", "date": "20261109", "ts": "11:22", "kind": "condition", "hit": false, "reference": 10.74, "baseline": 10.57, "gain_pct": 0.01608325, "_synthetic": true}
+{"symbol": "300615.SZ", "date": "20261109", "ts": "13:24", "kind": "condition", "hit": true, "reference": 10.67, "baseline": 10.57, "gain_pct": 0.01040681, "_synthetic": true}
+{"symbol": "300615.SZ", "date": "20261109", "ts": "13:25", "kind": "condition", "hit": false, "reference": 10.69, "baseline": 10.57, "gain_pct": 0.00946074, "_synthetic": true}
+{"symbol": "300615.SZ", "date": "20261109", "ts": "13:32", "kind": "condition", "hit": true, "reference": 10.69, "baseline": 10.57, "gain_pct": 0.01229896, "_synthetic": true}
+{"symbol": "300615.SZ", "date": "20261109", "ts": "13:33", "kind": "condition", "hit": false, "reference": 10.71, "baseline": 10.57, "gain_pct": 0.01229896, "_synthetic": true}
+{"symbol": "300615.SZ", "date": "20261109", "ts": "13:38", "kind": "condition", "hit": true, "reference": 10.73, "baseline": 10.57, "gain_pct": 0.01702933, "_synthetic": true}
+{"symbol": "300615.SZ", "date": "20261109", "ts": "13:39", "kind": "signal", "signal": "buy", "wait_bars": 1, "_synthetic": true}
+{"symbol": "300615.SZ", "date": "20261109", "ts": "13:40", "kind": "condition", "hit": false, "reference": 10.76, "baseline": 10.57, "gain_pct": 0.01513718, "_synthetic": true}
+{"symbol": "300615.SZ", "date": "20261109", "ts": "13:41", "kind": "plan", "plan": "enter", "entry_time": "13:41", "entry_price": 10.73, "wait_bars": 1, "qty": 9300, "exit_time": null, "exit_reason": null, "net_return_pct": null, "cross_day_pending": false, "_synthetic": true}
+{"symbol": "300642.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "300642.SZ", "date": "20261109", "ts": "10:42", "kind": "condition", "hit": true, "reference": 16.41, "baseline": 16.02, "gain_pct": 0.02621723, "_synthetic": true}
+{"symbol": "300642.SZ", "date": "20261109", "ts": "10:43", "kind": "condition", "hit": false, "reference": 16.44, "baseline": 16.02, "gain_pct": 0.02621723, "_synthetic": true}
+{"symbol": "300642.SZ", "date": "20261109", "ts": "14:08", "kind": "condition", "hit": true, "reference": 16.22, "baseline": 16.02, "gain_pct": 0.01310861, "_synthetic": true}
+{"symbol": "300642.SZ", "date": "20261109", "ts": "14:09", "kind": "condition", "hit": false, "reference": 16.23, "baseline": 16.02, "gain_pct": 0.01186017, "_synthetic": true}
+{"symbol": "300669.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "300669.SZ", "date": "20261109", "ts": "10:35", "kind": "condition", "hit": true, "reference": 20.88, "baseline": 20.52, "gain_pct": 0.01851852, "_synthetic": true}
+{"symbol": "300669.SZ", "date": "20261109", "ts": "10:36", "kind": "condition", "hit": false, "reference": 20.9, "baseline": 20.52, "gain_pct": 0.0165692, "_synthetic": true}
+{"symbol": "300669.SZ", "date": "20261109", "ts": "10:39", "kind": "condition", "hit": true, "reference": 20.94, "baseline": 20.52, "gain_pct": 0.02095517, "_synthetic": true}
+{"symbol": "300669.SZ", "date": "20261109", "ts": "10:40", "kind": "signal", "signal": "buy", "wait_bars": 1, "_synthetic": true}
+{"symbol": "300669.SZ", "date": "20261109", "ts": "10:41", "kind": "condition", "hit": false, "reference": 20.98, "baseline": 20.52, "gain_pct": 0.0214425, "_synthetic": true}
+{"symbol": "300669.SZ", "date": "20261109", "ts": "10:42", "kind": "plan", "plan": "enter", "entry_time": "10:42", "entry_price": 20.94, "wait_bars": 1, "qty": 4700, "exit_time": null, "exit_reason": null, "net_return_pct": null, "cross_day_pending": false, "_synthetic": true}
+{"symbol": "300669.SZ", "date": "20261109", "ts": "13:45", "kind": "condition", "hit": true, "reference": 20.71, "baseline": 20.52, "gain_pct": 0.01072125, "_synthetic": true}
+{"symbol": "300669.SZ", "date": "20261109", "ts": "13:46", "kind": "condition", "hit": false, "reference": 20.76, "baseline": 20.52, "gain_pct": 0.01023392, "_synthetic": true}
+{"symbol": "300669.SZ", "date": "20261109", "ts": "13:47", "kind": "condition", "hit": true, "reference": 20.76, "baseline": 20.52, "gain_pct": 0.01267057, "_synthetic": true}
+{"symbol": "300669.SZ", "date": "20261109", "ts": "13:48", "kind": "condition", "hit": false, "reference": 20.78, "baseline": 20.52, "gain_pct": 0.01267057, "_synthetic": true}
+{"symbol": "300669.SZ", "date": "20261109", "ts": "13:49", "kind": "condition", "hit": true, "reference": 20.78, "baseline": 20.52, "gain_pct": 0.01608187, "_synthetic": true}
+{"symbol": "300669.SZ", "date": "20261109", "ts": "13:50", "kind": "condition", "hit": false, "reference": 20.85, "baseline": 20.52, "gain_pct": 0.01315789, "_synthetic": true}
+{"symbol": "300695.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "300695.SZ", "date": "20261109", "ts": "09:31", "kind": "plan", "plan": "exit", "entry_time": "09:55", "entry_price": 59.15, "exit_time": "09:31", "exit_reason": "stop_loss", "net_return_pct": -0.0064, "cross_day": true, "_synthetic": true}
+{"symbol": "300695.SZ", "date": "20261109", "ts": "09:31", "kind": "fill", "side": "sell", "price": 58.85425, "qty": 1600, "status": "filled", "cross_day": true, "_synthetic": true}
+{"symbol": "300695.SZ", "date": "20261109", "ts": "09:54", "kind": "condition", "hit": true, "reference": 59.79, "baseline": 57.08, "gain_pct": 0.05080589, "_synthetic": true}
+{"symbol": "300695.SZ", "date": "20261109", "ts": "09:55", "kind": "signal", "signal": "buy", "wait_bars": 1, "_synthetic": true}
+{"symbol": "300695.SZ", "date": "20261109", "ts": "09:56", "kind": "condition", "hit": false, "reference": 60.83, "baseline": 57.08, "gain_pct": 0.04187106, "_synthetic": true}
+{"symbol": "300695.SZ", "date": "20261109", "ts": "09:57", "kind": "plan", "plan": "enter", "entry_time": "09:57", "entry_price": 59.47, "wait_bars": 1, "qty": 1600, "exit_time": null, "exit_reason": null, "net_return_pct": null, "cross_day_pending": false, "_synthetic": true}
+{"symbol": "300723.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "300753.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "300753.SZ", "date": "20261109", "ts": "10:33", "kind": "condition", "hit": true, "reference": 20.91, "baseline": 19.88, "gain_pct": 0.0528169, "_synthetic": true}
+{"symbol": "300753.SZ", "date": "20261109", "ts": "10:34", "kind": "signal", "signal": "buy", "wait_bars": 1, "_synthetic": true}
+{"symbol": "300753.SZ", "date": "20261109", "ts": "10:35", "kind": "condition", "hit": false, "reference": 21.04, "baseline": 19.88, "gain_pct": 0.05231388, "_synthetic": true}
+{"symbol": "300753.SZ", "date": "20261109", "ts": "10:36", "kind": "plan", "plan": "enter", "entry_time": "10:36", "entry_price": 20.93, "wait_bars": 1, "qty": 4700, "exit_time": null, "exit_reason": null, "net_return_pct": null, "cross_day_pending": false, "_synthetic": true}
+{"symbol": "300753.SZ", "date": "20261109", "ts": "13:23", "kind": "condition", "hit": true, "reference": 20.52, "baseline": 19.88, "gain_pct": 0.03269618, "_synthetic": true}
+{"symbol": "300753.SZ", "date": "20261109", "ts": "13:24", "kind": "condition", "hit": false, "reference": 20.53, "baseline": 19.88, "gain_pct": 0.03118712, "_synthetic": true}
+{"symbol": "300753.SZ", "date": "20261109", "ts": "13:32", "kind": "condition", "hit": true, "reference": 20.53, "baseline": 19.88, "gain_pct": 0.0331992, "_synthetic": true}
+{"symbol": "300753.SZ", "date": "20261109", "ts": "13:33", "kind": "condition", "hit": false, "reference": 20.54, "baseline": 19.88, "gain_pct": 0.03118712, "_synthetic": true}
+{"symbol": "300781.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "300809.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "300809.SZ", "date": "20261109", "ts": "10:32", "kind": "condition", "hit": true, "reference": 21.05, "baseline": 20.41, "gain_pct": 0.03625674, "_synthetic": true}
+{"symbol": "300809.SZ", "date": "20261109", "ts": "10:33", "kind": "condition", "hit": false, "reference": 21.15, "baseline": 20.41, "gain_pct": 0.03086722, "_synthetic": true}
+{"symbol": "300809.SZ", "date": "20261109", "ts": "11:23", "kind": "condition", "hit": true, "reference": 20.78, "baseline": 20.41, "gain_pct": 0.02057815, "_synthetic": true}
+{"symbol": "300809.SZ", "date": "20261109", "ts": "11:24", "kind": "condition", "hit": false, "reference": 20.83, "baseline": 20.41, "gain_pct": 0.02008819, "_synthetic": true}
+{"symbol": "300809.SZ", "date": "20261109", "ts": "13:22", "kind": "condition", "hit": true, "reference": 20.74, "baseline": 20.41, "gain_pct": 0.0166585, "_synthetic": true}
+{"symbol": "300809.SZ", "date": "20261109", "ts": "13:23", "kind": "signal", "signal": "buy", "wait_bars": 1, "_synthetic": true}
+{"symbol": "300809.SZ", "date": "20261109", "ts": "13:25", "kind": "condition", "hit": false, "reference": 20.8, "baseline": 20.41, "gain_pct": 0.01714846, "_synthetic": true}
+{"symbol": "300809.SZ", "date": "20261109", "ts": "13:25", "kind": "plan", "plan": "enter", "entry_time": "13:25", "entry_price": 20.79, "wait_bars": 1, "qty": 4800, "exit_time": null, "exit_reason": null, "net_return_pct": null, "cross_day_pending": true, "_synthetic": true}
+{"symbol": "300809.SZ", "date": "20261109", "ts": "13:27", "kind": "condition", "hit": true, "reference": 20.8, "baseline": 20.41, "gain_pct": 0.01959824, "_synthetic": true}
+{"symbol": "300809.SZ", "date": "20261109", "ts": "13:28", "kind": "condition", "hit": false, "reference": 20.81, "baseline": 20.41, "gain_pct": 0.01861832, "_synthetic": true}
+{"symbol": "300809.SZ", "date": "20261109", "ts": "13:32", "kind": "condition", "hit": true, "reference": 20.82, "baseline": 20.41, "gain_pct": 0.0210681, "_synthetic": true}
+{"symbol": "300809.SZ", "date": "20261109", "ts": "13:33", "kind": "condition", "hit": false, "reference": 20.85, "baseline": 20.41, "gain_pct": 0.01910828, "_synthetic": true}
+{"symbol": "300809.SZ", "date": "20261109", "ts": "14:01", "kind": "condition", "hit": true, "reference": 20.79, "baseline": 20.41, "gain_pct": 0.01910828, "_synthetic": true}
+{"symbol": "300809.SZ", "date": "20261109", "ts": "14:02", "kind": "condition", "hit": false, "reference": 20.8, "baseline": 20.41, "gain_pct": 0.01714846, "_synthetic": true}
+{"symbol": "300835.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "300835.SZ", "date": "20261109", "ts": "10:01", "kind": "condition", "hit": true, "reference": 110.0, "baseline": 109.03, "gain_pct": 0.01137302, "_synthetic": true}
+{"symbol": "300835.SZ", "date": "20261109", "ts": "10:02", "kind": "signal", "signal": "buy", "wait_bars": 1, "_synthetic": true}
+{"symbol": "300835.SZ", "date": "20261109", "ts": "10:03", "kind": "condition", "hit": false, "reference": 111.12, "baseline": 109.03, "gain_pct": 0.01550032, "_synthetic": true}
+{"symbol": "300835.SZ", "date": "20261109", "ts": "10:04", "kind": "plan", "plan": "enter", "entry_time": "10:04", "entry_price": 110.46, "wait_bars": 1, "qty": 900, "exit_time": null, "exit_reason": null, "net_return_pct": null, "cross_day_pending": true, "_synthetic": true}
+{"symbol": "300835.SZ", "date": "20261109", "ts": "10:05", "kind": "condition", "hit": true, "reference": 111.12, "baseline": 109.03, "gain_pct": 0.02613959, "_synthetic": true}
+{"symbol": "300835.SZ", "date": "20261109", "ts": "10:06", "kind": "condition", "hit": false, "reference": 111.88, "baseline": 109.03, "gain_pct": 0.02613959, "_synthetic": true}
+{"symbol": "300835.SZ", "date": "20261109", "ts": "10:45", "kind": "condition", "hit": true, "reference": 110.89, "baseline": 109.03, "gain_pct": 0.02137027, "_synthetic": true}
+{"symbol": "300835.SZ", "date": "20261109", "ts": "10:46", "kind": "condition", "hit": false, "reference": 111.36, "baseline": 109.03, "gain_pct": 0.01806842, "_synthetic": true}
+{"symbol": "300835.SZ", "date": "20261109", "ts": "11:21", "kind": "condition", "hit": true, "reference": 111.25, "baseline": 109.03, "gain_pct": 0.02357149, "_synthetic": true}
+{"symbol": "300835.SZ", "date": "20261109", "ts": "11:24", "kind": "condition", "hit": false, "reference": 112.39, "baseline": 109.03, "gain_pct": 0.02439695, "_synthetic": true}
+{"symbol": "300835.SZ", "date": "20261109", "ts": "13:32", "kind": "condition", "hit": true, "reference": 110.77, "baseline": 109.03, "gain_pct": 0.01834358, "_synthetic": true}
+{"symbol": "300835.SZ", "date": "20261109", "ts": "13:33", "kind": "condition", "hit": false, "reference": 111.03, "baseline": 109.03, "gain_pct": 0.01449142, "_synthetic": true}
+{"symbol": "300835.SZ", "date": "20261109", "ts": "13:38", "kind": "condition", "hit": true, "reference": 111.03, "baseline": 109.03, "gain_pct": 0.02173714, "_synthetic": true}
+{"symbol": "300835.SZ", "date": "20261109", "ts": "13:39", "kind": "condition", "hit": false, "reference": 111.4, "baseline": 109.03, "gain_pct": 0.02137027, "_synthetic": true}
+{"symbol": "300835.SZ", "date": "20261109", "ts": "14:01", "kind": "condition", "hit": true, "reference": 110.75, "baseline": 109.03, "gain_pct": 0.01595891, "_synthetic": true}
+{"symbol": "300835.SZ", "date": "20261109", "ts": "14:02", "kind": "condition", "hit": false, "reference": 110.79, "baseline": 109.03, "gain_pct": 0.01302394, "_synthetic": true}
+{"symbol": "300861.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "300889.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "300889.SZ", "date": "20261109", "ts": "10:34", "kind": "condition", "hit": true, "reference": 17.28, "baseline": 17.02, "gain_pct": 0.01645123, "_synthetic": true}
+{"symbol": "300889.SZ", "date": "20261109", "ts": "10:35", "kind": "signal", "signal": "buy", "wait_bars": 1, "_synthetic": true}
+{"symbol": "300889.SZ", "date": "20261109", "ts": "10:36", "kind": "condition", "hit": false, "reference": 17.33, "baseline": 17.02, "gain_pct": 0.01527615, "_synthetic": true}
+{"symbol": "300889.SZ", "date": "20261109", "ts": "10:37", "kind": "plan", "plan": "enter", "entry_time": "10:37", "entry_price": 17.27, "wait_bars": 1, "qty": 5700, "exit_time": null, "exit_reason": null, "net_return_pct": null, "cross_day_pending": false, "_synthetic": true}
+{"symbol": "300889.SZ", "date": "20261109", "ts": "11:22", "kind": "condition", "hit": true, "reference": 17.3, "baseline": 17.02, "gain_pct": 0.01762632, "_synthetic": true}
+{"symbol": "300889.SZ", "date": "20261109", "ts": "11:23", "kind": "condition", "hit": false, "reference": 17.32, "baseline": 17.02, "gain_pct": 0.01586369, "_synthetic": true}
+{"symbol": "300889.SZ", "date": "20261109", "ts": "13:32", "kind": "condition", "hit": true, "reference": 17.19, "baseline": 17.02, "gain_pct": 0.01351351, "_synthetic": true}
+{"symbol": "300889.SZ", "date": "20261109", "ts": "13:33", "kind": "condition", "hit": false, "reference": 17.26, "baseline": 17.02, "gain_pct": 0.01351351, "_synthetic": true}
+{"symbol": "300889.SZ", "date": "20261109", "ts": "13:35", "kind": "condition", "hit": true, "reference": 17.26, "baseline": 17.02, "gain_pct": 0.01527615, "_synthetic": true}
+{"symbol": "300889.SZ", "date": "20261109", "ts": "13:36", "kind": "condition", "hit": false, "reference": 17.29, "baseline": 17.02, "gain_pct": 0.01527615, "_synthetic": true}
+{"symbol": "300889.SZ", "date": "20261109", "ts": "14:01", "kind": "condition", "hit": true, "reference": 17.3, "baseline": 17.02, "gain_pct": 0.01938895, "_synthetic": true}
+{"symbol": "300889.SZ", "date": "20261109", "ts": "14:02", "kind": "condition", "hit": false, "reference": 17.35, "baseline": 17.02, "gain_pct": 0.01880141, "_synthetic": true}
+{"symbol": "300916.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "300916.SZ", "date": "20261109", "ts": "10:52", "kind": "condition", "hit": true, "reference": 27.97, "baseline": 27.17, "gain_pct": 0.03275672, "_synthetic": true}
+{"symbol": "300916.SZ", "date": "20261109", "ts": "10:53", "kind": "signal", "signal": "buy", "wait_bars": 1, "_synthetic": true}
+{"symbol": "300916.SZ", "date": "20261109", "ts": "10:55", "kind": "condition", "hit": false, "reference": 28.24, "baseline": 27.17, "gain_pct": 0.03570114, "_synthetic": true}
+{"symbol": "300916.SZ", "date": "20261109", "ts": "10:55", "kind": "plan", "plan": "enter", "entry_time": "10:55", "entry_price": 28.23, "wait_bars": 1, "qty": 3500, "exit_time": null, "exit_reason": null, "net_return_pct": null, "cross_day_pending": false, "_synthetic": true}
+{"symbol": "300916.SZ", "date": "20261109", "ts": "10:56", "kind": "condition", "hit": true, "reference": 28.24, "baseline": 27.17, "gain_pct": 0.04048583, "_synthetic": true}
+{"symbol": "300916.SZ", "date": "20261109", "ts": "10:57", "kind": "condition", "hit": false, "reference": 28.35, "baseline": 27.17, "gain_pct": 0.03901362, "_synthetic": true}
+{"symbol": "300916.SZ", "date": "20261109", "ts": "11:25", "kind": "condition", "hit": true, "reference": 28.15, "baseline": 27.17, "gain_pct": 0.04011778, "_synthetic": true}
+{"symbol": "300916.SZ", "date": "20261109", "ts": "11:26", "kind": "condition", "hit": false, "reference": 28.26, "baseline": 27.17, "gain_pct": 0.03717335, "_synthetic": true}
+{"symbol": "300916.SZ", "date": "20261109", "ts": "13:18", "kind": "condition", "hit": true, "reference": 28.24, "baseline": 27.17, "gain_pct": 0.04600662, "_synthetic": true}
+{"symbol": "300916.SZ", "date": "20261109", "ts": "13:20", "kind": "condition", "hit": false, "reference": 28.47, "baseline": 27.17, "gain_pct": 0.04747884, "_synthetic": true}
+{"symbol": "300916.SZ", "date": "20261109", "ts": "13:21", "kind": "condition", "hit": true, "reference": 28.55, "baseline": 27.17, "gain_pct": 0.05447184, "_synthetic": true}
+{"symbol": "300916.SZ", "date": "20261109", "ts": "13:22", "kind": "condition", "hit": false, "reference": 28.65, "baseline": 27.17, "gain_pct": 0.05373574, "_synthetic": true}
+{"symbol": "300916.SZ", "date": "20261109", "ts": "13:23", "kind": "condition", "hit": true, "reference": 28.7, "baseline": 27.17, "gain_pct": 0.05815237, "_synthetic": true}
+{"symbol": "300916.SZ", "date": "20261109", "ts": "13:24", "kind": "condition", "hit": false, "reference": 28.76, "baseline": 27.17, "gain_pct": 0.05410379, "_synthetic": true}
+{"symbol": "300945.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "300972.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "300972.SZ", "date": "20261109", "ts": "10:01", "kind": "condition", "hit": true, "reference": 135.43, "baseline": 129.6, "gain_pct": 0.04876543, "_synthetic": true}
+{"symbol": "300972.SZ", "date": "20261109", "ts": "10:02", "kind": "condition", "hit": false, "reference": 135.92, "baseline": 129.6, "gain_pct": 0.0441358, "_synthetic": true}
+{"symbol": "300972.SZ", "date": "20261109", "ts": "10:03", "kind": "condition", "hit": true, "reference": 135.92, "baseline": 129.6, "gain_pct": 0.05100309, "_synthetic": true}
+{"symbol": "300972.SZ", "date": "20261109", "ts": "10:04", "kind": "condition", "hit": false, "reference": 136.45, "baseline": 129.6, "gain_pct": 0.0503858, "_synthetic": true}
+{"symbol": "300972.SZ", "date": "20261109", "ts": "10:06", "kind": "condition", "hit": true, "reference": 136.45, "baseline": 129.6, "gain_pct": 0.05810185, "_synthetic": true}
+{"symbol": "300972.SZ", "date": "20261109", "ts": "10:07", "kind": "condition", "hit": false, "reference": 137.13, "baseline": 129.6, "gain_pct": 0.0537037, "_synthetic": true}
+{"symbol": "300972.SZ", "date": "20261109", "ts": "10:25", "kind": "condition", "hit": true, "reference": 137.14, "baseline": 129.6, "gain_pct": 0.05864198, "_synthetic": true}
+{"symbol": "300972.SZ", "date": "20261109", "ts": "10:26", "kind": "condition", "hit": false, "reference": 137.42, "baseline": 129.6, "gain_pct": 0.05779321, "_synthetic": true}
+{"symbol": "300972.SZ", "date": "20261109", "ts": "10:39", "kind": "condition", "hit": true, "reference": 137.59, "baseline": 129.6, "gain_pct": 0.06180556, "_synthetic": true}
+{"symbol": "300972.SZ", "date": "20261109", "ts": "10:40", "kind": "condition", "hit": false, "reference": 137.7, "baseline": 129.6, "gain_pct": 0.05972222, "_synthetic": true}
+{"symbol": "300972.SZ", "date": "20261109", "ts": "10:45", "kind": "condition", "hit": true, "reference": 137.73, "baseline": 129.6, "gain_pct": 0.06388889, "_synthetic": true}
+{"symbol": "300972.SZ", "date": "20261109", "ts": "10:46", "kind": "condition", "hit": false, "reference": 137.88, "baseline": 129.6, "gain_pct": 0.05887346, "_synthetic": true}
+{"symbol": "300972.SZ", "date": "20261109", "ts": "10:51", "kind": "condition", "hit": true, "reference": 138.14, "baseline": 129.6, "gain_pct": 0.06604938, "_synthetic": true}
+{"symbol": "300972.SZ", "date": "20261109", "ts": "10:52", "kind": "condition", "hit": false, "reference": 138.23, "baseline": 129.6, "gain_pct": 0.06628086, "_synthetic": true}
+{"symbol": "300972.SZ", "date": "20261109", "ts": "14:09", "kind": "condition", "hit": true, "reference": 135.82, "baseline": 129.6, "gain_pct": 0.04822531, "_synthetic": true}
+{"symbol": "300972.SZ", "date": "20261109", "ts": "14:10", "kind": "condition", "hit": false, "reference": 135.96, "baseline": 129.6, "gain_pct": 0.04814815, "_synthetic": true}
+{"symbol": "300972.SZ", "date": "20261109", "ts": "14:30", "kind": "condition", "hit": true, "reference": 135.87, "baseline": 129.6, "gain_pct": 0.04945988, "_synthetic": true}
+{"symbol": "300972.SZ", "date": "20261109", "ts": "14:31", "kind": "condition", "hit": false, "reference": 136.06, "baseline": 129.6, "gain_pct": 0.04938272, "_synthetic": true}
+{"symbol": "300999.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "301026.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "301055.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "301055.SZ", "date": "20261109", "ts": "10:10", "kind": "condition", "hit": true, "reference": 25.97, "baseline": 25.51, "gain_pct": 0.02038416, "_synthetic": true}
+{"symbol": "301055.SZ", "date": "20261109", "ts": "10:11", "kind": "condition", "hit": false, "reference": 26.13, "baseline": 25.51, "gain_pct": 0.01803214, "_synthetic": true}
+{"symbol": "301055.SZ", "date": "20261109", "ts": "13:24", "kind": "condition", "hit": true, "reference": 25.76, "baseline": 25.51, "gain_pct": 0.01058408, "_synthetic": true}
+{"symbol": "301055.SZ", "date": "20261109", "ts": "13:25", "kind": "condition", "hit": false, "reference": 25.8, "baseline": 25.51, "gain_pct": 0.01058408, "_synthetic": true}
+{"symbol": "301083.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "301112.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "301149.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "301178.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "301178.SZ", "date": "20261109", "ts": "09:31", "kind": "plan", "plan": "exit", "entry_time": "13:09", "entry_price": 35.37, "exit_time": "09:31", "exit_reason": "stop_loss", "net_return_pct": -0.0064, "cross_day": true, "_synthetic": true}
+{"symbol": "301178.SZ", "date": "20261109", "ts": "09:31", "kind": "fill", "side": "sell", "price": 35.19315, "qty": 2800, "status": "filled", "cross_day": true, "_synthetic": true}
+{"symbol": "301178.SZ", "date": "20261109", "ts": "14:07", "kind": "condition", "hit": true, "reference": 34.52, "baseline": 33.83, "gain_pct": 0.02157848, "_synthetic": true}
+{"symbol": "301178.SZ", "date": "20261109", "ts": "14:08", "kind": "condition", "hit": false, "reference": 34.57, "baseline": 33.83, "gain_pct": 0.02128289, "_synthetic": true}
+{"symbol": "301208.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "301236.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "301236.SZ", "date": "20261109", "ts": "11:22", "kind": "condition", "hit": true, "reference": 33.47, "baseline": 33.04, "gain_pct": 0.01392252, "_synthetic": true}
+{"symbol": "301236.SZ", "date": "20261109", "ts": "11:23", "kind": "signal", "signal": "buy", "wait_bars": 1, "_synthetic": true}
+{"symbol": "301236.SZ", "date": "20261109", "ts": "11:24", "kind": "condition", "hit": false, "reference": 33.52, "baseline": 33.04, "gain_pct": 0.01331719, "_synthetic": true}
+{"symbol": "301236.SZ", "date": "20261109", "ts": "11:25", "kind": "plan", "plan": "enter", "entry_time": "11:25", "entry_price": 33.47, "wait_bars": 1, "qty": 2900, "exit_time": null, "exit_reason": null, "net_return_pct": null, "cross_day_pending": false, "_synthetic": true}
+{"symbol": "301236.SZ", "date": "20261109", "ts": "13:24", "kind": "condition", "hit": true, "reference": 33.44, "baseline": 33.04, "gain_pct": 0.01271186, "_synthetic": true}
+{"symbol": "301236.SZ", "date": "20261109", "ts": "13:25", "kind": "condition", "hit": false, "reference": 33.49, "baseline": 33.04, "gain_pct": 0.01210654, "_synthetic": true}
+{"symbol": "301236.SZ", "date": "20261109", "ts": "14:01", "kind": "condition", "hit": true, "reference": 33.45, "baseline": 33.04, "gain_pct": 0.01392252, "_synthetic": true}
+{"symbol": "301236.SZ", "date": "20261109", "ts": "14:02", "kind": "condition", "hit": false, "reference": 33.5, "baseline": 33.04, "gain_pct": 0.01271186, "_synthetic": true}
+{"symbol": "301276.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "301305.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "301305.SZ", "date": "20261109", "ts": "10:06", "kind": "condition", "hit": true, "reference": 21.25, "baseline": 20.88, "gain_pct": 0.01867816, "_synthetic": true}
+{"symbol": "301305.SZ", "date": "20261109", "ts": "10:07", "kind": "condition", "hit": false, "reference": 21.27, "baseline": 20.88, "gain_pct": 0.01819923, "_synthetic": true}
+{"symbol": "301332.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "301371.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "301418.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "301505.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "301550.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "301588.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "301588.SZ", "date": "20261109", "ts": "10:34", "kind": "condition", "hit": true, "reference": 21.96, "baseline": 21.11, "gain_pct": 0.04405495, "_synthetic": true}
+{"symbol": "301588.SZ", "date": "20261109", "ts": "10:35", "kind": "signal", "signal": "buy", "wait_bars": 1, "_synthetic": true}
+{"symbol": "301588.SZ", "date": "20261109", "ts": "10:36", "kind": "condition", "hit": false, "reference": 22.22, "baseline": 21.11, "gain_pct": 0.04784462, "_synthetic": true}
+{"symbol": "301588.SZ", "date": "20261109", "ts": "10:37", "kind": "plan", "plan": "enter", "entry_time": "10:37", "entry_price": 22.11, "wait_bars": 1, "qty": 4500, "exit_time": null, "exit_reason": null, "net_return_pct": null, "cross_day_pending": true, "_synthetic": true}
+{"symbol": "301588.SZ", "date": "20261109", "ts": "13:22", "kind": "condition", "hit": true, "reference": 21.48, "baseline": 21.11, "gain_pct": 0.01800095, "_synthetic": true}
+{"symbol": "301588.SZ", "date": "20261109", "ts": "13:24", "kind": "condition", "hit": false, "reference": 21.54, "baseline": 21.11, "gain_pct": 0.01989578, "_synthetic": true}
+{"symbol": "301630.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "301630.SZ", "date": "20261109", "ts": "09:51", "kind": "condition", "hit": true, "reference": 149.43, "baseline": 144.1, "gain_pct": 0.04614851, "_synthetic": true}
+{"symbol": "301630.SZ", "date": "20261109", "ts": "09:52", "kind": "signal", "signal": "buy", "wait_bars": 1, "_synthetic": true}
+{"symbol": "301630.SZ", "date": "20261109", "ts": "09:54", "kind": "condition", "hit": false, "reference": 153.28, "baseline": 144.1, "gain_pct": 0.06162387, "_synthetic": true}
+{"symbol": "301630.SZ", "date": "20261109", "ts": "09:54", "kind": "plan", "plan": "enter", "entry_time": "09:54", "entry_price": 153.14, "wait_bars": 1, "qty": 600, "exit_time": null, "exit_reason": null, "net_return_pct": null, "cross_day_pending": true, "_synthetic": true}
+{"symbol": "301630.SZ", "date": "20261109", "ts": "10:00", "kind": "condition", "hit": true, "reference": 153.49, "baseline": 144.1, "gain_pct": 0.06786954, "_synthetic": true}
+{"symbol": "301630.SZ", "date": "20261109", "ts": "10:01", "kind": "condition", "hit": false, "reference": 153.88, "baseline": 144.1, "gain_pct": 0.06523248, "_synthetic": true}
+{"symbol": "301630.SZ", "date": "20261109", "ts": "10:02", "kind": "condition", "hit": true, "reference": 154.53, "baseline": 144.1, "gain_pct": 0.07383761, "_synthetic": true}
+{"symbol": "301630.SZ", "date": "20261109", "ts": "10:04", "kind": "condition", "hit": false, "reference": 156.0, "baseline": 144.1, "gain_pct": 0.07918112, "_synthetic": true}
+{"symbol": "301630.SZ", "date": "20261109", "ts": "10:45", "kind": "condition", "hit": true, "reference": 154.62, "baseline": 144.1, "gain_pct": 0.07564192, "_synthetic": true}
+{"symbol": "301630.SZ", "date": "20261109", "ts": "10:46", "kind": "condition", "hit": false, "reference": 155.0, "baseline": 144.1, "gain_pct": 0.07536433, "_synthetic": true}
+{"symbol": "301630.SZ", "date": "20261109", "ts": "11:21", "kind": "condition", "hit": true, "reference": 154.93, "baseline": 144.1, "gain_pct": 0.07827897, "_synthetic": true}
+{"symbol": "301630.SZ", "date": "20261109", "ts": "11:23", "kind": "condition", "hit": false, "reference": 155.93, "baseline": 144.1, "gain_pct": 0.07911173, "_synthetic": true}
+{"symbol": "301630.SZ", "date": "20261109", "ts": "13:23", "kind": "condition", "hit": true, "reference": 153.14, "baseline": 144.1, "gain_pct": 0.0685635, "_synthetic": true}
+{"symbol": "301630.SZ", "date": "20261109", "ts": "13:24", "kind": "condition", "hit": false, "reference": 154.0, "baseline": 144.1, "gain_pct": 0.06551006, "_synthetic": true}
+{"symbol": "301630.SZ", "date": "20261109", "ts": "13:35", "kind": "condition", "hit": true, "reference": 154.18, "baseline": 144.1, "gain_pct": 0.07009022, "_synthetic": true}
+{"symbol": "301630.SZ", "date": "20261109", "ts": "13:36", "kind": "condition", "hit": false, "reference": 154.2, "baseline": 144.1, "gain_pct": 0.06814712, "_synthetic": true}
+{"symbol": "301630.SZ", "date": "20261109", "ts": "13:38", "kind": "condition", "hit": true, "reference": 154.2, "baseline": 144.1, "gain_pct": 0.07064539, "_synthetic": true}
+{"symbol": "301630.SZ", "date": "20261109", "ts": "13:40", "kind": "condition", "hit": false, "reference": 154.5, "baseline": 144.1, "gain_pct": 0.06703678, "_synthetic": true}
+{"symbol": "301630.SZ", "date": "20261109", "ts": "14:01", "kind": "condition", "hit": true, "reference": 153.83, "baseline": 144.1, "gain_pct": 0.06780014, "_synthetic": true}
+{"symbol": "301630.SZ", "date": "20261109", "ts": "14:02", "kind": "condition", "hit": false, "reference": 153.87, "baseline": 144.1, "gain_pct": 0.0648855, "_synthetic": true}
+{"symbol": "301630.SZ", "date": "20261109", "ts": "14:28", "kind": "condition", "hit": true, "reference": 153.26, "baseline": 144.1, "gain_pct": 0.06592644, "_synthetic": true}
+{"symbol": "301630.SZ", "date": "20261109", "ts": "14:29", "kind": "condition", "hit": false, "reference": 153.6, "baseline": 144.1, "gain_pct": 0.06523248, "_synthetic": true}
+{"symbol": "301697.SZ", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "600027.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "600063.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "600103.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "600103.SH", "date": "20261109", "ts": "10:07", "kind": "condition", "hit": true, "reference": 2.95, "baseline": 2.9, "gain_pct": 0.02068966, "_synthetic": true}
+{"symbol": "600103.SH", "date": "20261109", "ts": "10:08", "kind": "condition", "hit": false, "reference": 2.96, "baseline": 2.9, "gain_pct": 0.02068966, "_synthetic": true}
+{"symbol": "600132.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "600168.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "600201.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "600235.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "600272.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "600272.SH", "date": "20261109", "ts": "10:12", "kind": "condition", "hit": true, "reference": 13.22, "baseline": 12.96, "gain_pct": 0.02777778, "_synthetic": true}
+{"symbol": "600272.SH", "date": "20261109", "ts": "10:13", "kind": "signal", "signal": "buy", "wait_bars": 1, "_synthetic": true}
+{"symbol": "600272.SH", "date": "20261109", "ts": "10:14", "kind": "condition", "hit": false, "reference": 13.46, "baseline": 12.96, "gain_pct": 0.02391975, "_synthetic": true}
+{"symbol": "600272.SH", "date": "20261109", "ts": "10:15", "kind": "plan", "plan": "enter", "entry_time": "10:15", "entry_price": 13.32, "wait_bars": 1, "qty": 7500, "exit_time": null, "exit_reason": null, "net_return_pct": null, "cross_day_pending": true, "_synthetic": true}
+{"symbol": "600272.SH", "date": "20261109", "ts": "10:42", "kind": "condition", "hit": true, "reference": 13.35, "baseline": 12.96, "gain_pct": 0.04320988, "_synthetic": true}
+{"symbol": "600272.SH", "date": "20261109", "ts": "10:44", "kind": "condition", "hit": false, "reference": 13.8, "baseline": 12.96, "gain_pct": 0.04552469, "_synthetic": true}
+{"symbol": "600272.SH", "date": "20261109", "ts": "14:44", "kind": "condition", "hit": true, "reference": 13.3, "baseline": 12.96, "gain_pct": 0.02932099, "_synthetic": true}
+{"symbol": "600272.SH", "date": "20261109", "ts": "14:45", "kind": "condition", "hit": false, "reference": 13.34, "baseline": 12.96, "gain_pct": 0.02700617, "_synthetic": true}
+{"symbol": "600272.SH", "date": "20261109", "ts": "14:51", "kind": "condition", "hit": true, "reference": 13.35, "baseline": 12.96, "gain_pct": 0.0308642, "_synthetic": true}
+{"symbol": "600272.SH", "date": "20261109", "ts": "14:52", "kind": "condition", "hit": false, "reference": 13.36, "baseline": 12.96, "gain_pct": 0.0308642, "_synthetic": true}
+{"symbol": "600309.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "600343.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "600343.SH", "date": "20261109", "ts": "10:33", "kind": "condition", "hit": true, "reference": 18.0, "baseline": 17.26, "gain_pct": 0.04577057, "_synthetic": true}
+{"symbol": "600343.SH", "date": "20261109", "ts": "10:34", "kind": "signal", "signal": "buy", "wait_bars": 1, "_synthetic": true}
+{"symbol": "600343.SH", "date": "20261109", "ts": "10:35", "kind": "condition", "hit": false, "reference": 18.14, "baseline": 17.26, "gain_pct": 0.04982619, "_synthetic": true}
+{"symbol": "600343.SH", "date": "20261109", "ts": "10:36", "kind": "condition", "hit": true, "reference": 18.15, "baseline": 17.26, "gain_pct": 0.05214368, "_synthetic": true}
+{"symbol": "600343.SH", "date": "20261109", "ts": "10:36", "kind": "plan", "plan": "enter", "entry_time": "10:36", "entry_price": 18.13, "wait_bars": 1, "qty": 5500, "exit_time": null, "exit_reason": null, "net_return_pct": null, "cross_day_pending": true, "_synthetic": true}
+{"symbol": "600343.SH", "date": "20261109", "ts": "10:37", "kind": "condition", "hit": false, "reference": 18.17, "baseline": 17.26, "gain_pct": 0.04924681, "_synthetic": true}
+{"symbol": "600343.SH", "date": "20261109", "ts": "13:24", "kind": "condition", "hit": true, "reference": 17.63, "baseline": 17.26, "gain_pct": 0.0225956, "_synthetic": true}
+{"symbol": "600343.SH", "date": "20261109", "ts": "13:25", "kind": "condition", "hit": false, "reference": 17.66, "baseline": 17.26, "gain_pct": 0.0225956, "_synthetic": true}
+{"symbol": "600343.SH", "date": "20261109", "ts": "13:27", "kind": "condition", "hit": true, "reference": 17.66, "baseline": 17.26, "gain_pct": 0.02375435, "_synthetic": true}
+{"symbol": "600343.SH", "date": "20261109", "ts": "13:28", "kind": "condition", "hit": false, "reference": 17.67, "baseline": 17.26, "gain_pct": 0.02317497, "_synthetic": true}
+{"symbol": "600343.SH", "date": "20261109", "ts": "13:32", "kind": "condition", "hit": true, "reference": 17.67, "baseline": 17.26, "gain_pct": 0.02433372, "_synthetic": true}
+{"symbol": "600343.SH", "date": "20261109", "ts": "13:33", "kind": "condition", "hit": false, "reference": 17.71, "baseline": 17.26, "gain_pct": 0.02375435, "_synthetic": true}
+{"symbol": "600343.SH", "date": "20261109", "ts": "14:01", "kind": "condition", "hit": true, "reference": 17.58, "baseline": 17.26, "gain_pct": 0.0202781, "_synthetic": true}
+{"symbol": "600343.SH", "date": "20261109", "ts": "14:02", "kind": "condition", "hit": false, "reference": 17.61, "baseline": 17.26, "gain_pct": 0.0179606, "_synthetic": true}
+{"symbol": "600376.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "600416.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "600416.SH", "date": "20261109", "ts": "10:33", "kind": "condition", "hit": true, "reference": 8.36, "baseline": 8.28, "gain_pct": 0.01086957, "_synthetic": true}
+{"symbol": "600416.SH", "date": "20261109", "ts": "10:34", "kind": "condition", "hit": false, "reference": 8.38, "baseline": 8.28, "gain_pct": 0.01086957, "_synthetic": true}
+{"symbol": "600463.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "600500.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "600529.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "600563.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "600593.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "600593.SH", "date": "20261109", "ts": "09:57", "kind": "condition", "hit": true, "reference": 42.87, "baseline": 40.51, "gain_pct": 0.05998519, "_synthetic": true}
+{"symbol": "600593.SH", "date": "20261109", "ts": "09:58", "kind": "signal", "signal": "buy", "wait_bars": 1, "_synthetic": true}
+{"symbol": "600593.SH", "date": "20261109", "ts": "09:59", "kind": "condition", "hit": false, "reference": 43.3, "baseline": 40.51, "gain_pct": 0.06665021, "_synthetic": true}
+{"symbol": "600593.SH", "date": "20261109", "ts": "10:00", "kind": "plan", "plan": "enter", "entry_time": "10:00", "entry_price": 43.2, "wait_bars": 1, "qty": 2300, "exit_time": null, "exit_reason": null, "net_return_pct": null, "cross_day_pending": true, "_synthetic": true}
+{"symbol": "600593.SH", "date": "20261109", "ts": "10:38", "kind": "condition", "hit": true, "reference": 42.98, "baseline": 40.51, "gain_pct": 0.06121945, "_synthetic": true}
+{"symbol": "600593.SH", "date": "20261109", "ts": "10:39", "kind": "condition", "hit": false, "reference": 43.0, "baseline": 40.51, "gain_pct": 0.06072575, "_synthetic": true}
+{"symbol": "600593.SH", "date": "20261109", "ts": "11:06", "kind": "condition", "hit": true, "reference": 42.95, "baseline": 40.51, "gain_pct": 0.06541595, "_synthetic": true}
+{"symbol": "600593.SH", "date": "20261109", "ts": "11:07", "kind": "condition", "hit": false, "reference": 43.28, "baseline": 40.51, "gain_pct": 0.06196001, "_synthetic": true}
+{"symbol": "600593.SH", "date": "20261109", "ts": "11:08", "kind": "condition", "hit": true, "reference": 43.28, "baseline": 40.51, "gain_pct": 0.07208097, "_synthetic": true}
+{"symbol": "600593.SH", "date": "20261109", "ts": "11:09", "kind": "condition", "hit": false, "reference": 43.43, "baseline": 40.51, "gain_pct": 0.06640336, "_synthetic": true}
+{"symbol": "600593.SH", "date": "20261109", "ts": "13:11", "kind": "condition", "hit": true, "reference": 43.39, "baseline": 40.51, "gain_pct": 0.08121451, "_synthetic": true}
+{"symbol": "600593.SH", "date": "20261109", "ts": "13:13", "kind": "condition", "hit": false, "reference": 44.2, "baseline": 40.51, "gain_pct": 0.08121451, "_synthetic": true}
+{"symbol": "600593.SH", "date": "20261109", "ts": "13:59", "kind": "condition", "hit": true, "reference": 43.79, "baseline": 40.51, "gain_pct": 0.08244878, "_synthetic": true}
+{"symbol": "600593.SH", "date": "20261109", "ts": "14:01", "kind": "condition", "hit": false, "reference": 43.9, "baseline": 40.51, "gain_pct": 0.08244878, "_synthetic": true}
+{"symbol": "600593.SH", "date": "20261109", "ts": "14:31", "kind": "condition", "hit": true, "reference": 43.8, "baseline": 40.51, "gain_pct": 0.08195507, "_synthetic": true}
+{"symbol": "600593.SH", "date": "20261109", "ts": "14:32", "kind": "condition", "hit": false, "reference": 43.83, "baseline": 40.51, "gain_pct": 0.08072081, "_synthetic": true}
+{"symbol": "600593.SH", "date": "20261109", "ts": "14:46", "kind": "condition", "hit": true, "reference": 43.83, "baseline": 40.51, "gain_pct": 0.08318934, "_synthetic": true}
+{"symbol": "600593.SH", "date": "20261109", "ts": "14:50", "kind": "condition", "hit": false, "reference": 44.38, "baseline": 40.51, "gain_pct": 0.093804, "_synthetic": true}
+{"symbol": "600623.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "600660.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "600660.SH", "date": "20261109", "ts": "09:31", "kind": "plan", "plan": "exit", "entry_time": "13:43", "entry_price": 56.34, "exit_time": "09:31", "exit_reason": "max_hold", "net_return_pct": -0.0099197, "cross_day": true, "_synthetic": true}
+{"symbol": "600660.SH", "date": "20261109", "ts": "09:31", "kind": "fill", "side": "sell", "price": 55.86, "qty": 1700, "status": "filled", "cross_day": true, "_synthetic": true}
+{"symbol": "600660.SH", "date": "20261109", "ts": "10:55", "kind": "condition", "hit": true, "reference": 56.38, "baseline": 55.92, "gain_pct": 0.01180258, "_synthetic": true}
+{"symbol": "600660.SH", "date": "20261109", "ts": "10:56", "kind": "signal", "signal": "buy", "wait_bars": 1, "_synthetic": true}
+{"symbol": "600660.SH", "date": "20261109", "ts": "10:57", "kind": "condition", "hit": false, "reference": 56.6, "baseline": 55.92, "gain_pct": 0.01180258, "_synthetic": true}
+{"symbol": "600660.SH", "date": "20261109", "ts": "10:58", "kind": "plan", "plan": "enter", "entry_time": "10:58", "entry_price": 56.58, "wait_bars": 1, "qty": 1700, "exit_time": null, "exit_reason": null, "net_return_pct": null, "cross_day_pending": true, "_synthetic": true}
+{"symbol": "600660.SH", "date": "20261109", "ts": "11:00", "kind": "condition", "hit": true, "reference": 56.6, "baseline": 55.92, "gain_pct": 0.01251788, "_synthetic": true}
+{"symbol": "600660.SH", "date": "20261109", "ts": "11:02", "kind": "condition", "hit": false, "reference": 56.66, "baseline": 55.92, "gain_pct": 0.01162375, "_synthetic": true}
+{"symbol": "600660.SH", "date": "20261109", "ts": "13:07", "kind": "condition", "hit": true, "reference": 56.5, "baseline": 55.92, "gain_pct": 0.01055079, "_synthetic": true}
+{"symbol": "600660.SH", "date": "20261109", "ts": "13:08", "kind": "condition", "hit": false, "reference": 56.54, "baseline": 55.92, "gain_pct": 0.01055079, "_synthetic": true}
+{"symbol": "600660.SH", "date": "20261109", "ts": "13:51", "kind": "condition", "hit": true, "reference": 56.54, "baseline": 55.92, "gain_pct": 0.01144492, "_synthetic": true}
+{"symbol": "600660.SH", "date": "20261109", "ts": "13:52", "kind": "condition", "hit": false, "reference": 56.57, "baseline": 55.92, "gain_pct": 0.01144492, "_synthetic": true}
+{"symbol": "600660.SH", "date": "20261109", "ts": "14:13", "kind": "condition", "hit": true, "reference": 56.6, "baseline": 55.92, "gain_pct": 0.01269671, "_synthetic": true}
+{"symbol": "600660.SH", "date": "20261109", "ts": "14:14", "kind": "condition", "hit": false, "reference": 56.64, "baseline": 55.92, "gain_pct": 0.01233906, "_synthetic": true}
+{"symbol": "600660.SH", "date": "20261109", "ts": "14:32", "kind": "condition", "hit": true, "reference": 56.66, "baseline": 55.92, "gain_pct": 0.01376967, "_synthetic": true}
+{"symbol": "600660.SH", "date": "20261109", "ts": "14:33", "kind": "condition", "hit": false, "reference": 56.69, "baseline": 55.92, "gain_pct": 0.01376967, "_synthetic": true}
+{"symbol": "600692.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "600725.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "600725.SH", "date": "20261109", "ts": "09:56", "kind": "condition", "hit": true, "reference": 2.96, "baseline": 2.92, "gain_pct": 0.01712329, "_synthetic": true}
+{"symbol": "600725.SH", "date": "20261109", "ts": "09:57", "kind": "condition", "hit": false, "reference": 2.97, "baseline": 2.92, "gain_pct": 0.01712329, "_synthetic": true}
+{"symbol": "600725.SH", "date": "20261109", "ts": "13:09", "kind": "condition", "hit": true, "reference": 2.96, "baseline": 2.92, "gain_pct": 0.01712329, "_synthetic": true}
+{"symbol": "600725.SH", "date": "20261109", "ts": "13:10", "kind": "condition", "hit": false, "reference": 2.97, "baseline": 2.92, "gain_pct": 0.01712329, "_synthetic": true}
+{"symbol": "600753.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "600753.SH", "date": "20261109", "ts": "13:26", "kind": "condition", "hit": true, "reference": 12.03, "baseline": 11.92, "gain_pct": 0.01006711, "_synthetic": true}
+{"symbol": "600753.SH", "date": "20261109", "ts": "13:27", "kind": "condition", "hit": false, "reference": 12.04, "baseline": 11.92, "gain_pct": 0.01006711, "_synthetic": true}
+{"symbol": "600753.SH", "date": "20261109", "ts": "13:28", "kind": "condition", "hit": true, "reference": 12.04, "baseline": 11.92, "gain_pct": 0.01090604, "_synthetic": true}
+{"symbol": "600753.SH", "date": "20261109", "ts": "13:29", "kind": "condition", "hit": false, "reference": 12.05, "baseline": 11.92, "gain_pct": 0.01090604, "_synthetic": true}
+{"symbol": "600753.SH", "date": "20261109", "ts": "14:53", "kind": "condition", "hit": true, "reference": 12.03, "baseline": 11.92, "gain_pct": 0.01006711, "_synthetic": true}
+{"symbol": "600753.SH", "date": "20261109", "ts": "14:54", "kind": "condition", "hit": false, "reference": 12.04, "baseline": 11.92, "gain_pct": 0.00503356, "_synthetic": true}
+{"symbol": "600785.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "600785.SH", "date": "20261109", "ts": "09:54", "kind": "condition", "hit": true, "reference": 11.68, "baseline": 11.39, "gain_pct": 0.03160667, "_synthetic": true}
+{"symbol": "600785.SH", "date": "20261109", "ts": "09:55", "kind": "signal", "signal": "buy", "wait_bars": 1, "_synthetic": true}
+{"symbol": "600785.SH", "date": "20261109", "ts": "09:56", "kind": "condition", "hit": false, "reference": 11.88, "baseline": 11.39, "gain_pct": 0.0403863, "_synthetic": true}
+{"symbol": "600785.SH", "date": "20261109", "ts": "09:57", "kind": "plan", "plan": "enter", "entry_time": "09:57", "entry_price": 11.87, "wait_bars": 1, "qty": 8400, "exit_time": null, "exit_reason": null, "net_return_pct": null, "cross_day_pending": true, "_synthetic": true}
+{"symbol": "600785.SH", "date": "20261109", "ts": "10:43", "kind": "condition", "hit": true, "reference": 11.73, "baseline": 11.39, "gain_pct": 0.03072871, "_synthetic": true}
+{"symbol": "600785.SH", "date": "20261109", "ts": "10:44", "kind": "condition", "hit": false, "reference": 11.74, "baseline": 11.39, "gain_pct": 0.02809482, "_synthetic": true}
+{"symbol": "600785.SH", "date": "20261109", "ts": "13:36", "kind": "condition", "hit": true, "reference": 11.66, "baseline": 11.39, "gain_pct": 0.02458297, "_synthetic": true}
+{"symbol": "600785.SH", "date": "20261109", "ts": "13:37", "kind": "condition", "hit": false, "reference": 11.67, "baseline": 11.39, "gain_pct": 0.023705, "_synthetic": true}
+{"symbol": "600785.SH", "date": "20261109", "ts": "13:42", "kind": "condition", "hit": true, "reference": 11.67, "baseline": 11.39, "gain_pct": 0.02633889, "_synthetic": true}
+{"symbol": "600785.SH", "date": "20261109", "ts": "13:43", "kind": "condition", "hit": false, "reference": 11.69, "baseline": 11.39, "gain_pct": 0.02546093, "_synthetic": true}
+{"symbol": "600785.SH", "date": "20261109", "ts": "13:50", "kind": "condition", "hit": true, "reference": 11.69, "baseline": 11.39, "gain_pct": 0.02809482, "_synthetic": true}
+{"symbol": "600785.SH", "date": "20261109", "ts": "13:51", "kind": "condition", "hit": false, "reference": 11.73, "baseline": 11.39, "gain_pct": 0.023705, "_synthetic": true}
+{"symbol": "600818.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "600818.SH", "date": "20261109", "ts": "09:31", "kind": "plan", "plan": "exit", "entry_time": "14:00", "entry_price": 7.84, "exit_time": "09:31", "exit_reason": "stop_loss", "net_return_pct": -0.0064, "cross_day": true, "_synthetic": true}
+{"symbol": "600818.SH", "date": "20261109", "ts": "09:31", "kind": "fill", "side": "sell", "price": 7.8008, "qty": 12700, "status": "filled", "cross_day": true, "_synthetic": true}
+{"symbol": "600818.SH", "date": "20261109", "ts": "09:57", "kind": "condition", "hit": true, "reference": 8.05, "baseline": 7.75, "gain_pct": 0.04129032, "_synthetic": true}
+{"symbol": "600818.SH", "date": "20261109", "ts": "09:58", "kind": "condition", "hit": false, "reference": 8.08, "baseline": 7.75, "gain_pct": 0.03870968, "_synthetic": true}
+{"symbol": "600818.SH", "date": "20261109", "ts": "14:25", "kind": "condition", "hit": true, "reference": 7.94, "baseline": 7.75, "gain_pct": 0.02580645, "_synthetic": true}
+{"symbol": "600818.SH", "date": "20261109", "ts": "14:26", "kind": "condition", "hit": false, "reference": 7.95, "baseline": 7.75, "gain_pct": 0.02580645, "_synthetic": true}
+{"symbol": "600851.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "600881.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "600926.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "600926.SH", "date": "20261109", "ts": "13:09", "kind": "condition", "hit": true, "reference": 17.24, "baseline": 17.09, "gain_pct": 0.01111761, "_synthetic": true}
+{"symbol": "600926.SH", "date": "20261109", "ts": "13:10", "kind": "signal", "signal": "buy", "wait_bars": 1, "_synthetic": true}
+{"symbol": "600926.SH", "date": "20261109", "ts": "13:12", "kind": "condition", "hit": false, "reference": 17.32, "baseline": 17.09, "gain_pct": 0.01170275, "_synthetic": true}
+{"symbol": "600926.SH", "date": "20261109", "ts": "13:12", "kind": "plan", "plan": "enter", "entry_time": "13:12", "entry_price": 17.29, "wait_bars": 1, "qty": 5700, "exit_time": null, "exit_reason": null, "net_return_pct": null, "cross_day_pending": true, "_synthetic": true}
+{"symbol": "600973.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "601003.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "601083.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "601137.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "601228.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "601398.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "601398.SH", "date": "20261109", "ts": "10:31", "kind": "condition", "hit": true, "reference": 8.52, "baseline": 8.44, "gain_pct": 0.01066351, "_synthetic": true}
+{"symbol": "601398.SH", "date": "20261109", "ts": "10:32", "kind": "condition", "hit": false, "reference": 8.53, "baseline": 8.44, "gain_pct": 0.00829384, "_synthetic": true}
+{"symbol": "601398.SH", "date": "20261109", "ts": "13:05", "kind": "condition", "hit": true, "reference": 8.58, "baseline": 8.44, "gain_pct": 0.01777251, "_synthetic": true}
+{"symbol": "601398.SH", "date": "20261109", "ts": "13:06", "kind": "condition", "hit": false, "reference": 8.59, "baseline": 8.44, "gain_pct": 0.01540284, "_synthetic": true}
+{"symbol": "601398.SH", "date": "20261109", "ts": "14:13", "kind": "condition", "hit": true, "reference": 8.59, "baseline": 8.44, "gain_pct": 0.01895735, "_synthetic": true}
+{"symbol": "601398.SH", "date": "20261109", "ts": "14:14", "kind": "condition", "hit": false, "reference": 8.6, "baseline": 8.44, "gain_pct": 0.01777251, "_synthetic": true}
+{"symbol": "601398.SH", "date": "20261109", "ts": "14:45", "kind": "condition", "hit": true, "reference": 8.6, "baseline": 8.44, "gain_pct": 0.02014218, "_synthetic": true}
+{"symbol": "601398.SH", "date": "20261109", "ts": "14:46", "kind": "condition", "hit": false, "reference": 8.61, "baseline": 8.44, "gain_pct": 0.01777251, "_synthetic": true}
+{"symbol": "601616.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "601777.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "601880.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "601968.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "603014.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "603014.SH", "date": "20261109", "ts": "09:31", "kind": "plan", "plan": "exit", "entry_time": "10:05", "entry_price": 34.83, "exit_time": "09:31", "exit_reason": "stop_loss", "net_return_pct": -0.0064, "cross_day": true, "_synthetic": true}
+{"symbol": "603014.SH", "date": "20261109", "ts": "09:31", "kind": "fill", "side": "sell", "price": 34.65585, "qty": 2800, "status": "filled", "cross_day": true, "_synthetic": true}
+{"symbol": "603042.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "603042.SH", "date": "20261109", "ts": "10:03", "kind": "condition", "hit": true, "reference": 12.09, "baseline": 11.71, "gain_pct": 0.03415884, "_synthetic": true}
+{"symbol": "603042.SH", "date": "20261109", "ts": "10:04", "kind": "condition", "hit": false, "reference": 12.12, "baseline": 11.71, "gain_pct": 0.03074295, "_synthetic": true}
+{"symbol": "603042.SH", "date": "20261109", "ts": "13:32", "kind": "condition", "hit": true, "reference": 11.91, "baseline": 11.71, "gain_pct": 0.01793339, "_synthetic": true}
+{"symbol": "603042.SH", "date": "20261109", "ts": "13:33", "kind": "condition", "hit": false, "reference": 11.92, "baseline": 11.71, "gain_pct": 0.01622545, "_synthetic": true}
+{"symbol": "603042.SH", "date": "20261109", "ts": "13:35", "kind": "condition", "hit": true, "reference": 11.92, "baseline": 11.71, "gain_pct": 0.01878736, "_synthetic": true}
+{"symbol": "603042.SH", "date": "20261109", "ts": "13:36", "kind": "condition", "hit": false, "reference": 11.94, "baseline": 11.71, "gain_pct": 0.01793339, "_synthetic": true}
+{"symbol": "603042.SH", "date": "20261109", "ts": "13:38", "kind": "condition", "hit": true, "reference": 11.94, "baseline": 11.71, "gain_pct": 0.0204953, "_synthetic": true}
+{"symbol": "603042.SH", "date": "20261109", "ts": "13:39", "kind": "condition", "hit": false, "reference": 11.97, "baseline": 11.71, "gain_pct": 0.02134927, "_synthetic": true}
+{"symbol": "603042.SH", "date": "20261109", "ts": "14:01", "kind": "condition", "hit": true, "reference": 11.92, "baseline": 11.71, "gain_pct": 0.01878736, "_synthetic": true}
+{"symbol": "603042.SH", "date": "20261109", "ts": "14:02", "kind": "condition", "hit": false, "reference": 11.97, "baseline": 11.71, "gain_pct": 0.01793339, "_synthetic": true}
+{"symbol": "603075.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "603103.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "603103.SH", "date": "20261109", "ts": "14:05", "kind": "condition", "hit": true, "reference": 17.4, "baseline": 17.0, "gain_pct": 0.02647059, "_synthetic": true}
+{"symbol": "603103.SH", "date": "20261109", "ts": "14:06", "kind": "signal", "signal": "buy", "wait_bars": 1, "_synthetic": true}
+{"symbol": "603103.SH", "date": "20261109", "ts": "14:07", "kind": "condition", "hit": false, "reference": 17.48, "baseline": 17.0, "gain_pct": 0.02764706, "_synthetic": true}
+{"symbol": "603103.SH", "date": "20261109", "ts": "14:08", "kind": "plan", "plan": "enter", "entry_time": "14:08", "entry_price": 17.48, "wait_bars": 1, "qty": 5700, "exit_time": null, "exit_reason": null, "net_return_pct": null, "cross_day_pending": true, "_synthetic": true}
+{"symbol": "603131.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "603131.SH", "date": "20261109", "ts": "10:00", "kind": "condition", "hit": true, "reference": 17.4, "baseline": 16.15, "gain_pct": 0.08297214, "_synthetic": true}
+{"symbol": "603131.SH", "date": "20261109", "ts": "10:01", "kind": "signal", "signal": "buy", "wait_bars": 1, "_synthetic": true}
+{"symbol": "603131.SH", "date": "20261109", "ts": "10:02", "kind": "condition", "hit": false, "reference": 17.77, "baseline": 16.15, "gain_pct": 0.0879257, "_synthetic": true}
+{"symbol": "603131.SH", "date": "20261109", "ts": "10:03", "kind": "plan", "plan": "enter", "entry_time": "10:03", "entry_price": 17.7, "wait_bars": 1, "qty": 5600, "exit_time": null, "exit_reason": null, "net_return_pct": null, "cross_day_pending": true, "_synthetic": true}
+{"symbol": "603131.SH", "date": "20261109", "ts": "10:27", "kind": "condition", "hit": true, "reference": 17.5, "baseline": 16.15, "gain_pct": 0.08916409, "_synthetic": true}
+{"symbol": "603131.SH", "date": "20261109", "ts": "10:28", "kind": "condition", "hit": false, "reference": 17.61, "baseline": 16.15, "gain_pct": 0.08916409, "_synthetic": true}
+{"symbol": "603131.SH", "date": "20261109", "ts": "10:29", "kind": "condition", "hit": true, "reference": 17.61, "baseline": 16.15, "gain_pct": 0.09535604, "_synthetic": true}
+{"symbol": "603131.SH", "date": "20261109", "ts": "10:31", "kind": "condition", "hit": false, "reference": 17.77, "baseline": 16.15, "gain_pct": 0.1003096, "_synthetic": true}
+{"symbol": "603131.SH", "date": "20261109", "ts": "14:15", "kind": "condition", "hit": true, "reference": 17.17, "baseline": 16.15, "gain_pct": 0.06439628, "_synthetic": true}
+{"symbol": "603131.SH", "date": "20261109", "ts": "14:16", "kind": "condition", "hit": false, "reference": 17.19, "baseline": 16.15, "gain_pct": 0.06068111, "_synthetic": true}
+{"symbol": "603173.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "603201.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "603201.SH", "date": "20261109", "ts": "10:32", "kind": "condition", "hit": true, "reference": 14.07, "baseline": 13.89, "gain_pct": 0.01439885, "_synthetic": true}
+{"symbol": "603201.SH", "date": "20261109", "ts": "10:33", "kind": "condition", "hit": false, "reference": 14.1, "baseline": 13.89, "gain_pct": 0.01295896, "_synthetic": true}
+{"symbol": "603201.SH", "date": "20261109", "ts": "14:28", "kind": "condition", "hit": true, "reference": 14.0, "baseline": 13.89, "gain_pct": 0.01007919, "_synthetic": true}
+{"symbol": "603201.SH", "date": "20261109", "ts": "14:29", "kind": "condition", "hit": false, "reference": 14.05, "baseline": 13.89, "gain_pct": 0.00791937, "_synthetic": true}
+{"symbol": "603230.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "603230.SH", "date": "20261109", "ts": "10:13", "kind": "condition", "hit": true, "reference": 10.79, "baseline": 10.45, "gain_pct": 0.03444976, "_synthetic": true}
+{"symbol": "603230.SH", "date": "20261109", "ts": "10:14", "kind": "condition", "hit": false, "reference": 10.82, "baseline": 10.45, "gain_pct": 0.03253589, "_synthetic": true}
+{"symbol": "603230.SH", "date": "20261109", "ts": "13:38", "kind": "condition", "hit": true, "reference": 10.65, "baseline": 10.45, "gain_pct": 0.02009569, "_synthetic": true}
+{"symbol": "603230.SH", "date": "20261109", "ts": "13:39", "kind": "condition", "hit": false, "reference": 10.66, "baseline": 10.45, "gain_pct": 0.01913876, "_synthetic": true}
+{"symbol": "603230.SH", "date": "20261109", "ts": "14:05", "kind": "condition", "hit": true, "reference": 10.65, "baseline": 10.45, "gain_pct": 0.02009569, "_synthetic": true}
+{"symbol": "603230.SH", "date": "20261109", "ts": "14:06", "kind": "condition", "hit": false, "reference": 10.66, "baseline": 10.45, "gain_pct": 0.01913876, "_synthetic": true}
+{"symbol": "603230.SH", "date": "20261109", "ts": "14:07", "kind": "condition", "hit": true, "reference": 10.66, "baseline": 10.45, "gain_pct": 0.02200957, "_synthetic": true}
+{"symbol": "603230.SH", "date": "20261109", "ts": "14:08", "kind": "condition", "hit": false, "reference": 10.68, "baseline": 10.45, "gain_pct": 0.02009569, "_synthetic": true}
+{"symbol": "603230.SH", "date": "20261109", "ts": "14:45", "kind": "condition", "hit": true, "reference": 10.65, "baseline": 10.45, "gain_pct": 0.02009569, "_synthetic": true}
+{"symbol": "603230.SH", "date": "20261109", "ts": "14:46", "kind": "condition", "hit": false, "reference": 10.67, "baseline": 10.45, "gain_pct": 0.01818182, "_synthetic": true}
+{"symbol": "603275.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "603275.SH", "date": "20261109", "ts": "10:30", "kind": "condition", "hit": true, "reference": 35.1, "baseline": 34.29, "gain_pct": 0.02449694, "_synthetic": true}
+{"symbol": "603275.SH", "date": "20261109", "ts": "10:31", "kind": "condition", "hit": false, "reference": 35.13, "baseline": 34.29, "gain_pct": 0.02245553, "_synthetic": true}
+{"symbol": "603275.SH", "date": "20261109", "ts": "11:23", "kind": "condition", "hit": true, "reference": 34.6, "baseline": 34.29, "gain_pct": 0.0125401, "_synthetic": true}
+{"symbol": "603275.SH", "date": "20261109", "ts": "11:24", "kind": "condition", "hit": false, "reference": 34.72, "baseline": 34.29, "gain_pct": 0.00816565, "_synthetic": true}
+{"symbol": "603275.SH", "date": "20261109", "ts": "13:22", "kind": "condition", "hit": true, "reference": 34.61, "baseline": 34.29, "gain_pct": 0.01137358, "_synthetic": true}
+{"symbol": "603275.SH", "date": "20261109", "ts": "13:23", "kind": "signal", "signal": "buy", "wait_bars": 1, "_synthetic": true}
+{"symbol": "603275.SH", "date": "20261109", "ts": "13:24", "kind": "condition", "hit": false, "reference": 34.69, "baseline": 34.29, "gain_pct": 0.01108195, "_synthetic": true}
+{"symbol": "603275.SH", "date": "20261109", "ts": "13:25", "kind": "condition", "hit": true, "reference": 34.69, "baseline": 34.29, "gain_pct": 0.01778944, "_synthetic": true}
+{"symbol": "603275.SH", "date": "20261109", "ts": "13:25", "kind": "plan", "plan": "enter", "entry_time": "13:25", "entry_price": 34.67, "wait_bars": 1, "qty": 2800, "exit_time": null, "exit_reason": null, "net_return_pct": null, "cross_day_pending": true, "_synthetic": true}
+{"symbol": "603275.SH", "date": "20261109", "ts": "13:26", "kind": "condition", "hit": false, "reference": 34.9, "baseline": 34.29, "gain_pct": 0.01633129, "_synthetic": true}
+{"symbol": "603275.SH", "date": "20261109", "ts": "13:27", "kind": "condition", "hit": true, "reference": 34.9, "baseline": 34.29, "gain_pct": 0.01983085, "_synthetic": true}
+{"symbol": "603275.SH", "date": "20261109", "ts": "13:30", "kind": "condition", "hit": false, "reference": 35.05, "baseline": 34.29, "gain_pct": 0.02041411, "_synthetic": true}
+{"symbol": "603275.SH", "date": "20261109", "ts": "14:07", "kind": "condition", "hit": true, "reference": 34.93, "baseline": 34.29, "gain_pct": 0.01924759, "_synthetic": true}
+{"symbol": "603275.SH", "date": "20261109", "ts": "14:08", "kind": "condition", "hit": false, "reference": 34.95, "baseline": 34.29, "gain_pct": 0.01662292, "_synthetic": true}
+{"symbol": "603307.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "603334.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "603334.SH", "date": "20261109", "ts": "09:31", "kind": "plan", "plan": "exit", "entry_time": "11:19", "entry_price": 27.32, "exit_time": "09:31", "exit_reason": "max_hold", "net_return_pct": -0.00689048, "cross_day": true, "_synthetic": true}
+{"symbol": "603334.SH", "date": "20261109", "ts": "09:31", "kind": "fill", "side": "sell", "price": 27.17, "qty": 3600, "status": "filled", "cross_day": true, "_synthetic": true}
+{"symbol": "603370.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "603370.SH", "date": "20261109", "ts": "11:22", "kind": "condition", "hit": true, "reference": 25.79, "baseline": 25.29, "gain_pct": 0.02056149, "_synthetic": true}
+{"symbol": "603370.SH", "date": "20261109", "ts": "11:23", "kind": "condition", "hit": false, "reference": 25.81, "baseline": 25.29, "gain_pct": 0.01977066, "_synthetic": true}
+{"symbol": "603370.SH", "date": "20261109", "ts": "13:22", "kind": "condition", "hit": true, "reference": 25.7, "baseline": 25.29, "gain_pct": 0.01739818, "_synthetic": true}
+{"symbol": "603370.SH", "date": "20261109", "ts": "13:23", "kind": "signal", "signal": "buy", "wait_bars": 1, "_synthetic": true}
+{"symbol": "603370.SH", "date": "20261109", "ts": "13:24", "kind": "condition", "hit": false, "reference": 25.79, "baseline": 25.29, "gain_pct": 0.01977066, "_synthetic": true}
+{"symbol": "603370.SH", "date": "20261109", "ts": "13:25", "kind": "plan", "plan": "enter", "entry_time": "13:25", "entry_price": 25.79, "wait_bars": 1, "qty": 3800, "exit_time": null, "exit_reason": null, "net_return_pct": null, "cross_day_pending": true, "_synthetic": true}
+{"symbol": "603370.SH", "date": "20261109", "ts": "13:26", "kind": "condition", "hit": true, "reference": 25.79, "baseline": 25.29, "gain_pct": 0.02016607, "_synthetic": true}
+{"symbol": "603370.SH", "date": "20261109", "ts": "13:27", "kind": "condition", "hit": false, "reference": 25.81, "baseline": 25.29, "gain_pct": 0.01858442, "_synthetic": true}
+{"symbol": "603370.SH", "date": "20261109", "ts": "13:30", "kind": "condition", "hit": true, "reference": 25.81, "baseline": 25.29, "gain_pct": 0.02253855, "_synthetic": true}
+{"symbol": "603370.SH", "date": "20261109", "ts": "13:31", "kind": "condition", "hit": false, "reference": 25.86, "baseline": 25.29, "gain_pct": 0.02174773, "_synthetic": true}
+{"symbol": "603370.SH", "date": "20261109", "ts": "14:02", "kind": "condition", "hit": true, "reference": 25.8, "baseline": 25.29, "gain_pct": 0.02174773, "_synthetic": true}
+{"symbol": "603370.SH", "date": "20261109", "ts": "14:03", "kind": "condition", "hit": false, "reference": 25.84, "baseline": 25.29, "gain_pct": 0.01937525, "_synthetic": true}
+{"symbol": "603370.SH", "date": "20261109", "ts": "14:12", "kind": "condition", "hit": true, "reference": 25.84, "baseline": 25.29, "gain_pct": 0.02214314, "_synthetic": true}
+{"symbol": "603370.SH", "date": "20261109", "ts": "14:13", "kind": "condition", "hit": false, "reference": 25.85, "baseline": 25.29, "gain_pct": 0.0209569, "_synthetic": true}
+{"symbol": "603370.SH", "date": "20261109", "ts": "14:28", "kind": "condition", "hit": true, "reference": 25.85, "baseline": 25.29, "gain_pct": 0.02253855, "_synthetic": true}
+{"symbol": "603370.SH", "date": "20261109", "ts": "14:30", "kind": "condition", "hit": false, "reference": 25.93, "baseline": 25.29, "gain_pct": 0.02135231, "_synthetic": true}
+{"symbol": "603407.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "603407.SH", "date": "20261109", "ts": "11:20", "kind": "condition", "hit": true, "reference": 42.83, "baseline": 42.35, "gain_pct": 0.01157025, "_synthetic": true}
+{"symbol": "603407.SH", "date": "20261109", "ts": "11:21", "kind": "signal", "signal": "buy", "wait_bars": 1, "_synthetic": true}
+{"symbol": "603407.SH", "date": "20261109", "ts": "11:23", "kind": "condition", "hit": false, "reference": 43.05, "baseline": 42.35, "gain_pct": 0.01534829, "_synthetic": true}
+{"symbol": "603407.SH", "date": "20261109", "ts": "11:23", "kind": "plan", "plan": "enter", "entry_time": "11:23", "entry_price": 43.01, "wait_bars": 1, "qty": 2300, "exit_time": null, "exit_reason": null, "net_return_pct": null, "cross_day_pending": true, "_synthetic": true}
+{"symbol": "603507.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "603569.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "603612.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "603663.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "603663.SH", "date": "20261109", "ts": "10:45", "kind": "condition", "hit": true, "reference": 30.25, "baseline": 29.76, "gain_pct": 0.01814516, "_synthetic": true}
+{"symbol": "603663.SH", "date": "20261109", "ts": "10:46", "kind": "condition", "hit": false, "reference": 30.3, "baseline": 29.76, "gain_pct": 0.01814516, "_synthetic": true}
+{"symbol": "603663.SH", "date": "20261109", "ts": "11:21", "kind": "condition", "hit": true, "reference": 30.29, "baseline": 29.76, "gain_pct": 0.01982527, "_synthetic": true}
+{"symbol": "603663.SH", "date": "20261109", "ts": "11:22", "kind": "signal", "signal": "buy", "wait_bars": 1, "_synthetic": true}
+{"symbol": "603663.SH", "date": "20261109", "ts": "11:23", "kind": "condition", "hit": false, "reference": 30.42, "baseline": 29.76, "gain_pct": 0.02049731, "_synthetic": true}
+{"symbol": "603663.SH", "date": "20261109", "ts": "11:24", "kind": "plan", "plan": "enter", "entry_time": "11:24", "entry_price": 30.35, "wait_bars": 1, "qty": 3200, "exit_time": null, "exit_reason": null, "net_return_pct": null, "cross_day_pending": true, "_synthetic": true}
+{"symbol": "603663.SH", "date": "20261109", "ts": "13:23", "kind": "condition", "hit": true, "reference": 30.1, "baseline": 29.76, "gain_pct": 0.01209677, "_synthetic": true}
+{"symbol": "603663.SH", "date": "20261109", "ts": "13:24", "kind": "condition", "hit": false, "reference": 30.12, "baseline": 29.76, "gain_pct": 0.01176075, "_synthetic": true}
+{"symbol": "603663.SH", "date": "20261109", "ts": "13:30", "kind": "condition", "hit": true, "reference": 30.14, "baseline": 29.76, "gain_pct": 0.01377688, "_synthetic": true}
+{"symbol": "603663.SH", "date": "20261109", "ts": "13:31", "kind": "condition", "hit": false, "reference": 30.17, "baseline": 29.76, "gain_pct": 0.01142473, "_synthetic": true}
+{"symbol": "603663.SH", "date": "20261109", "ts": "13:32", "kind": "condition", "hit": true, "reference": 30.17, "baseline": 29.76, "gain_pct": 0.01444892, "_synthetic": true}
+{"symbol": "603663.SH", "date": "20261109", "ts": "13:33", "kind": "condition", "hit": false, "reference": 30.19, "baseline": 29.76, "gain_pct": 0.01344086, "_synthetic": true}
+{"symbol": "603701.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "603758.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "603758.SH", "date": "20261109", "ts": "14:30", "kind": "condition", "hit": true, "reference": 9.25, "baseline": 9.13, "gain_pct": 0.01533406, "_synthetic": true}
+{"symbol": "603758.SH", "date": "20261109", "ts": "14:31", "kind": "condition", "hit": false, "reference": 9.27, "baseline": 9.13, "gain_pct": 0.01423877, "_synthetic": true}
+{"symbol": "603813.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "603867.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "603903.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "603903.SH", "date": "20261109", "ts": "10:33", "kind": "condition", "hit": true, "reference": 11.89, "baseline": 11.77, "gain_pct": 0.01274427, "_synthetic": true}
+{"symbol": "603903.SH", "date": "20261109", "ts": "10:34", "kind": "signal", "signal": "buy", "wait_bars": 1, "_synthetic": true}
+{"symbol": "603903.SH", "date": "20261109", "ts": "10:35", "kind": "condition", "hit": false, "reference": 11.95, "baseline": 11.77, "gain_pct": 0.01359388, "_synthetic": true}
+{"symbol": "603903.SH", "date": "20261109", "ts": "10:36", "kind": "plan", "plan": "enter", "entry_time": "10:36", "entry_price": 11.93, "wait_bars": 1, "qty": 8300, "exit_time": null, "exit_reason": null, "net_return_pct": null, "cross_day_pending": true, "_synthetic": true}
+{"symbol": "603903.SH", "date": "20261109", "ts": "11:20", "kind": "condition", "hit": true, "reference": 11.88, "baseline": 11.77, "gain_pct": 0.01104503, "_synthetic": true}
+{"symbol": "603903.SH", "date": "20261109", "ts": "11:23", "kind": "condition", "hit": false, "reference": 11.94, "baseline": 11.77, "gain_pct": 0.0144435, "_synthetic": true}
+{"symbol": "603956.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "603956.SH", "date": "20261109", "ts": "09:31", "kind": "plan", "plan": "exit", "entry_time": "10:00", "entry_price": 6.83, "exit_time": "09:31", "exit_reason": "stop_loss", "net_return_pct": -0.0064, "cross_day": true, "_synthetic": true}
+{"symbol": "603956.SH", "date": "20261109", "ts": "09:31", "kind": "fill", "side": "sell", "price": 6.79585, "qty": 14600, "status": "filled", "cross_day": true, "_synthetic": true}
+{"symbol": "603956.SH", "date": "20261109", "ts": "09:58", "kind": "condition", "hit": true, "reference": 7.04, "baseline": 6.67, "gain_pct": 0.06146927, "_synthetic": true}
+{"symbol": "603956.SH", "date": "20261109", "ts": "09:59", "kind": "condition", "hit": false, "reference": 7.08, "baseline": 6.67, "gain_pct": 0.05397301, "_synthetic": true}
+{"symbol": "603956.SH", "date": "20261109", "ts": "10:07", "kind": "condition", "hit": true, "reference": 7.08, "baseline": 6.67, "gain_pct": 0.06446777, "_synthetic": true}
+{"symbol": "603956.SH", "date": "20261109", "ts": "10:08", "kind": "condition", "hit": false, "reference": 7.1, "baseline": 6.67, "gain_pct": 0.06146927, "_synthetic": true}
+{"symbol": "603956.SH", "date": "20261109", "ts": "10:09", "kind": "condition", "hit": true, "reference": 7.1, "baseline": 6.67, "gain_pct": 0.06746627, "_synthetic": true}
+{"symbol": "603956.SH", "date": "20261109", "ts": "10:10", "kind": "condition", "hit": false, "reference": 7.13, "baseline": 6.67, "gain_pct": 0.06446777, "_synthetic": true}
+{"symbol": "603956.SH", "date": "20261109", "ts": "10:12", "kind": "condition", "hit": true, "reference": 7.13, "baseline": 6.67, "gain_pct": 0.07496252, "_synthetic": true}
+{"symbol": "603956.SH", "date": "20261109", "ts": "10:13", "kind": "condition", "hit": false, "reference": 7.18, "baseline": 6.67, "gain_pct": 0.07196402, "_synthetic": true}
+{"symbol": "603956.SH", "date": "20261109", "ts": "13:25", "kind": "condition", "hit": true, "reference": 7.03, "baseline": 6.67, "gain_pct": 0.05697151, "_synthetic": true}
+{"symbol": "603956.SH", "date": "20261109", "ts": "13:26", "kind": "condition", "hit": false, "reference": 7.05, "baseline": 6.67, "gain_pct": 0.05697151, "_synthetic": true}
+{"symbol": "603956.SH", "date": "20261109", "ts": "13:30", "kind": "condition", "hit": true, "reference": 7.05, "baseline": 6.67, "gain_pct": 0.06146927, "_synthetic": true}
+{"symbol": "603956.SH", "date": "20261109", "ts": "13:31", "kind": "condition", "hit": false, "reference": 7.09, "baseline": 6.67, "gain_pct": 0.05997001, "_synthetic": true}
+{"symbol": "603956.SH", "date": "20261109", "ts": "14:42", "kind": "condition", "hit": true, "reference": 6.98, "baseline": 6.67, "gain_pct": 0.04797601, "_synthetic": true}
+{"symbol": "603956.SH", "date": "20261109", "ts": "14:43", "kind": "condition", "hit": false, "reference": 6.99, "baseline": 6.67, "gain_pct": 0.04647676, "_synthetic": true}
+{"symbol": "603997.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "603997.SH", "date": "20261109", "ts": "13:32", "kind": "condition", "hit": true, "reference": 11.25, "baseline": 11.19, "gain_pct": 0.01072386, "_synthetic": true}
+{"symbol": "603997.SH", "date": "20261109", "ts": "13:33", "kind": "condition", "hit": false, "reference": 11.33, "baseline": 11.19, "gain_pct": 0.00714924, "_synthetic": true}
+{"symbol": "605086.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "605177.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "605298.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "605500.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "688017.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "688017.SH", "date": "20261109", "ts": "11:22", "kind": "condition", "hit": true, "reference": 297.0, "baseline": 285.05, "gain_pct": 0.04297492, "_synthetic": true}
+{"symbol": "688017.SH", "date": "20261109", "ts": "11:23", "kind": "condition", "hit": false, "reference": 297.32, "baseline": 285.05, "gain_pct": 0.04192247, "_synthetic": true}
+{"symbol": "688017.SH", "date": "20261109", "ts": "13:22", "kind": "condition", "hit": true, "reference": 296.85, "baseline": 285.05, "gain_pct": 0.0426241, "_synthetic": true}
+{"symbol": "688017.SH", "date": "20261109", "ts": "13:23", "kind": "signal", "signal": "buy", "wait_bars": 1, "_synthetic": true}
+{"symbol": "688017.SH", "date": "20261109", "ts": "13:25", "kind": "condition", "hit": false, "reference": 298.0, "baseline": 285.05, "gain_pct": 0.04462375, "_synthetic": true}
+{"symbol": "688017.SH", "date": "20261109", "ts": "13:25", "kind": "plan", "plan": "enter", "entry_time": "13:25", "entry_price": 298.0, "wait_bars": 1, "qty": 300, "exit_time": null, "exit_reason": null, "net_return_pct": null, "cross_day_pending": true, "_synthetic": true}
+{"symbol": "688017.SH", "date": "20261109", "ts": "13:40", "kind": "condition", "hit": true, "reference": 298.08, "baseline": 285.05, "gain_pct": 0.04781617, "_synthetic": true}
+{"symbol": "688017.SH", "date": "20261109", "ts": "13:41", "kind": "condition", "hit": false, "reference": 298.74, "baseline": 285.05, "gain_pct": 0.04651815, "_synthetic": true}
+{"symbol": "688017.SH", "date": "20261109", "ts": "14:02", "kind": "condition", "hit": true, "reference": 298.6, "baseline": 285.05, "gain_pct": 0.04893878, "_synthetic": true}
+{"symbol": "688017.SH", "date": "20261109", "ts": "14:03", "kind": "condition", "hit": false, "reference": 299.88, "baseline": 285.05, "gain_pct": 0.04992107, "_synthetic": true}
+{"symbol": "688017.SH", "date": "20261109", "ts": "14:06", "kind": "condition", "hit": true, "reference": 299.88, "baseline": 285.05, "gain_pct": 0.05230661, "_synthetic": true}
+{"symbol": "688017.SH", "date": "20261109", "ts": "14:07", "kind": "condition", "hit": false, "reference": 299.96, "baseline": 285.05, "gain_pct": 0.05146466, "_synthetic": true}
+{"symbol": "688017.SH", "date": "20261109", "ts": "14:29", "kind": "condition", "hit": true, "reference": 299.3, "baseline": 285.05, "gain_pct": 0.05153482, "_synthetic": true}
+{"symbol": "688017.SH", "date": "20261109", "ts": "14:30", "kind": "condition", "hit": false, "reference": 299.81, "baseline": 285.05, "gain_pct": 0.05153482, "_synthetic": true}
+{"symbol": "688050.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "688079.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "688079.SH", "date": "20261109", "ts": "10:05", "kind": "condition", "hit": true, "reference": 10.97, "baseline": 10.6, "gain_pct": 0.03679245, "_synthetic": true}
+{"symbol": "688079.SH", "date": "20261109", "ts": "10:06", "kind": "condition", "hit": false, "reference": 10.99, "baseline": 10.6, "gain_pct": 0.03679245, "_synthetic": true}
+{"symbol": "688079.SH", "date": "20261109", "ts": "11:21", "kind": "condition", "hit": true, "reference": 10.81, "baseline": 10.6, "gain_pct": 0.02264151, "_synthetic": true}
+{"symbol": "688079.SH", "date": "20261109", "ts": "11:22", "kind": "signal", "signal": "buy", "wait_bars": 1, "_synthetic": true}
+{"symbol": "688079.SH", "date": "20261109", "ts": "11:23", "kind": "condition", "hit": false, "reference": 10.87, "baseline": 10.6, "gain_pct": 0.0254717, "_synthetic": true}
+{"symbol": "688079.SH", "date": "20261109", "ts": "11:24", "kind": "plan", "plan": "enter", "entry_time": "11:24", "entry_price": 10.86, "wait_bars": 1, "qty": 9200, "exit_time": null, "exit_reason": null, "net_return_pct": null, "cross_day_pending": true, "_synthetic": true}
+{"symbol": "688079.SH", "date": "20261109", "ts": "13:23", "kind": "condition", "hit": true, "reference": 10.7, "baseline": 10.6, "gain_pct": 0.01132075, "_synthetic": true}
+{"symbol": "688079.SH", "date": "20261109", "ts": "13:24", "kind": "condition", "hit": false, "reference": 10.72, "baseline": 10.6, "gain_pct": 0.01037736, "_synthetic": true}
+{"symbol": "688079.SH", "date": "20261109", "ts": "13:27", "kind": "condition", "hit": true, "reference": 10.73, "baseline": 10.6, "gain_pct": 0.01320755, "_synthetic": true}
+{"symbol": "688079.SH", "date": "20261109", "ts": "13:28", "kind": "condition", "hit": false, "reference": 10.74, "baseline": 10.6, "gain_pct": 0.01226415, "_synthetic": true}
+{"symbol": "688079.SH", "date": "20261109", "ts": "13:32", "kind": "condition", "hit": true, "reference": 10.76, "baseline": 10.6, "gain_pct": 0.01603774, "_synthetic": true}
+{"symbol": "688079.SH", "date": "20261109", "ts": "13:33", "kind": "condition", "hit": false, "reference": 10.77, "baseline": 10.6, "gain_pct": 0.01509434, "_synthetic": true}
+{"symbol": "688079.SH", "date": "20261109", "ts": "13:35", "kind": "condition", "hit": true, "reference": 10.77, "baseline": 10.6, "gain_pct": 0.01698113, "_synthetic": true}
+{"symbol": "688079.SH", "date": "20261109", "ts": "13:36", "kind": "condition", "hit": false, "reference": 10.78, "baseline": 10.6, "gain_pct": 0.01698113, "_synthetic": true}
+{"symbol": "688079.SH", "date": "20261109", "ts": "13:38", "kind": "condition", "hit": true, "reference": 10.78, "baseline": 10.6, "gain_pct": 0.01886792, "_synthetic": true}
+{"symbol": "688079.SH", "date": "20261109", "ts": "13:39", "kind": "condition", "hit": false, "reference": 10.8, "baseline": 10.6, "gain_pct": 0.01886792, "_synthetic": true}
+{"symbol": "688108.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "688137.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "688137.SH", "date": "20261109", "ts": "09:55", "kind": "condition", "hit": true, "reference": 129.7, "baseline": 126.6, "gain_pct": 0.02796209, "_synthetic": true}
+{"symbol": "688137.SH", "date": "20261109", "ts": "09:56", "kind": "signal", "signal": "buy", "wait_bars": 1, "_synthetic": true}
+{"symbol": "688137.SH", "date": "20261109", "ts": "09:58", "kind": "condition", "hit": false, "reference": 135.66, "baseline": 126.6, "gain_pct": 0.0593207, "_synthetic": true}
+{"symbol": "688137.SH", "date": "20261109", "ts": "09:58", "kind": "plan", "plan": "enter", "entry_time": "09:58", "entry_price": 135.73, "wait_bars": 1, "qty": 700, "exit_time": null, "exit_reason": null, "net_return_pct": null, "cross_day_pending": true, "_synthetic": true}
+{"symbol": "688137.SH", "date": "20261109", "ts": "10:42", "kind": "condition", "hit": true, "reference": 132.88, "baseline": 126.6, "gain_pct": 0.05545024, "_synthetic": true}
+{"symbol": "688137.SH", "date": "20261109", "ts": "10:44", "kind": "condition", "hit": false, "reference": 133.96, "baseline": 126.6, "gain_pct": 0.05576619, "_synthetic": true}
+{"symbol": "688137.SH", "date": "20261109", "ts": "10:49", "kind": "condition", "hit": true, "reference": 134.0, "baseline": 126.6, "gain_pct": 0.06319115, "_synthetic": true}
+{"symbol": "688137.SH", "date": "20261109", "ts": "10:51", "kind": "condition", "hit": false, "reference": 135.48, "baseline": 126.6, "gain_pct": 0.06635071, "_synthetic": true}
+{"symbol": "688137.SH", "date": "20261109", "ts": "11:30", "kind": "condition", "hit": true, "reference": 134.0, "baseline": 126.6, "gain_pct": 0.0664297, "_synthetic": true}
+{"symbol": "688137.SH", "date": "20261109", "ts": "13:01", "kind": "condition", "hit": false, "reference": 135.01, "baseline": 126.6, "gain_pct": 0.0535545, "_synthetic": true}
+{"symbol": "688170.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "688170.SH", "date": "20261109", "ts": "10:20", "kind": "condition", "hit": true, "reference": 47.42, "baseline": 46.41, "gain_pct": 0.02779573, "_synthetic": true}
+{"symbol": "688170.SH", "date": "20261109", "ts": "10:21", "kind": "condition", "hit": false, "reference": 47.7, "baseline": 46.41, "gain_pct": 0.02025426, "_synthetic": true}
+{"symbol": "688170.SH", "date": "20261109", "ts": "10:45", "kind": "condition", "hit": true, "reference": 47.47, "baseline": 46.41, "gain_pct": 0.02413273, "_synthetic": true}
+{"symbol": "688170.SH", "date": "20261109", "ts": "10:46", "kind": "condition", "hit": false, "reference": 47.53, "baseline": 46.41, "gain_pct": 0.02176255, "_synthetic": true}
+{"symbol": "688170.SH", "date": "20261109", "ts": "11:20", "kind": "condition", "hit": true, "reference": 47.27, "baseline": 46.41, "gain_pct": 0.0191769, "_synthetic": true}
+{"symbol": "688170.SH", "date": "20261109", "ts": "11:21", "kind": "signal", "signal": "buy", "wait_bars": 1, "_synthetic": true}
+{"symbol": "688170.SH", "date": "20261109", "ts": "11:23", "kind": "plan", "plan": "enter", "entry_time": "11:23", "entry_price": 47.51, "wait_bars": 1, "qty": 2100, "exit_time": null, "exit_reason": null, "net_return_pct": null, "cross_day_pending": true, "_synthetic": true}
+{"symbol": "688170.SH", "date": "20261109", "ts": "11:24", "kind": "condition", "hit": false, "reference": 47.65, "baseline": 46.41, "gain_pct": 0.02240896, "_synthetic": true}
+{"symbol": "688170.SH", "date": "20261109", "ts": "13:22", "kind": "condition", "hit": true, "reference": 47.11, "baseline": 46.41, "gain_pct": 0.01745314, "_synthetic": true}
+{"symbol": "688170.SH", "date": "20261109", "ts": "13:23", "kind": "condition", "hit": false, "reference": 47.22, "baseline": 46.41, "gain_pct": 0.01745314, "_synthetic": true}
+{"symbol": "688170.SH", "date": "20261109", "ts": "13:32", "kind": "condition", "hit": true, "reference": 47.3, "baseline": 46.41, "gain_pct": 0.01960784, "_synthetic": true}
+{"symbol": "688170.SH", "date": "20261109", "ts": "13:33", "kind": "condition", "hit": false, "reference": 47.36, "baseline": 46.41, "gain_pct": 0.01939237, "_synthetic": true}
+{"symbol": "688170.SH", "date": "20261109", "ts": "13:38", "kind": "condition", "hit": true, "reference": 47.36, "baseline": 46.41, "gain_pct": 0.02197802, "_synthetic": true}
+{"symbol": "688170.SH", "date": "20261109", "ts": "13:39", "kind": "condition", "hit": false, "reference": 47.45, "baseline": 46.41, "gain_pct": 0.0206852, "_synthetic": true}
+{"symbol": "688170.SH", "date": "20261109", "ts": "14:01", "kind": "condition", "hit": true, "reference": 47.24, "baseline": 46.41, "gain_pct": 0.01874596, "_synthetic": true}
+{"symbol": "688170.SH", "date": "20261109", "ts": "14:02", "kind": "condition", "hit": false, "reference": 47.28, "baseline": 46.41, "gain_pct": 0.01572937, "_synthetic": true}
+{"symbol": "688198.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "688227.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "688227.SH", "date": "20261109", "ts": "10:34", "kind": "condition", "hit": true, "reference": 65.51, "baseline": 63.65, "gain_pct": 0.03157895, "_synthetic": true}
+{"symbol": "688227.SH", "date": "20261109", "ts": "10:35", "kind": "signal", "signal": "buy", "wait_bars": 1, "_synthetic": true}
+{"symbol": "688227.SH", "date": "20261109", "ts": "10:36", "kind": "condition", "hit": false, "reference": 66.2, "baseline": 63.65, "gain_pct": 0.03534957, "_synthetic": true}
+{"symbol": "688227.SH", "date": "20261109", "ts": "10:37", "kind": "plan", "plan": "enter", "entry_time": "10:37", "entry_price": 65.89, "wait_bars": 1, "qty": 1500, "exit_time": null, "exit_reason": null, "net_return_pct": null, "cross_day_pending": true, "_synthetic": true}
+{"symbol": "688227.SH", "date": "20261109", "ts": "11:23", "kind": "condition", "hit": true, "reference": 65.38, "baseline": 63.65, "gain_pct": 0.02765122, "_synthetic": true}
+{"symbol": "688227.SH", "date": "20261109", "ts": "11:24", "kind": "condition", "hit": false, "reference": 65.41, "baseline": 63.65, "gain_pct": 0.02120974, "_synthetic": true}
+{"symbol": "688227.SH", "date": "20261109", "ts": "13:23", "kind": "condition", "hit": true, "reference": 64.48, "baseline": 63.65, "gain_pct": 0.01335428, "_synthetic": true}
+{"symbol": "688227.SH", "date": "20261109", "ts": "13:25", "kind": "condition", "hit": false, "reference": 64.91, "baseline": 63.65, "gain_pct": 0.01728201, "_synthetic": true}
+{"symbol": "688227.SH", "date": "20261109", "ts": "13:27", "kind": "condition", "hit": true, "reference": 64.91, "baseline": 63.65, "gain_pct": 0.02340927, "_synthetic": true}
+{"symbol": "688227.SH", "date": "20261109", "ts": "13:30", "kind": "condition", "hit": false, "reference": 65.84, "baseline": 63.65, "gain_pct": 0.03189317, "_synthetic": true}
+{"symbol": "688227.SH", "date": "20261109", "ts": "13:32", "kind": "condition", "hit": true, "reference": 65.84, "baseline": 63.65, "gain_pct": 0.03456402, "_synthetic": true}
+{"symbol": "688227.SH", "date": "20261109", "ts": "13:38", "kind": "condition", "hit": false, "reference": 68.66, "baseline": 63.65, "gain_pct": 0.06975648, "_synthetic": true}
+{"symbol": "688227.SH", "date": "20261109", "ts": "14:23", "kind": "condition", "hit": true, "reference": 67.02, "baseline": 63.65, "gain_pct": 0.05310291, "_synthetic": true}
+{"symbol": "688227.SH", "date": "20261109", "ts": "14:25", "kind": "condition", "hit": false, "reference": 67.36, "baseline": 63.65, "gain_pct": 0.05451689, "_synthetic": true}
+{"symbol": "688260.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "688260.SH", "date": "20261109", "ts": "10:05", "kind": "condition", "hit": true, "reference": 66.63, "baseline": 64.96, "gain_pct": 0.02909483, "_synthetic": true}
+{"symbol": "688260.SH", "date": "20261109", "ts": "10:06", "kind": "signal", "signal": "buy", "wait_bars": 1, "_synthetic": true}
+{"symbol": "688260.SH", "date": "20261109", "ts": "10:07", "kind": "condition", "hit": false, "reference": 66.9, "baseline": 64.96, "gain_pct": 0.02616995, "_synthetic": true}
+{"symbol": "688260.SH", "date": "20261109", "ts": "10:08", "kind": "plan", "plan": "enter", "entry_time": "10:08", "entry_price": 66.45, "wait_bars": 1, "qty": 1500, "exit_time": null, "exit_reason": null, "net_return_pct": null, "cross_day_pending": true, "_synthetic": true}
+{"symbol": "688260.SH", "date": "20261109", "ts": "10:45", "kind": "condition", "hit": true, "reference": 66.4, "baseline": 64.96, "gain_pct": 0.02616995, "_synthetic": true}
+{"symbol": "688260.SH", "date": "20261109", "ts": "10:46", "kind": "condition", "hit": false, "reference": 66.7, "baseline": 64.96, "gain_pct": 0.02355296, "_synthetic": true}
+{"symbol": "688260.SH", "date": "20261109", "ts": "11:21", "kind": "condition", "hit": true, "reference": 66.4, "baseline": 64.96, "gain_pct": 0.02293719, "_synthetic": true}
+{"symbol": "688260.SH", "date": "20261109", "ts": "11:22", "kind": "condition", "hit": false, "reference": 66.5, "baseline": 64.96, "gain_pct": 0.0237069, "_synthetic": true}
+{"symbol": "688260.SH", "date": "20261109", "ts": "13:23", "kind": "condition", "hit": true, "reference": 65.58, "baseline": 64.96, "gain_pct": 0.01031404, "_synthetic": true}
+{"symbol": "688260.SH", "date": "20261109", "ts": "13:24", "kind": "condition", "hit": false, "reference": 65.68, "baseline": 64.96, "gain_pct": 0.00985222, "_synthetic": true}
+{"symbol": "688260.SH", "date": "20261109", "ts": "13:27", "kind": "condition", "hit": true, "reference": 65.68, "baseline": 64.96, "gain_pct": 0.01169951, "_synthetic": true}
+{"symbol": "688260.SH", "date": "20261109", "ts": "13:28", "kind": "condition", "hit": false, "reference": 65.75, "baseline": 64.96, "gain_pct": 0.01139163, "_synthetic": true}
+{"symbol": "688260.SH", "date": "20261109", "ts": "13:30", "kind": "condition", "hit": true, "reference": 65.75, "baseline": 64.96, "gain_pct": 0.01416256, "_synthetic": true}
+{"symbol": "688260.SH", "date": "20261109", "ts": "13:31", "kind": "condition", "hit": false, "reference": 65.88, "baseline": 64.96, "gain_pct": 0.01216133, "_synthetic": true}
+{"symbol": "688260.SH", "date": "20261109", "ts": "13:38", "kind": "condition", "hit": true, "reference": 65.89, "baseline": 64.96, "gain_pct": 0.01585591, "_synthetic": true}
+{"symbol": "688260.SH", "date": "20261109", "ts": "13:39", "kind": "condition", "hit": false, "reference": 65.99, "baseline": 64.96, "gain_pct": 0.01508621, "_synthetic": true}
+{"symbol": "688260.SH", "date": "20261109", "ts": "14:01", "kind": "condition", "hit": true, "reference": 65.62, "baseline": 64.96, "gain_pct": 0.01031404, "_synthetic": true}
+{"symbol": "688260.SH", "date": "20261109", "ts": "14:02", "kind": "condition", "hit": false, "reference": 65.63, "baseline": 64.96, "gain_pct": 0.00769704, "_synthetic": true}
+{"symbol": "688291.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "688291.SH", "date": "20261109", "ts": "10:37", "kind": "condition", "hit": true, "reference": 30.51, "baseline": 29.84, "gain_pct": 0.02513405, "_synthetic": true}
+{"symbol": "688291.SH", "date": "20261109", "ts": "10:38", "kind": "condition", "hit": false, "reference": 30.6, "baseline": 29.84, "gain_pct": 0.02211796, "_synthetic": true}
+{"symbol": "688291.SH", "date": "20261109", "ts": "11:22", "kind": "condition", "hit": true, "reference": 30.19, "baseline": 29.84, "gain_pct": 0.01273458, "_synthetic": true}
+{"symbol": "688291.SH", "date": "20261109", "ts": "11:23", "kind": "signal", "signal": "buy", "wait_bars": 1, "_synthetic": true}
+{"symbol": "688291.SH", "date": "20261109", "ts": "11:24", "kind": "condition", "hit": false, "reference": 30.26, "baseline": 29.84, "gain_pct": 0.01239946, "_synthetic": true}
+{"symbol": "688291.SH", "date": "20261109", "ts": "11:25", "kind": "plan", "plan": "enter", "entry_time": "11:25", "entry_price": 30.21, "wait_bars": 1, "qty": 3300, "exit_time": null, "exit_reason": null, "net_return_pct": null, "cross_day_pending": true, "_synthetic": true}
+{"symbol": "688291.SH", "date": "20261109", "ts": "13:29", "kind": "condition", "hit": true, "reference": 30.13, "baseline": 29.84, "gain_pct": 0.01038874, "_synthetic": true}
+{"symbol": "688291.SH", "date": "20261109", "ts": "13:30", "kind": "condition", "hit": false, "reference": 30.16, "baseline": 29.84, "gain_pct": 0.01038874, "_synthetic": true}
+{"symbol": "688291.SH", "date": "20261109", "ts": "13:32", "kind": "condition", "hit": true, "reference": 30.16, "baseline": 29.84, "gain_pct": 0.01239946, "_synthetic": true}
+{"symbol": "688291.SH", "date": "20261109", "ts": "13:33", "kind": "condition", "hit": false, "reference": 30.21, "baseline": 29.84, "gain_pct": 0.01239946, "_synthetic": true}
+{"symbol": "688291.SH", "date": "20261109", "ts": "14:07", "kind": "condition", "hit": true, "reference": 30.14, "baseline": 29.84, "gain_pct": 0.01038874, "_synthetic": true}
+{"symbol": "688291.SH", "date": "20261109", "ts": "14:09", "kind": "condition", "hit": false, "reference": 30.18, "baseline": 29.84, "gain_pct": 0.01105898, "_synthetic": true}
+{"symbol": "688291.SH", "date": "20261109", "ts": "14:29", "kind": "condition", "hit": true, "reference": 30.17, "baseline": 29.84, "gain_pct": 0.0113941, "_synthetic": true}
+{"symbol": "688291.SH", "date": "20261109", "ts": "14:30", "kind": "condition", "hit": false, "reference": 30.18, "baseline": 29.84, "gain_pct": 0.01072386, "_synthetic": true}
+{"symbol": "688319.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "688351.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "688381.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "688381.SH", "date": "20261109", "ts": "10:06", "kind": "condition", "hit": true, "reference": 27.93, "baseline": 27.2, "gain_pct": 0.02757353, "_synthetic": true}
+{"symbol": "688381.SH", "date": "20261109", "ts": "10:07", "kind": "condition", "hit": false, "reference": 27.95, "baseline": 27.2, "gain_pct": 0.025, "_synthetic": true}
+{"symbol": "688381.SH", "date": "20261109", "ts": "11:21", "kind": "condition", "hit": true, "reference": 27.57, "baseline": 27.2, "gain_pct": 0.01544118, "_synthetic": true}
+{"symbol": "688381.SH", "date": "20261109", "ts": "11:22", "kind": "condition", "hit": false, "reference": 27.62, "baseline": 27.2, "gain_pct": 0.01544118, "_synthetic": true}
+{"symbol": "688381.SH", "date": "20261109", "ts": "13:34", "kind": "condition", "hit": true, "reference": 27.46, "baseline": 27.2, "gain_pct": 0.01102941, "_synthetic": true}
+{"symbol": "688381.SH", "date": "20261109", "ts": "13:35", "kind": "signal", "signal": "buy", "wait_bars": 1, "_synthetic": true}
+{"symbol": "688381.SH", "date": "20261109", "ts": "13:36", "kind": "condition", "hit": false, "reference": 27.56, "baseline": 27.2, "gain_pct": 0.0125, "_synthetic": true}
+{"symbol": "688381.SH", "date": "20261109", "ts": "13:37", "kind": "condition", "hit": true, "reference": 27.56, "baseline": 27.2, "gain_pct": 0.01470588, "_synthetic": true}
+{"symbol": "688381.SH", "date": "20261109", "ts": "13:37", "kind": "plan", "plan": "enter", "entry_time": "13:37", "entry_price": 27.55, "wait_bars": 1, "qty": 3600, "exit_time": null, "exit_reason": null, "net_return_pct": null, "cross_day_pending": true, "_synthetic": true}
+{"symbol": "688381.SH", "date": "20261109", "ts": "13:39", "kind": "condition", "hit": false, "reference": 27.75, "baseline": 27.2, "gain_pct": 0.01948529, "_synthetic": true}
+{"symbol": "688381.SH", "date": "20261109", "ts": "14:01", "kind": "condition", "hit": true, "reference": 27.59, "baseline": 27.2, "gain_pct": 0.01691176, "_synthetic": true}
+{"symbol": "688381.SH", "date": "20261109", "ts": "14:02", "kind": "condition", "hit": false, "reference": 27.66, "baseline": 27.2, "gain_pct": 0.01397059, "_synthetic": true}
+{"symbol": "688381.SH", "date": "20261109", "ts": "14:06", "kind": "condition", "hit": true, "reference": 27.67, "baseline": 27.2, "gain_pct": 0.01801471, "_synthetic": true}
+{"symbol": "688381.SH", "date": "20261109", "ts": "14:08", "kind": "condition", "hit": false, "reference": 27.74, "baseline": 27.2, "gain_pct": 0.01764706, "_synthetic": true}
+{"symbol": "688420.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "688485.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "688485.SH", "date": "20261109", "ts": "09:58", "kind": "condition", "hit": true, "reference": 72.62, "baseline": 71.23, "gain_pct": 0.01993542, "_synthetic": true}
+{"symbol": "688485.SH", "date": "20261109", "ts": "09:59", "kind": "condition", "hit": false, "reference": 72.67, "baseline": 71.23, "gain_pct": 0.01361786, "_synthetic": true}
+{"symbol": "688485.SH", "date": "20261109", "ts": "10:01", "kind": "condition", "hit": true, "reference": 72.67, "baseline": 71.23, "gain_pct": 0.0231644, "_synthetic": true}
+{"symbol": "688485.SH", "date": "20261109", "ts": "10:02", "kind": "signal", "signal": "buy", "wait_bars": 1, "_synthetic": true}
+{"symbol": "688485.SH", "date": "20261109", "ts": "10:04", "kind": "condition", "hit": false, "reference": 73.78, "baseline": 71.23, "gain_pct": 0.02695493, "_synthetic": true}
+{"symbol": "688485.SH", "date": "20261109", "ts": "10:04", "kind": "plan", "plan": "enter", "entry_time": "10:04", "entry_price": 73.63, "wait_bars": 1, "qty": 1300, "exit_time": null, "exit_reason": null, "net_return_pct": null, "cross_day_pending": true, "_synthetic": true}
+{"symbol": "688485.SH", "date": "20261109", "ts": "10:44", "kind": "condition", "hit": true, "reference": 73.09, "baseline": 71.23, "gain_pct": 0.02723572, "_synthetic": true}
+{"symbol": "688485.SH", "date": "20261109", "ts": "10:47", "kind": "condition", "hit": false, "reference": 74.0, "baseline": 71.23, "gain_pct": 0.03299172, "_synthetic": true}
+{"symbol": "688485.SH", "date": "20261109", "ts": "13:26", "kind": "condition", "hit": true, "reference": 73.39, "baseline": 71.23, "gain_pct": 0.03130703, "_synthetic": true}
+{"symbol": "688485.SH", "date": "20261109", "ts": "13:27", "kind": "condition", "hit": false, "reference": 73.46, "baseline": 71.23, "gain_pct": 0.02835884, "_synthetic": true}
+{"symbol": "688485.SH", "date": "20261109", "ts": "13:30", "kind": "condition", "hit": true, "reference": 73.46, "baseline": 71.23, "gain_pct": 0.03453601, "_synthetic": true}
+{"symbol": "688485.SH", "date": "20261109", "ts": "13:31", "kind": "condition", "hit": false, "reference": 73.69, "baseline": 71.23, "gain_pct": 0.03200898, "_synthetic": true}
+{"symbol": "688485.SH", "date": "20261109", "ts": "13:32", "kind": "condition", "hit": true, "reference": 73.69, "baseline": 71.23, "gain_pct": 0.0346764, "_synthetic": true}
+{"symbol": "688485.SH", "date": "20261109", "ts": "13:33", "kind": "condition", "hit": false, "reference": 73.7, "baseline": 71.23, "gain_pct": 0.0346764, "_synthetic": true}
+{"symbol": "688485.SH", "date": "20261109", "ts": "13:35", "kind": "condition", "hit": true, "reference": 73.71, "baseline": 71.23, "gain_pct": 0.03650147, "_synthetic": true}
+{"symbol": "688485.SH", "date": "20261109", "ts": "13:37", "kind": "condition", "hit": false, "reference": 73.99, "baseline": 71.23, "gain_pct": 0.03664186, "_synthetic": true}
+{"symbol": "688485.SH", "date": "20261109", "ts": "13:38", "kind": "condition", "hit": true, "reference": 73.99, "baseline": 71.23, "gain_pct": 0.03973045, "_synthetic": true}
+{"symbol": "688485.SH", "date": "20261109", "ts": "13:39", "kind": "condition", "hit": false, "reference": 74.09, "baseline": 71.23, "gain_pct": 0.03973045, "_synthetic": true}
+{"symbol": "688485.SH", "date": "20261109", "ts": "13:56", "kind": "condition", "hit": true, "reference": 74.09, "baseline": 71.23, "gain_pct": 0.04239787, "_synthetic": true}
+{"symbol": "688485.SH", "date": "20261109", "ts": "14:00", "kind": "condition", "hit": false, "reference": 75.3, "baseline": 71.23, "gain_pct": 0.05685807, "_synthetic": true}
+{"symbol": "688485.SH", "date": "20261109", "ts": "14:02", "kind": "condition", "hit": true, "reference": 75.62, "baseline": 71.23, "gain_pct": 0.06191212, "_synthetic": true}
+{"symbol": "688485.SH", "date": "20261109", "ts": "14:03", "kind": "condition", "hit": false, "reference": 75.68, "baseline": 71.23, "gain_pct": 0.06050821, "_synthetic": true}
+{"symbol": "688485.SH", "date": "20261109", "ts": "14:06", "kind": "condition", "hit": true, "reference": 75.76, "baseline": 71.23, "gain_pct": 0.06415836, "_synthetic": true}
+{"symbol": "688485.SH", "date": "20261109", "ts": "14:08", "kind": "condition", "hit": false, "reference": 75.98, "baseline": 71.23, "gain_pct": 0.06584304, "_synthetic": true}
+{"symbol": "688485.SH", "date": "20261109", "ts": "14:10", "kind": "condition", "hit": true, "reference": 75.99, "baseline": 71.23, "gain_pct": 0.06865085, "_synthetic": true}
+{"symbol": "688485.SH", "date": "20261109", "ts": "14:11", "kind": "condition", "hit": false, "reference": 76.49, "baseline": 71.23, "gain_pct": 0.06991436, "_synthetic": true}
+{"symbol": "688522.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "688522.SH", "date": "20261109", "ts": "10:34", "kind": "condition", "hit": true, "reference": 18.32, "baseline": 17.93, "gain_pct": 0.02230898, "_synthetic": true}
+{"symbol": "688522.SH", "date": "20261109", "ts": "10:35", "kind": "signal", "signal": "buy", "wait_bars": 1, "_synthetic": true}
+{"symbol": "688522.SH", "date": "20261109", "ts": "10:36", "kind": "condition", "hit": false, "reference": 18.45, "baseline": 17.93, "gain_pct": 0.02230898, "_synthetic": true}
+{"symbol": "688522.SH", "date": "20261109", "ts": "10:37", "kind": "condition", "hit": true, "reference": 18.45, "baseline": 17.93, "gain_pct": 0.03402119, "_synthetic": true}
+{"symbol": "688522.SH", "date": "20261109", "ts": "10:37", "kind": "plan", "plan": "enter", "entry_time": "10:37", "entry_price": 18.32, "wait_bars": 1, "qty": 5400, "exit_time": null, "exit_reason": null, "net_return_pct": null, "cross_day_pending": true, "_synthetic": true}
+{"symbol": "688522.SH", "date": "20261109", "ts": "10:39", "kind": "condition", "hit": false, "reference": 18.56, "baseline": 17.93, "gain_pct": 0.03234802, "_synthetic": true}
+{"symbol": "688522.SH", "date": "20261109", "ts": "13:23", "kind": "condition", "hit": true, "reference": 18.19, "baseline": 17.93, "gain_pct": 0.01505856, "_synthetic": true}
+{"symbol": "688522.SH", "date": "20261109", "ts": "13:24", "kind": "condition", "hit": false, "reference": 18.2, "baseline": 17.93, "gain_pct": 0.01338539, "_synthetic": true}
+{"symbol": "688522.SH", "date": "20261109", "ts": "13:30", "kind": "condition", "hit": true, "reference": 18.22, "baseline": 17.93, "gain_pct": 0.01673173, "_synthetic": true}
+{"symbol": "688522.SH", "date": "20261109", "ts": "13:31", "kind": "condition", "hit": false, "reference": 18.23, "baseline": 17.93, "gain_pct": 0.01450084, "_synthetic": true}
+{"symbol": "688522.SH", "date": "20261109", "ts": "14:07", "kind": "condition", "hit": true, "reference": 18.18, "baseline": 17.93, "gain_pct": 0.01450084, "_synthetic": true}
+{"symbol": "688522.SH", "date": "20261109", "ts": "14:08", "kind": "condition", "hit": false, "reference": 18.2, "baseline": 17.93, "gain_pct": 0.01338539, "_synthetic": true}
+{"symbol": "688522.SH", "date": "20261109", "ts": "14:28", "kind": "condition", "hit": true, "reference": 18.2, "baseline": 17.93, "gain_pct": 0.01617401, "_synthetic": true}
+{"symbol": "688522.SH", "date": "20261109", "ts": "14:30", "kind": "condition", "hit": false, "reference": 18.23, "baseline": 17.93, "gain_pct": 0.01505856, "_synthetic": true}
+{"symbol": "688561.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "688591.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "688620.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "688620.SH", "date": "20261109", "ts": "11:22", "kind": "condition", "hit": true, "reference": 12.17, "baseline": 12.0, "gain_pct": 0.01583333, "_synthetic": true}
+{"symbol": "688620.SH", "date": "20261109", "ts": "11:23", "kind": "condition", "hit": false, "reference": 12.19, "baseline": 12.0, "gain_pct": 0.01583333, "_synthetic": true}
+{"symbol": "688620.SH", "date": "20261109", "ts": "13:35", "kind": "condition", "hit": true, "reference": 12.15, "baseline": 12.0, "gain_pct": 0.01583333, "_synthetic": true}
+{"symbol": "688620.SH", "date": "20261109", "ts": "13:36", "kind": "condition", "hit": false, "reference": 12.2, "baseline": 12.0, "gain_pct": 0.01666667, "_synthetic": true}
+{"symbol": "688620.SH", "date": "20261109", "ts": "13:38", "kind": "condition", "hit": true, "reference": 12.21, "baseline": 12.0, "gain_pct": 0.0225, "_synthetic": true}
+{"symbol": "688620.SH", "date": "20261109", "ts": "13:39", "kind": "condition", "hit": false, "reference": 12.27, "baseline": 12.0, "gain_pct": 0.01833333, "_synthetic": true}
+{"symbol": "688660.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "688695.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "688737.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "688737.SH", "date": "20261109", "ts": "11:22", "kind": "condition", "hit": true, "reference": 13.45, "baseline": 13.32, "gain_pct": 0.01051051, "_synthetic": true}
+{"symbol": "688737.SH", "date": "20261109", "ts": "11:23", "kind": "condition", "hit": false, "reference": 13.48, "baseline": 13.32, "gain_pct": 0.00975976, "_synthetic": true}
+{"symbol": "688737.SH", "date": "20261109", "ts": "13:24", "kind": "condition", "hit": true, "reference": 13.45, "baseline": 13.32, "gain_pct": 0.01051051, "_synthetic": true}
+{"symbol": "688737.SH", "date": "20261109", "ts": "13:25", "kind": "condition", "hit": false, "reference": 13.46, "baseline": 13.32, "gain_pct": 0.00825826, "_synthetic": true}
+{"symbol": "688737.SH", "date": "20261109", "ts": "13:30", "kind": "condition", "hit": true, "reference": 13.46, "baseline": 13.32, "gain_pct": 0.01201201, "_synthetic": true}
+{"symbol": "688737.SH", "date": "20261109", "ts": "13:31", "kind": "condition", "hit": false, "reference": 13.48, "baseline": 13.32, "gain_pct": 0.01126126, "_synthetic": true}
+{"symbol": "688737.SH", "date": "20261109", "ts": "13:32", "kind": "condition", "hit": true, "reference": 13.48, "baseline": 13.32, "gain_pct": 0.01351351, "_synthetic": true}
+{"symbol": "688737.SH", "date": "20261109", "ts": "13:33", "kind": "condition", "hit": false, "reference": 13.5, "baseline": 13.32, "gain_pct": 0.00900901, "_synthetic": true}
+{"symbol": "688795.SH", "date": "20261109", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
+{"symbol": "688795.SH", "date": "20261109", "ts": "10:35", "kind": "condition", "hit": true, "reference": 345.02, "baseline": 337.0, "gain_pct": 0.02575668, "_synthetic": true}
+{"symbol": "688795.SH", "date": "20261109", "ts": "10:36", "kind": "condition", "hit": false, "reference": 345.7, "baseline": 337.0, "gain_pct": 0.02017804, "_synthetic": true}
+{"symbol": "688795.SH", "date": "20261109", "ts": "11:25", "kind": "condition", "hit": true, "reference": 339.49, "baseline": 337.0, "gain_pct": 0.01477745, "_synthetic": true}
+{"symbol": "688795.SH", "date": "20261109", "ts": "11:26", "kind": "condition", "hit": false, "reference": 341.98, "baseline": 337.0, "gain_pct": 0.00744807, "_synthetic": true}
+{"symbol": "688795.SH", "date": "20261109", "ts": "11:27", "kind": "condition", "hit": true, "reference": 342.0, "baseline": 337.0, "gain_pct": 0.01608309, "_synthetic": true}
+{"symbol": "688795.SH", "date": "20261109", "ts": "11:28", "kind": "condition", "hit": false, "reference": 342.44, "baseline": 337.0, "gain_pct": 0.01614243, "_synthetic": true}
+{"symbol": "688795.SH", "date": "20261109", "ts": "13:26", "kind": "condition", "hit": true, "reference": 339.55, "baseline": 337.0, "gain_pct": 0.01186944, "_synthetic": true}
+{"symbol": "688795.SH", "date": "20261109", "ts": "13:27", "kind": "condition", "hit": false, "reference": 341.0, "baseline": 337.0, "gain_pct": 0.01133531, "_synthetic": true}
+{"symbol": "688795.SH", "date": "20261109", "ts": "13:30", "kind": "condition", "hit": true, "reference": 341.99, "baseline": 337.0, "gain_pct": 0.02566766, "_synthetic": true}
+{"symbol": "688795.SH", "date": "20261109", "ts": "13:31", "kind": "condition", "hit": false, "reference": 345.65, "baseline": 337.0, "gain_pct": 0.02080119, "_synthetic": true}
+{"symbol": "688795.SH", "date": "20261109", "ts": "13:32", "kind": "condition", "hit": true, "reference": 345.65, "baseline": 337.0, "gain_pct": 0.02635015, "_synthetic": true}
+{"symbol": "688795.SH", "date": "20261109", "ts": "13:33", "kind": "signal", "signal": "buy", "wait_bars": 1, "_synthetic": true}
+{"symbol": "688795.SH", "date": "20261109", "ts": "13:35", "kind": "plan", "plan": "enter", "entry_time": "13:35", "entry_price": 352.28, "wait_bars": 1, "qty": 200, "exit_time": null, "exit_reason": null, "net_return_pct": null, "cross_day_pending": true, "_synthetic": true}
+{"symbol": "688795.SH", "date": "20261109", "ts": "13:36", "kind": "condition", "hit": false, "reference": 354.77, "baseline": 337.0, "gain_pct": 0.04845697, "_synthetic": true}
+{"symbol": "688795.SH", "date": "20261109", "ts": "13:37", "kind": "condition", "hit": true, "reference": 354.77, "baseline": 337.0, "gain_pct": 0.05925816, "_synthetic": true}
+{"symbol": "688795.SH", "date": "20261109", "ts": "13:39", "kind": "condition", "hit": false, "reference": 359.28, "baseline": 337.0, "gain_pct": 0.05994065, "_synthetic": true}

@@ -141,3 +141,53 @@ def test_semantics_hash_in_ranked_metadata():
         tol_minutes=1, price_tolerance_bps=5.0, knobs=["bar_timestamp"],
     )
     assert result["knobs_tested"] == 1
+
+def test_ablation_uses_same_view_as_main_flow():
+    """消融必须与主流程共用 by_series 视图，否则可比项口径不一致。"""
+    bars = make_dataset({"A": BREAKOUT})
+    base = _base_semantics()
+    replay_base = replay_all(bars, base, {"A": 10.0})
+    assert "by_series" in replay_base
+    logs = _log_groups_from(replay_base)
+    result = attribution.run_ablation(
+        bars, base, {"A": 10.0},
+        baseline_divergences=0,
+        baseline_comparable=1,
+        log_groups_by_symbol=logs,
+        tol_minutes=1,
+        price_tolerance_bps=5.0,
+        knobs=["exit_eval"],
+    )
+    row = result["ranked"][0]
+    # 单日输入下 by_series 与 symbols 同构，可比项不应因视图切换而暴跌
+    assert row["comparable"] > 0
+
+
+def test_real_difference_is_attributable_despite_signal_change():
+    """真实语义差异会改变信号集，不能因此被判成"未归因"。"""
+    bars = make_dataset({"A": BREAKOUT})
+    base = _base_semantics()
+    logged_sem = dict(base)
+    logged_sem["exit_eval"] = "bar_high_low"
+    replay_logged = replay_all(bars, logged_sem, {"A": 10.0})
+    logs = _log_groups_from(replay_logged)
+
+    from scripts.aligner import align_symbol, aggregate_rows
+    rows = {"A": align_symbol(
+        "A", replay_all(bars, base, {"A": 10.0})["symbols"]["A"], logs["A"], 1, 5.0
+    )["rows"]}
+    agg = aggregate_rows(rows)["total"]
+
+    result = attribution.run_ablation(
+        bars, base, {"A": 10.0},
+        baseline_divergences=agg["divergent"],
+        baseline_comparable=agg["comparable"],
+        log_groups_by_symbol=logs,
+        tol_minutes=1,
+        price_tolerance_bps=5.0,
+    )
+    if agg["divergent"] == 0:
+        assert result["verdict"] == "no_divergence"
+    else:
+        assert result["top_knob"] == "exit_eval"
+        assert result["top_explained_rate"] == 1.0

@@ -16,6 +16,10 @@ price_tolerance_bps: 5
 # 归因：单旋钮解释率达到该阈值即认定为主要成因
 explained_rate_threshold: 0.95
 
+# 归因时消融配置必须保留的最小可比项比例。
+# 低于该比例说明差异减少主要来自"配对消失"而非"冲突消失"，不认。
+min_comparable_retention: 0.05
+
 # 价值判定所需的最小配对周期数
 min_cycles: 20
 

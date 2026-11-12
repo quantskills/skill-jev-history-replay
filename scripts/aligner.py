@@ -223,13 +223,19 @@ def align_symbol(symbol: str, replay: Dict[str, Any], log_groups: Dict[str, List
     cross_day_exits: List[Dict[str, Any]] = []
     cycle_pairs = _pair_cycles(entry_cycles, log_groups["plan"], tol_minutes,
                                 time_field="entry_time")
-    # 退出轴分两类处理，绝不混配：
-    #   1) 当日入场当日退出：与入场轴共用同一条 plan（日志侧就是这样记的）；
-    #   2) 跨日带入的持仓：日志侧只有入场日那条 plan，其 exit_time 是"若当日
-    #      能卖"的计划时刻，不是次日实际退出。这类没有可比记录，
-    #      单独记为 cross_day_no_log，不计入一致率，也绝不硬配到别的记录上。
-    exit_pair_of = {id(p["replay"]): p for p in cycle_pairs if p["replay"] is not None}
-    same_day_exit_ids = set(exit_pair_of)
+    # 退出轴按**退出时刻**在本序列的退出记录里配对：
+    #   - 当日入当日出：日志 plan 的 exit_time 就在这条上；
+    #   - 跨日持仓：日志在退出日另写了一条 plan(exit)，Ts 即次日退出时刻。
+    # 只拿"入场配对"复用会把跨日退出永远判成无记录，等于自证无差异。
+    exit_log_plans = [pl for pl in log_groups["plan"]
+                      if str(pl.get("plan", "enter")) != "enter"]
+    exit_pair_list = _pair_cycles(exit_cycles, exit_log_plans, tol_minutes,
+                                  time_field="exit_time")
+    exit_pair_of = {id(pr["replay"]): pr for pr in exit_pair_list
+                    if pr["replay"] is not None}
+    # 当日入当日出的周期没有独立 plan(exit)，退出信息挂在入场那条 plan 上
+    entry_pair_of = {id(pr["replay"]): pr for pr in cycle_pairs
+                     if pr["replay"] is not None and pr["log"] is not None}
 
     decision_changes: List[Dict[str, Any]] = []
     for pair in cycle_pairs:
@@ -296,13 +302,23 @@ def align_symbol(symbol: str, replay: Dict[str, Any], log_groups: Dict[str, List
         #
         # 在**退出日视图**里，同一条跨日周期没有对应的 plan 记录（那天的 plan
         # 属于当天的新交易），因此标 cross_day_no_log，不参与一致率。
-        if rc.get("carried_from_previous_day") and rc.get("entry_series") != symbol:
-            rows.append(_row("exit", symbol, rc.get("exit_time") or "", "cross_day_no_log",
-                             None, rc.get("exit_reason"), "reason",
-                             note="跨日退出的退出日视图：日志无对应记录，不参与一致率"))
-            continue
         exit_pair = exit_pair_of.get(id(rc))
         exit_log = exit_pair["log"] if exit_pair else None
+        if exit_log is None:
+            # 回退到入场配对的那条 plan（当日入当日出的情况）
+            fallback = entry_pair_of.get(id(rc))
+            if fallback and fallback["log"].get("exit_time"):
+                exit_log = fallback["log"]
+        if exit_log is None:
+            # 入场日视图里看到跨日周期时，它的退出记录在退出日，
+            # 这里跳过即可，不产生一条"缺失"——退出日视图会独立比对。
+            if rc.get("exit_series") and rc.get("exit_series") != symbol:
+                continue
+            # 到数据末尾仍未退出：这是"仓位仍持有"，不是差异，也不是日志缺失
+            rows.append(_row("exit", symbol, "", "open_position", None,
+                             rc.get("exit_reason"), "reason",
+                             note="数据末尾仍未退出，无退出可比"))
+            continue
         jev_exit_time = exit_log.get("exit_time") if exit_log else None
         replay_exit_time = rc.get("exit_time")
         if replay_exit_time and jev_exit_time:
@@ -330,6 +346,39 @@ def align_symbol(symbol: str, replay: Dict[str, Any], log_groups: Dict[str, List
                 "jev": {"entry": jev_entry_time, "exit": jev_exit_time,
                         "net_return_pct": lp.get("net_return_pct")},
             })
+
+    # 退出日视图：本序列没有"当日入场"的周期，退出都在 exit_cycles 里。
+    # 这部分必须单独比对，否则跨日退出的退出轴永远是空集。
+    entry_ids = {id(p["replay"]) for p in cycle_pairs if p["replay"] is not None}
+    for pr in exit_pair_list:
+        rc2, lp2 = pr["replay"], pr["log"]
+        if rc2 is None or id(rc2) in entry_ids:
+            continue
+        if lp2 is None:
+            rows.append(_row("exit", symbol, rc2.get("exit_time") or "", "replay_only",
+                             None, rc2.get("exit_time"), "time",
+                             note="重放退出、日志无退出记录"))
+            continue
+        jev_exit_time = lp2.get("exit_time") or lp2.get("ts")
+        replay_exit_time = rc2.get("exit_time")
+        gap = minutes_of(replay_exit_time) - minutes_of(jev_exit_time)
+        status = "match" if gap == 0 else "divergent"
+        rows.append(_row("exit", symbol, replay_exit_time, status,
+                         jev_exit_time, replay_exit_time, "time", gap))
+        if rc2.get("exit_reason") and lp2.get("exit_reason"):
+            rstatus = ("match" if rc2["exit_reason"] == lp2["exit_reason"]
+                       else "divergent")
+            rows.append(_row("exit", symbol, replay_exit_time, rstatus,
+                             lp2["exit_reason"], rc2["exit_reason"], "reason"))
+            if rstatus == "divergent":
+                decision_changes.append({
+                    "changes": ["exit_reason_changed"], "symbol": symbol,
+                    "signal_time": lp2.get("entry_time") or lp2["ts"],
+                    "replay": {"exit": replay_exit_time,
+                               "net_return_pct": rc2.get("net_return_pct")},
+                    "jev": {"exit": jev_exit_time,
+                            "net_return_pct": lp2.get("net_return_pct")},
+                })
 
     if cross_day_exits:
         # 汇总成一行，避免每个跨日周期刷一条单边缺失

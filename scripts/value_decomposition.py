@@ -54,9 +54,11 @@ def _carry_breakdown(replay: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
-def decompose() -> Dict[str, Any]:
-    bars = data_loader.load_bars(REPO_ROOT / "fixtures" / "bars")
-    prev = _load_prev_closes(REPO_ROOT / "fixtures" / "reference", list(bars))
+def decompose(bars_dir: Path | None = None,
+              ref_dir: Path | None = None) -> Dict[str, Any]:
+    bars = data_loader.load_bars(bars_dir or (REPO_ROOT / "fixtures" / "bars"))
+    prev = _load_prev_closes(ref_dir or (REPO_ROOT / "fixtures" / "reference"),
+                             list(bars))
     base_cfg = dict(cfg.load_config()["semantics"])
 
     naive = dict(base_cfg)
@@ -136,9 +138,15 @@ def decompose() -> Dict[str, Any]:
 def main(argv: List[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Decompose the value verdict by knob")
     parser.add_argument("--json", action="store_true")
+    parser.add_argument("--bars-dir", default=None,
+                        help="换一份夹具做样本外复现，如 /tmp/jev-oos/fixtures/bars")
+    parser.add_argument("--ref-dir", default=None)
     args = parser.parse_args(argv)
 
-    result = decompose()
+    result = decompose(
+        Path(args.bars_dir) if args.bars_dir else None,
+        Path(args.ref_dir) if args.ref_dir else None,
+    )
     if args.json:
         print(json.dumps(result, ensure_ascii=False, indent=2, default=str))
         return 0

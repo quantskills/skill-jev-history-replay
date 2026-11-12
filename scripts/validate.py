@@ -51,6 +51,28 @@ def validate(bars_dir: Path, logs_dir: Path) -> Dict[str, Any]:
                         "message": exc.message, "hint": exc.hint}],
         }
 
+    # 分钟缺口：重放器按根数计算窗口/持有期，缺口会让语义静默失真
+    gap_report = {}
+    for symbol, entry in bars.items():
+        gaps = data_loader.find_gaps(entry["bars"])
+        if gaps:
+            gap_report[symbol] = {
+                "gap_count": len(gaps),
+                "missing_bars": sum(g["missing_bars"] for g in gaps),
+                "first": gaps[0],
+            }
+    if gap_report:
+        total_missing = sum(v["missing_bars"] for v in gap_report.values())
+        issues.append({
+            "severity": "warn" if total_missing < 500 else "error",
+            "code": "minute_gaps",
+            "message": (f"{len(gap_report)} 个序列存在分钟缺口，"
+                        f"合计缺 {total_missing} 根"),
+            "hint": ("重放器按『根数』计算 breakout_window / max_hold_bars / "
+                     "bars_to_entry；缺口会让这些语义失真。确认这些标的当日是否停牌或流动性枯竭。"),
+            "samples": dict(list(gap_report.items())[:5]),
+        })
+
     lengths = {symbol: len(entry["bars"]) for symbol, entry in bars.items()}
     for symbol, count in lengths.items():
         if count < 30:

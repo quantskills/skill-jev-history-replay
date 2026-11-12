@@ -26,6 +26,34 @@ class LoadError(ValueError):
 
 
 BAR_REQUIRED = ("symbol", "datetime", "open", "high", "low", "close")
+
+# A 股午休：11:30 收市，13:00/13:01 复市。缺口检测必须排除这段，
+# 否则每条序列都会报一个假缺口。
+LUNCH_BREAK = (11 * 60 + 30, 13 * 60 + 1)
+
+
+def find_gaps(bars: List[Dict[str, Any]],
+              lunch_break: tuple[int, int] = LUNCH_BREAK) -> List[Dict[str, Any]]:
+    """找出序列中的分钟缺口（排除午休）。
+
+    为什么重要：重放器按「根数」计算 breakout_window / max_hold_bars /
+    bars_to_entry。若序列有缺口，10 分钟的空档会被当成 0 根，
+    窗口和持有期语义都会失真——而且**不会报错**，只是静默算错。
+    """
+    gaps: List[Dict[str, Any]] = []
+    for prev, cur in zip(bars, bars[1:]):
+        step = cur["minute"] - prev["minute"]
+        if step == 1:
+            continue
+        if prev["minute"] == lunch_break[0] and cur["minute"] == lunch_break[1]:
+            continue
+        gaps.append({
+            "after": prev["time"],
+            "before": cur["time"],
+            "missing_minutes": step - 1,
+            "missing_bars": step - 1,
+        })
+    return gaps
 LOG_REQUIRED = ("ts", "kind", "symbol")
 
 LOG_KINDS = ("condition", "signal", "plan", "fill")

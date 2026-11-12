@@ -128,3 +128,66 @@ def test_group_logs_fills_all_kinds():
     grouped = data_loader.group_logs(recs)
     assert set(grouped["S"]) == set(data_loader.LOG_KINDS)
     assert grouped["S"]["plan"] == []
+
+def _seq(times):
+    out = []
+    for t in times:
+        h, m = t.split(":")
+        out.append({"time": t, "minute": int(h) * 60 + int(m),
+                    "open": 1.0, "high": 1.0, "low": 1.0, "close": 1.0, "volume": 1.0})
+    return out
+
+
+def test_find_gaps_detects_missing_minutes():
+    bars = _seq(["09:31", "09:32", "09:45", "09:46"])
+    gaps = data_loader.find_gaps(bars)
+    assert len(gaps) == 1
+    assert gaps[0]["after"] == "09:32"
+    assert gaps[0]["before"] == "09:45"
+    assert gaps[0]["missing_bars"] == 12
+
+
+def test_find_gaps_ignores_lunch_break():
+    """午休 11:30→13:01 不是缺口，否则每条序列都会假报警。"""
+    bars = _seq(["11:29", "11:30", "13:01", "13:02"])
+    assert data_loader.find_gaps(bars) == []
+
+
+def test_find_gaps_empty_for_continuous_sequence():
+    times = []
+    for m in range(9 * 60 + 31, 11 * 60 + 31):
+        times.append(f"{m // 60:02d}:{m % 60:02d}")
+    assert data_loader.find_gaps(_seq(times)) == []
+
+
+def test_find_gaps_reports_multiple():
+    bars = _seq(["09:31", "09:35", "09:40"])
+    gaps = data_loader.find_gaps(bars)
+    assert len(gaps) == 2
+    assert [g["missing_bars"] for g in gaps] == [3, 4]
+
+
+def test_real_fixtures_have_no_unexpected_gaps():
+    """真实夹具（除午休外）不应有缺口；有的话 validate 会报。"""
+    import gzip
+    import json as _json
+    from pathlib import Path
+
+    root = Path(__file__).resolve().parents[1] / "fixtures" / "bars"
+    files = sorted(root.glob("*.json.gz"))
+    if not files:
+        pytest.skip("无夹具")
+    path = files[0]
+    with gzip.open(path, "rt", encoding="utf-8") as fh:
+        records = _json.load(fh)
+    by_symbol = {}
+    for rec in records:
+        hhmm = rec["datetime"].split(" ")[-1][:5]
+        h, m = hhmm.split(":")
+        by_symbol.setdefault(rec["symbol"], []).append({
+            "time": hhmm, "minute": int(h) * 60 + int(m),
+            "open": 0, "high": 0, "low": 0, "close": 0, "volume": 0,
+        })
+    offenders = {s: data_loader.find_gaps(b)
+                 for s, b in by_symbol.items() if data_loader.find_gaps(b)}
+    assert offenders == {}, f"夹具存在分钟缺口：{list(offenders)[:3]}"

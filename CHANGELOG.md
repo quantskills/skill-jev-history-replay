@@ -1,5 +1,53 @@
 # CHANGELOG
 
+## 0.13.0 — 2026-11-13
+
+这一轮逐条实跑 **§7 错误路径**那 11 行声明。大部分正确，查出 2 个真实缺陷
+（外加一个在验证过程中撞见的）。
+
+### 缺陷 35：`fetch_data.py` 直接运行必崩
+
+按 §8 的复现命令跑 `python3 scripts/fetch_data.py --date 20260101 --symbols 600519.SH`：
+
+```
+ModuleNotFoundError: No module named 'scripts'
+```
+
+该文件漏了 `sys.path.insert(0, REPO_ROOT)`，而其它脚本都有。
+问题只在**真正调用凭证**时才触发（`_client()` → `from scripts.credentials import ...`），
+所以 `--help`、单元测试都发现不了。这直接影响"重新生成夹具"这条主路径。
+
+### 缺陷 36：`changed_fields` 不报告 `config_hash` 本身
+
+`compare_baseline.compare()` 在 `comparable=false` 时给出：
+
+```json
+{"comparable": false, "changed_fields": [], 
+ "note": "config_hash 不一致，差异不可解读；请确认语义、夹具或日志来源是否变化"}
+```
+
+`changed_fields` 空着，note 却让读者去查三个组成项。只改 `config_hash` 的情形下
+读者完全无从判断哪里变了。已加入 `config_hash` 自身的变化检测。
+
+### §7 逐条实跑结果
+
+| 场景 | 文档 | 实测 |
+|---|---|---|
+| 空字符串 / 未知字段 / bars_dir 不存在 / 语义非法 | ReplayError | ✅ 4/4 |
+| K 线缺字段 / high<low / 价格非正 / 重复 | ReplayError | ✅ 4/4 |
+| 日志 kind 非法 | LoadError | ✅ |
+| 多日缺 `date` | LoadError | ✅（v0.12.7 已验） |
+| 缺 panda_data | `env_check` 报 warn 不报 blocked | ✅ warn / blocked=0 |
+| config_hash 不一致 | comparable=false，不给 delta | ✅（`changed_fields` 已修） |
+| 非交易日拉数据 | **退出码 2** | ✅（我一开始误读成 0，那是 `tail` 的退出码） |
+
+### 新增测试
+- `test_fetch_data_can_run_as_script`（以脚本方式加载并调用 `_env`）
+- `test_changed_config_hash_alone_is_reported`
+- 缺陷台账 34 → 36 项
+
+---
+
 ## 0.12.9 — 2026-11-13
 
 这一轮做**真实冷克隆验收**（§1.1）并核对 §8 复现环境。流程本身全过，
@@ -12,7 +60,7 @@
 | 项 | 文档写的 | 实际 |
 |---|---|---|
 | `verify_claims.py` | 27/27（§1.1）、61/61（§1.0a） | **71/71** |
-| `pytest tests/ -q` | 113 passed | **223 passed, 1 skipped** |
+| `pytest tests/ -q` | 113 passed | **224 passed, 1 skipped** |
 | `build.py` | 54 秒 | **31 秒** |
 | Python | 3.12.12 / 3.11.16 | 3.12.12 / **3.9.6**（实测） |
 
@@ -27,7 +75,7 @@ env_check     ok=true
 validate      ok=true, 0 issues
 build         31 秒，exit 0
 verify_claims 71/71
-pytest        223 passed, 1 skipped
+pytest        224 passed, 1 skipped
 ```
 总一致率 0.9913、退出轴 0.8896，与本机完全一致；`output/` 由 `build.py` 自动创建。
 

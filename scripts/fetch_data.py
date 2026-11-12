@@ -22,6 +22,11 @@ from pathlib import Path
 from typing import Any, Dict, List
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+# 直接 `python3 scripts/fetch_data.py` 时，sys.path[0] 是 scripts/ 而不是仓库根，
+# `from scripts.credentials import ...` 会 ModuleNotFoundError。
+# 其他脚本都有这行，本文件曾漏掉——只有真正调用凭证时才暴露。
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 
 DEFAULT_SYMBOLS = [
     "600519.SH",  # 贵州茅台

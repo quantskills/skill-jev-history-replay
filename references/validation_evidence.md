@@ -77,8 +77,8 @@ python3 -m pytest tests/ -q -m slow         # 区分度对照，约 2 分钟
 | `test_validation_claims.py` | 13 | **文档数字对账**、防漂移、区分度对照、**陈旧数字扫描** |
 | `test_data_quality_audit.py` | 6 | 板块分类、涨跌停口径、离线不把"未核验"当 0、报告回显 |
 | `test_trade_audit.py` | 4 | **逐笔价格/算术反查**、跨日覆盖、故意改价必被抓 |
-| `test_doc_commands.py` | 8 | **文档引用的脚本必须存在 / 可解析**、**证据表格与实际测试文件一致**、**表格用例数 = pytest 收集数**、**README 目录树列全脚本**、**缺陷标题数 = 表行数**、**文档里的命令输出计数与实际一致** | **文档引用的脚本必须存在 / 可解析**、**证据表格与实际测试文件一致**、**表格用例数 = pytest 收集数**、**README 目录树列全脚本**、**缺陷标题数 = 表行数** |
-| `test_compare_baseline.py` | 7 | **冻结基线**、同配置给 delta、异配置拒绝、结构化错误 |
+| `test_doc_commands.py` | 9 | **文档引用的脚本必须存在 / 可解析**、**证据表格与实际测试文件一致**、**表格用例数 = pytest 收集数**、**README 目录树列全脚本**、**缺陷标题数 = 表行数**、**文档里的命令输出计数与实际一致** | **文档引用的脚本必须存在 / 可解析**、**证据表格与实际测试文件一致**、**表格用例数 = pytest 收集数**、**README 目录树列全脚本**、**缺陷标题数 = 表行数** |
+| `test_compare_baseline.py` | 8 | **冻结基线**、同配置给 delta、异配置拒绝、结构化错误、**仅 config_hash 变也要列出** |
 | `test_value_decomposition.py` | 4 | **T+1 强制隔夜**、拆解前提、summary 形状 |
 | `test_credentials.py` | 6 | **引号去除**、别名回退、缺凭证结构化报错、非法 URL 拒绝 |
 | `test_ci_config.py` | 4 | **CI 配置合法**、步骤齐全、build 先于 tests |
@@ -270,7 +270,7 @@ python3 scripts/env_check.py      # ok=true
 python3 scripts/validate.py       # ok=true, 0 issues
 python3 scripts/build.py          # 约 31 秒
 python3 scripts/verify_claims.py  # 71/71
-python3 -m pytest tests/ -q       # 223 passed, 1 skipped
+python3 -m pytest tests/ -q       # 224 passed, 1 skipped
 ```
 
 实测（v0.12.8，从 `origin/main` 全新 clone 到 /tmp）：各项全过，
@@ -973,7 +973,7 @@ python3 scripts/value_decomposition.py \
 
 ---
 
-## 6. 验证中发现并修复的缺陷（34 项）
+## 6. 验证中发现并修复的缺陷（36 项）
 
 以下都不是构造的测试用例，而是在真实数据上跑出来的：
 
@@ -1013,6 +1013,8 @@ python3 scripts/value_decomposition.py \
 | 32 | **`time_tolerance_minutes` 根本不参与判定** | 四处判定都写死 `"match" if gap == 0`，容差只影响配对搜索半径。把容差 0→1→2→5 调，结果**一模一样**；文档还把这个"四档一致"解释成"时刻差是整分钟离散值、比较天然精确"——把参数没生效说成了结论。真实影响：201 条退出时间冲突中 65 条差值 ≤1 分钟 | 四处改为 `abs(gap) <= tol_minutes`；`test_verdict_tolerance_actually_changes_verdict` 与 `test_entry_and_signal_axes_honour_tolerance` 锁住。修复后四档才真正分化（0.9895/0.9913/0.9920/0.9931） |
 | 33 | **`oos_check.IN_SAMPLE` 硬编码基准会过期** | 修好容差后主样本变成 0.9913/0.8896，但 `IN_SAMPLE` 仍是 0.9895/0.8667，复现判定拿旧基准比新结果 | 同步基准 + `test_oos_check.py` 以 `output/report.json` 反查，主样本一变就红 |
 | 34 | **§1.1 / §8 的验收数字长期过期** | 文档写 `verify_claims 27/27`（实际 71/71）、`pytest 113 passed`（实际 222）、`build 54 秒`（实际 31 秒）。这些数字从 v0.7 起就没跟上，而冷克隆验收正是最容易被人照抄的一节 | 按 v0.12.8 冷克隆实测重写；新增 `test_doc_counts_match_actual` 以实际值对账 |
+| 35 | **`fetch_data.py` 直接运行必崩** | 漏了 `sys.path.insert(0, REPO_ROOT)`，直接 `python3 scripts/fetch_data.py` 会在 `_client()` 里 `from scripts.credentials import ...` 抛 ModuleNotFoundError。只在真正调用凭证时触发，`--help` 与单元测试都发现不了——按 §8 的复现命令手跑才暴露 | 补 sys.path + `test_fetch_data_can_run_as_script` |
+| 36 | **`changed_fields` 不报告 `config_hash` 本身** | `comparable=false` 时 `changed_fields=[]`，而 note 还写着"请确认语义、夹具或日志来源是否变化"——只改了 config_hash 的话读者无从判断哪里变了 | 加 `cur_hash != base_hash` 判断 + `test_changed_config_hash_alone_is_reported` |
 
 ---
 
@@ -1042,7 +1044,7 @@ python3 scripts/value_decomposition.py \
 | panda-data | 1.0.6（仅夹具再生） |
 | 三方依赖 | 无（对齐与回放为纯标准库；`python3 -S` 实测通过） |
 | 全量对齐 | 约 31 秒（4,200 序列 × 240 根，1,008,000 根） |
-| 单元测试 | 约 160 秒（223 passed, 1 skipped） |
+| 单元测试 | 约 160 秒（224 passed, 1 skipped） |
 
 ```bash
 git clone https://github.com/quantskills/skill-jev-history-replay

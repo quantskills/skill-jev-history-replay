@@ -184,6 +184,32 @@ def test_doc_counts_match_actual():
             )
 
 
+def test_fetch_data_can_run_as_script():
+    """`scripts/fetch_data.py` 直接运行时必须能 import 到 `scripts.credentials`。
+
+    它曾漏了 `sys.path.insert(0, REPO_ROOT)`，直接运行时
+    `from scripts.credentials import ...` 抛 ModuleNotFoundError。
+    因为只在真正调用凭证时才触发，`--help` 与单元测试都发现不了，
+    直到按 §8 的复现命令手跑（`fetch_data.py --date ...`）才暴露。
+    """
+    import subprocess
+    import sys
+
+    code = (
+        "import sys; sys.path.insert(0, 'scripts');"          # 模拟脚本方式运行
+        "import importlib.util as u;"
+        "spec = u.spec_from_file_location('fd', 'scripts/fetch_data.py');"
+        "m = u.module_from_spec(spec); spec.loader.exec_module(m);"
+        "m._env('PANDA_DATA_USERNAME', 'DEFAULT_USERNAME');"  # 无凭证时返回空串
+        "print('ok')"
+    )
+    proc = subprocess.run([sys.executable, "-c", code], cwd=REPO_ROOT,
+                          capture_output=True, text=True)
+    assert proc.returncode == 0, (
+        f"以脚本方式运行 fetch_data.py 失败：{proc.stderr[-800:]}"
+    )
+
+
 def test_evidence_table_lists_every_test_file():
     """`validation_evidence.md` 的测试清单必须与 `tests/` 实际文件一一对应。
 

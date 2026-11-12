@@ -78,6 +78,26 @@ def test_compare_different_config_refuses_deltas(tmp_path):
     assert "不一致" in out["note"]
 
 
+def test_changed_config_hash_alone_is_reported(tmp_path):
+    """只有 config_hash 变化时，它也必须出现在 `changed_fields` 里。
+
+    此前只比较 semantics_hash / fixture_fingerprint / log_source 三个组成项。
+    若 config_hash 被外部改动（或组成项之外的成份变了），
+    `comparable=false` 却给出**空列表**，而 note 还写着"请确认语义、
+    夹具或日志来源是否变化"——读者无从判断到底哪里变了。
+    """
+    a = _report(tmp_path, config_hash="h1", semantics_hash="s1")
+    frozen = compare_baseline.freeze(
+        a, name="base", baseline_dir=tmp_path / "baselines")
+    b = _report(tmp_path, config_hash="h2", semantics_hash="s1")  # 只改 config_hash
+    out = compare_baseline.compare(b, frozen["baseline"])
+    assert out["comparable"] is False
+    assert out["deltas"] is None
+    assert "config_hash" in out["changed_fields"], (
+        f"changed_fields 未列出 config_hash：{out['changed_fields']}"
+    )
+
+
 def test_list_empty_dir(tmp_path):
     out = compare_baseline.list_baselines(tmp_path / "nope")
     assert out == {"ok": True, "baselines": []}

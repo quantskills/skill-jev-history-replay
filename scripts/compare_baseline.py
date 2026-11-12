@@ -94,6 +94,11 @@ def compare(report_path: str | Path, baseline_path: str | Path) -> Dict[str, Any
     cur_cmp = current.get("comparability", {})
     base_fp = baseline.get("fixture_fingerprint")
     changed = []
+    # config_hash 本身必须能出现在 changed_fields 里。此前只比较三个组成项，
+    # 若报告有人手工改过 config_hash（或组成项之外的因素变了），
+    # comparable=false 却给出空列表，读者无从判断到底哪里变了。
+    if cur_hash != base_hash:
+        changed.append("config_hash")
     if cur_cmp.get("semantics_hash") != baseline.get("semantics_hash"):
         changed.append("semantics_hash")
     if cur_cmp.get("fixture_fingerprint") != base_fp:

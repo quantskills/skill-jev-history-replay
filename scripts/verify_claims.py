@@ -106,6 +106,28 @@ def verify(report: Dict[str, Any], claims: Dict[str, Any]) -> Dict[str, Any]:
                va_block.get("effect_size", {}).get("full_sample_welch", {}).get("p"),
                claims_va["welch_p"], tol=5e-3)
 
+    per_day_claims = claims.get("per_day")
+    if per_day_claims:
+        import collections as _c
+
+        counts = _c.defaultdict(_c.Counter)
+        ledger_path = REPO_ROOT / "output" / "ledger.jsonl"
+        if ledger_path.exists():
+            for line in ledger_path.read_text(encoding="utf-8").splitlines():
+                if not line.strip():
+                    continue
+                row = json.loads(line)
+                sym = row.get("symbol", "")
+                day = sym.split("@")[-1] if "@" in sym else "single"
+                counts[day][row.get("status")] += 1
+        for day, expected in per_day_claims.items():
+            c = counts.get(day, _c.Counter())
+            comparable = c.get("match", 0) + c.get("divergent", 0)
+            _check(results, f"per_day.{day}.comparable", comparable,
+                   expected.get("comparable"))
+            _check(results, f"per_day.{day}.divergent", c.get("divergent", 0),
+                   expected.get("divergent"))
+
     dq_claims = claims.get("data_quality")
     if dq_claims:
         dq = report.get("applicability", {}).get("unmodeled_market_states") or {}
@@ -161,7 +183,10 @@ def verify(report: Dict[str, Any], claims: Dict[str, Any]) -> Dict[str, Any]:
 # 这些是历史样本的产物，出现在当前描述里就说明文档没跟上代码。
 # 例外：显式标注了版本/日期的历史叙述行不计入（见 _is_historical）。
 STALE_TOKENS = [
-    "1,680,000", "46,642", "58,110", "57,607", "28,754 / 1,680,000",
+    # v0.6.0 及更早（7,000 序列 / 500 标的/日）
+    "1,680,000", "46,642", "58,110", "57,607",
+    # v0.6.1 曾用的清单式写法
+    "28,754 / 1,680,000",
 ]
 
 

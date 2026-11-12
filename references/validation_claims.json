@@ -67,5 +67,63 @@
     "limit_down_touch_share": 0.0064,
     "overall_unmodeled_upper_bound": 0.0467,
     "verdict_level": "moderate"
+  },
+  "per_day": {
+    "20261026": {
+      "comparable": 1547,
+      "divergent": 0
+    },
+    "20261027": {
+      "comparable": 1094,
+      "divergent": 28
+    },
+    "20261028": {
+      "comparable": 4032,
+      "divergent": 10
+    },
+    "20261029": {
+      "comparable": 1279,
+      "divergent": 49
+    },
+    "20261030": {
+      "comparable": 1597,
+      "divergent": 6
+    },
+    "20261102": {
+      "comparable": 5127,
+      "divergent": 10
+    },
+    "20261103": {
+      "comparable": 2494,
+      "divergent": 90
+    },
+    "20261104": {
+      "comparable": 4170,
+      "divergent": 22
+    },
+    "20261105": {
+      "comparable": 4651,
+      "divergent": 50
+    },
+    "20261106": {
+      "comparable": 1008,
+      "divergent": 13
+    },
+    "20261109": {
+      "comparable": 1551,
+      "divergent": 3
+    },
+    "20261110": {
+      "comparable": 3201,
+      "divergent": 22
+    },
+    "20261111": {
+      "comparable": 2857,
+      "divergent": 53
+    },
+    "20261112": {
+      "comparable": 1478,
+      "divergent": 23
+    }
   }
 }

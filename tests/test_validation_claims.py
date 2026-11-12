@@ -152,3 +152,18 @@ def test_stale_scanner_detects_current_description():
     text = "样本共 1,680,000 根分钟线。"
     hits = verify_claims.scan_stale_tokens(text)
     assert hits and hits[0]["token"] == "1,680,000"
+
+
+def test_per_day_numbers_are_verified(report):
+    """分日表也必须被校验——它曾停留在旧样本上（7,000 vs 4,200 序列）。"""
+    claims = json.loads(CLAIMS.read_text(encoding="utf-8"))
+    assert "per_day" in claims, "claims 缺 per_day 段"
+    assert len(claims["per_day"]) >= 10, "per_day 覆盖天数过少"
+    result = verify_claims.verify(report, claims)
+    per_day_failures = [f for f in result["failed"]
+                        if f["check"].startswith("per_day.")]
+    assert per_day_failures == [], (
+        "分日数字与实现对不上：\n"
+        + "\n".join(f"  {f['check']}: actual={f['actual']} claimed={f['claimed']}"
+                    for f in per_day_failures)
+    )

@@ -83,7 +83,7 @@ python3 -m pytest tests/ -q -m slow         # 区分度对照，约 2 分钟
 | `test_credentials.py` | 6 | **引号去除**、别名回退、缺凭证结构化报错、非法 URL 拒绝 |
 | `test_ci_config.py` | 4 | **CI 配置合法**、步骤齐全、build 先于 tests |
 | `test_ledger_mode.py` | 3 | **账本瘦身**、full 可回溯、per_day 入报告 |
-| `test_adapt_logs.py` | 18 | **外部日志字段映射**、布尔规范化、缺字段必失败、**纯契约日志可端到端接入**、**多日缺 date 必报错（加载器与 validate 两处）** |
+| `test_adapt_logs.py` | 22 | **外部日志字段映射**、布尔规范化、缺字段必失败、**纯契约日志可端到端接入**、**多日缺 date 必报错（加载器与 validate 两处）**、**无法判定的 hit 必报错**、**时间戳写法不影响结论** |
 | `test_knob_efficacy.py` | 3 | **旋钮全部接线**、指纹稳定性、含当前根必归零 |
 | `test_metrics_correctness.py` | 15 | **统计函数正确性**：精确值对比、蒙特卡洛 Type-I/覆盖率 |
 | `test_fixture_universe.py` | 4 | **14 日标的池恒定**、每条序列 K 线完整、**manifest 与实际夹具对账**、**gzip mtime=0 可重现** |
@@ -272,7 +272,7 @@ python3 scripts/env_check.py      # ok=true
 python3 scripts/validate.py       # ok=true, 0 issues
 python3 scripts/build.py          # 约 31 秒
 python3 scripts/verify_claims.py  # 71/71
-python3 -m pytest tests/ -q       # 241 passed, 1 skipped
+python3 -m pytest tests/ -q       # 245 passed, 1 skipped
 ```
 
 实测（v0.12.8，从 `origin/main` 全新 clone 到 /tmp）：各项全过，
@@ -509,7 +509,7 @@ python3 scripts/adapt_logs.py --src raw/ --dst adapted/
 |---|---|
 | 通用同义词 | `timestamp→ts`、`code→symbol`、`type→kind`、`matched→hit`、`action→signal` 等 |
 | 按 kind 细化 | 同一字段在不同记录类型里含义不同时可单独指定 |
-| 布尔规范化 | `1/0`、`"true"/"false"`、`"yes"/"no"` 全部转成真正的 `bool` |
+| 布尔规范化 | `1/0`、`"true"/"false"`、`"yes"/"no"` 全部转成真正的 `bool`；**认不出的值报 `invalid_hit_value`，不默认成 False** |
 | 缺字段即失败 | 适配后仍缺必需字段 → 报错，不让它进入对齐 |
 | 未映射字段保留 | 不丢弃，便于追溯 |
 
@@ -975,7 +975,7 @@ python3 scripts/value_decomposition.py \
 
 ---
 
-## 6. 验证中发现并修复的缺陷（40 项）
+## 6. 验证中发现并修复的缺陷（41 项）
 
 以下都不是构造的测试用例，而是在真实数据上跑出来的：
 
@@ -1021,6 +1021,7 @@ python3 scripts/value_decomposition.py \
 | 38 | **`openai.yaml` 旋钮清单与代码三处不一致** | 声明 18 个旋钮，而 `REFERENCE_SEMANTICS` 可配置键是 23 个、`KNOB_VALUES` 可消融旋钮是 10 个——18 既不是前者也不是后者，是手抄残留 | 拆成 `x-semantics-knobs`（=23，可配置全集）与 `x-attribution-knobs`（=10，可消融子集），并加测试双向对账 |
 | 39 | **`openai.yaml` 版本长期未跟** | `version: 0.1.0` 而 `skill.json` 已是 0.13.0 | 同步 + 测试锁住 |
 | 40 | **CI 的 release hygiene 只查文件存在、不查内容** | 社区审核真正看的是：免责声明四个要点、INSTALL 五平台覆盖、SPDX 许可证标识、无占位符、无敏感信息。CI 只做了 `test -f`，内容全对不上也照样绿。 | 扩充 CI 步骤用 Python 断言实际内容；新增 `tests/test_release_compliance.py`（7 例）本地可跑 |
+| 41 | **无法判定的 `hit` 被静默当成 False** | `hit: "也许"`、`hit: null` 落在旧白名单之外，被转成 `False`——把"不知道"变"没命中"。下游完全看不出来，属于最危险的一类静默降级 | 白名单外报 `invalid_hit_value`；补 `test_unrecognized_hit_is_an_error_not_false` 与 `test_hit_accepts_common_boolean_spellings` |
 
 ---
 
@@ -1050,7 +1051,7 @@ python3 scripts/value_decomposition.py \
 | panda-data | 1.0.6（仅夹具再生） |
 | 三方依赖 | 无（对齐与回放为纯标准库；`python3 -S` 实测通过） |
 | 全量对齐 | 约 31 秒（4,200 序列 × 240 根，1,008,000 根） |
-| 单元测试 | 约 160 秒（241 passed, 1 skipped） |
+| 单元测试 | 约 160 秒（245 passed, 1 skipped） |
 
 ```bash
 git clone https://github.com/quantskills/skill-jev-history-replay

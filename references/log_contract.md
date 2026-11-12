@@ -136,6 +136,11 @@ python3 scripts/validate.py --logs-dir adapted/
 
 > 注意 `hit: "false"` 这类字符串：直接加载会因 `bool("false") == True`
 > 把"未命中"读成"命中"。适配器会正确转成 `False`。
+>
+> **认不出的值会报错，不会默认成 `False`**。`hit` 接受 `bool`、
+> `1/0`、`"true"/"false"/"yes"/"no"`（大小写不敏感）。若上游写的是
+> `"也许"`、`null` 之类无法判定的值，适配会以 `invalid_hit_value`
+> 失败——把"不知道"当成"没命中"是最危险的一种静默降级。
 
 ---
 

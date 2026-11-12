@@ -140,12 +140,40 @@ def adapt_records(records: List[Dict[str, Any]],
 
         # 布尔字段规范化：1/0、"true"/"false" 都要变成真正的 bool。
         # 否则下游 bool("false") == True，会把"没命中"读成"命中"。
+        #
+        # 但**认不出的值必须报错，不能默认 False**。此前 "也许" 这种字符串
+        # 会静默变成 False —— 把"不知道"当成"没命中"，是最危险的一种
+        # 静默降级（不确定被转成了确定结论）。
+        bad_hit: str | None = None
         if "hit" in adapted:
             raw_hit = adapted["hit"]
-            if isinstance(raw_hit, str):
-                adapted["hit"] = raw_hit.strip().lower() in ("1", "true", "yes", "y")
+            if isinstance(raw_hit, bool):
+                adapted["hit"] = raw_hit
+            elif isinstance(raw_hit, (int, float)):
+                adapted["hit"] = raw_hit != 0
+            elif isinstance(raw_hit, str):
+                token = raw_hit.strip().lower()
+                if token in ("1", "true", "yes", "y", "t"):
+                    adapted["hit"] = True
+                elif token in ("0", "false", "no", "n", "f", ""):
+                    adapted["hit"] = False
+                else:
+                    bad_hit = raw_hit
+            elif raw_hit is None:
+                bad_hit = "None"
             else:
-                adapted["hit"] = bool(raw_hit)
+                bad_hit = repr(raw_hit)
+
+        if bad_hit is not None:
+            errors.append({
+                "index": idx,
+                "code": "invalid_hit_value",
+                "message": f"hit={bad_hit!r} 无法判定真假",
+                "hint": ("只接受 bool、0/1、true/false/yes/no；"
+                         "不确定的值请先在上游清洗，不要在这里默认成 False"),
+                "record": rec,
+            })
+            continue
 
         k = str(adapted.get("kind") or "").strip()
         if k not in REQUIRED:

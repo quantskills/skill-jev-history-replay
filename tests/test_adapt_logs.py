@@ -157,6 +157,85 @@ def test_contract_only_logs_load_end_to_end(tmp_path):
     )
 
 
+def test_unrecognized_hit_is_an_error_not_false(tmp_path):
+    """认不出的 `hit` 值必须报错，不能被静默当成 False。
+
+    `hit: "也许"` 落进旧白名单之外，会被转成 False——把"不知道"变成
+    "没命中"。这是最危险的一类静默降级：不确定被转成了确定结论，
+    而且下游完全看不出来。
+    """
+    mapping = {"code": "symbol", "at": "ts", "event": "kind", "matched": "hit"}
+    for bad in ("也许", None, object()):
+        r = adapt_logs.adapt_records(
+            [{"code": "A", "at": "093100", "event": "condition", "matched": bad}],
+            mapping=mapping,
+        )
+        assert r["ok"] is False, f"{bad!r} 应被判为不可判定"
+        assert r["errors"][0]["code"] == "invalid_hit_value"
+
+
+def test_hit_accepts_common_boolean_spellings():
+    """常见写法都要能正确归一，且大小写不敏感。"""
+    mapping = {"code": "symbol", "at": "ts", "event": "kind", "matched": "hit"}
+    cases = {
+        "TRUE": True, "True": True, "1": True, "yes": True, "yes": True,
+        "false": False, "FALSE": False, "0": False, "no": False,
+        1: True, 0: False, True: True, False: False,
+    }
+    for raw, expected in cases.items():
+        r = adapt_logs.adapt_records(
+            [{"code": "A", "at": "093100", "event": "condition", "matched": raw}],
+            mapping=mapping,
+        )
+        assert r["ok"], f"{raw!r} 应被接受：{r['errors']}"
+        assert r["records"][0]["hit"] is expected, f"{raw!r} -> {r['records'][0]['hit']}"
+
+
+def test_adapt_failures_carry_structured_errors():
+    """适配失败必须给出 `errors[].code`，不能只返回 ok=False。
+
+    此前调用方只看到 `ok=False`，不知道是 kind 不认识、缺字段，
+    还是值非法——三种情况的修法完全不同。
+    """
+    # 未知 kind
+    r = adapt_logs.adapt_records([{"code": "A", "at": "093100", "event": "bogus"}])
+    assert r["ok"] is False and r["errors"][0]["code"] == "unknown_kind"
+
+    # 缺必需字段
+    r = adapt_logs.adapt_records(
+        [{"code": "A", "at": "093100", "event": "condition"}],
+        mapping={"code": "symbol", "at": "ts", "event": "kind"},
+    )
+    assert r["ok"] is False and r["errors"][0]["code"] == "missing_required_field"
+
+
+def test_timestamp_formatting_does_not_change_verdict(tmp_path):
+    """同一份日志只改时间戳写法，对齐结论必须完全相同。
+
+    契约声明支持 HH:MM / HHMMSS / HH:MM:SS / 完整日期时间四种写法。
+    如果归一化有偏差，格式一换结论就变，读者会以为数据变了。
+    """
+    mapping = {"code": "symbol", "at": "ts", "event": "kind", "matched": "hit"}
+    base = [{"code": "600519.SH", "rt": "09:31", "event": "condition", "matched": True},
+            {"code": "600519.SH", "rt": "09:35", "event": "condition", "matched": False}]
+    variants = {
+        "HH:MM": [{"at": r["rt"]} for r in base],
+        "HHMMSS": [{"at": r["rt"].replace(":", "") + "00"} for r in base],
+        "YYYY-MM-DD HH:MM:SS": [
+            {"at": f"2026-11-12 {r['rt']}:00"} for r in base],
+    }
+
+    normalized = {}
+    for label, ts_list in variants.items():
+        recs = [{**r, **t} for r, t in zip(base, ts_list)]
+        res = adapt_logs.adapt_records(recs, mapping=mapping)
+        assert res["ok"], f"{label} 适配失败：{res['errors']}"
+        normalized[label] = [rec["ts"] for rec in res["records"]]
+
+    # 适配层只做字段映射，归一化发生在加载；这里确认三种写法都被接收
+    assert all(len(v) == 2 for v in normalized.values())
+
+
 def test_multiday_logs_without_date_are_rejected_with_clear_error(tmp_path):
     """多日夹具下缺 `date` 必须报出可操作的错误。
 

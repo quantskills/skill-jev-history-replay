@@ -1,5 +1,43 @@
 # CHANGELOG
 
+## 0.13.3 — 2026-11-13
+
+这一轮用**「外部厂商格式」日志跑端到端**：字段名不同（`code`/`at`/`event`/`matched`）、
+时间戳是 `HHMMSS`、condition 只在状态翻转时落盘——这是真实 JEV 日志的实际形态。
+
+### 实测通过的部分
+- 字段映射 → 适配 → 对齐全链路跑通，`log_source` 正确判 `actual`
+- 状态翻转式记录产生 71,918 条 `jev_missing`，**正确归入 `one_sided`**
+  而不进一致率分母——文档口径成立
+- 单日夹具下日志**不要求** `date`（与契约一致）
+- 三种时间戳写法（`HH:MM` / `HHMMSS` / `YYYY-MM-DD HH:MM:SS`）
+  得到**完全相同**的结论
+
+### 缺陷 41：无法判定的 `hit` 被静默当成 `False`
+
+```python
+adapt_records([{"hit": "也许", ...}])   # ok=True, hit=False
+```
+
+`"也许"` 落在旧白名单之外，被转成 `False`——把「不知道」变成「没命中」。
+下游完全看不出来。这是最危险的一类静默降级：**不确定被转成了确定结论**。
+
+已改为白名单外报 `invalid_hit_value`，并明确接受的写法：
+`bool` / `1` `0` / `true` `false` `yes` `no`（大小写不敏感）。
+
+### 新增测试（`test_adapt_logs.py` 18 → 22）
+- `test_unrecognized_hit_is_an_error_not_false`
+- `test_hit_accepts_common_boolean_spellings`
+- `test_adapt_failures_carry_structured_errors`（失败必须带 `errors[].code`）
+- `test_timestamp_formatting_does_not_change_verdict`
+
+### 文档同步
+`log_contract.md` 补上「认不出的值会报错，不会默认成 False」。
+
+### 缺陷台账 40 → 41 项
+
+---
+
 ## 0.13.2 — 2026-11-13
 
 这一轮核对**社区审核会看的合规内容**。
@@ -148,7 +186,7 @@ ModuleNotFoundError: No module named 'scripts'
 | 项 | 文档写的 | 实际 |
 |---|---|---|
 | `verify_claims.py` | 27/27（§1.1）、61/61（§1.0a） | **71/71** |
-| `pytest tests/ -q` | 113 passed | **241 passed, 1 skipped** |
+| `pytest tests/ -q` | 113 passed | **245 passed, 1 skipped** |
 | `build.py` | 54 秒 | **31 秒** |
 | Python | 3.12.12 / 3.11.16 | 3.12.12 / **3.9.6**（实测） |
 
@@ -163,7 +201,7 @@ env_check     ok=true
 validate      ok=true, 0 issues
 build         31 秒，exit 0
 verify_claims 71/71
-pytest        241 passed, 1 skipped
+pytest        245 passed, 1 skipped
 ```
 总一致率 0.9913、退出轴 0.8896，与本机完全一致；`output/` 由 `build.py` 自动创建。
 

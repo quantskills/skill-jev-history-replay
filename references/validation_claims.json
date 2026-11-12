@@ -58,5 +58,13 @@
   "summary": {
     "signal_count": 2480,
     "closed_cycles": 2014
+  },
+  "data_quality": {
+    "st_share": 0.042,
+    "suspended_share": 0.0,
+    "limit_up_touch_share": 0.0224,
+    "limit_down_touch_share": 0.0064,
+    "overall_unmodeled_upper_bound": 0.042,
+    "verdict_level": "moderate"
   }
 }

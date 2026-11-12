@@ -162,6 +162,14 @@ def main(argv: List[str] | None = None) -> int:
         ]
         # 数据拉完后统一生成一次日志（跨日持仓需要看到全部交易日）
         log_info = generate_logs(args.logged_profile)
+        # 生成夹具时顺带审计未建模状态，写进 manifest 供报告回显。
+        # 审计失败不阻断夹具生成。
+        try:
+            from scripts.data_quality_audit import audit as _audit
+            dq = _audit(offline=False)
+        except Exception as exc:
+            dq = {"error": f"{type(exc).__name__}: {exc}"}
+
         manifest = manifests[0] if len(manifests) == 1 else {
             "dates": dates,
             "symbol_count": manifests[0]["symbol_count"],
@@ -171,6 +179,7 @@ def main(argv: List[str] | None = None) -> int:
             "fixture_fingerprint": manifests[0]["fixture_fingerprint"],
             "per_date": log_info["per_date"],
             "logged_semantics_hash": log_info["logged_semantics_hash"],
+            "data_quality": dq,
             "provenance": manifests[0]["provenance"],
         }
     except FetchError as exc:

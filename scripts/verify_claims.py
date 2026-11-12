@@ -106,6 +106,24 @@ def verify(report: Dict[str, Any], claims: Dict[str, Any]) -> Dict[str, Any]:
                va_block.get("effect_size", {}).get("full_sample_welch", {}).get("p"),
                claims_va["welch_p"], tol=5e-3)
 
+    dq_claims = claims.get("data_quality")
+    if dq_claims:
+        dq = report.get("applicability", {}).get("unmodeled_market_states") or {}
+        checks = dq.get("checks", {})
+        mapping = {
+            "st_share": checks.get("st", {}).get("share"),
+            "suspended_share": checks.get("suspended", {}).get("share"),
+            "limit_up_touch_share": checks.get("limit_up_touch", {}).get("share"),
+            "limit_down_touch_share": checks.get("limit_down_touch", {}).get("share"),
+            "overall_unmodeled_upper_bound": dq.get("overall_unmodeled_upper_bound"),
+            "verdict_level": (dq.get("verdict") or {}).get("level"),
+        }
+        for key, expected in dq_claims.items():
+            if expected is None:
+                continue
+            _check(results, f"data_quality.{key}", mapping.get(key), expected,
+                   tol=5e-4)
+
     prov = report.get("provenance", {})
     if "log_source" in claims.get("provenance", {}):
         _check(results, "provenance.log_source", prov.get("log_source"),

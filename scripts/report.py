@@ -243,6 +243,13 @@ def build_applicability(log_source: str, semantics: Dict[str, Any],
             "fixture_fingerprint": (manifest or {}).get("fixture_fingerprint"),
             "symbol_count": (manifest or {}).get("symbol_count"),
         },
+        # 未建模状态的实际占比必须随报告提供，而不是只在文档里说"不含"。
+        # None 表示未核验（离线或无凭证），与"占比为 0"严格区分。
+        "unmodeled_market_states": (manifest or {}).get("data_quality"),
+        "unmodeled_market_states_note": (
+            "本 skill 不对 ST / 停牌 / 涨跌停做特殊处理。上面的占比是结论适用范围的折扣："
+            "占比越高，越不能把回放结果直接外推到实盘。未核验时为 null，不等于 0。"
+        ),
         "invalid_when": [
             "标的处于停牌、ST 或涨跌停状态（未建模）",
             "当日存在除权除息（K 线未复权对齐）",

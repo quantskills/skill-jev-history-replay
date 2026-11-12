@@ -1,44 +1,14 @@
 {
-  "dates": [
-    "20261104",
-    "20261105",
-    "20261106",
-    "20261109",
-    "20261110",
-    "20261111",
-    "20261112"
-  ],
-  "per_date": [
-    {
-      "date": "20261104",
-      "records": 2324
-    },
-    {
-      "date": "20261105",
-      "records": 2878
-    },
-    {
-      "date": "20261106",
-      "records": 648
-    },
-    {
-      "date": "20261109",
-      "records": 1001
-    },
-    {
-      "date": "20261110",
-      "records": 1884
-    },
-    {
-      "date": "20261111",
-      "records": 1641
-    },
-    {
-      "date": "20261112",
-      "records": 812
-    }
-  ],
+  "date": "20261112",
+  "prev_date": "20261111",
+  "symbol_count": 500,
+  "bar_count": 120000,
+  "log_record_count": 2049,
   "logged_profile": "jev_assumed",
   "logged_semantics_hash": "91fecace6d6c78b0",
-  "fixture_fingerprint": "895a21055cf87c9e"
+  "fixture_fingerprint": "20cded18599c6218",
+  "provenance": {
+    "bars": "panda-data==1.0.6 get_stock_min / get_stock_daily，仅生成阶段调用",
+    "logs": "synthetic：由 log_synth 按 logged_profile 生成，非 JEV 真实输出"
+  }
 }

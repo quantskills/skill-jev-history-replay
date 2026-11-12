@@ -76,42 +76,17 @@ def build(date: str, symbols: List[str] | None, universe: int,
         fh_out.write(fh_in.read())
     raw_bars_path.unlink()
 
-    config = cfg.load_config()
-    logged = dict(config["semantics"])
-    logged.update(sem.get_profile(profile))
-
-    # 只对本日文件生成日志。若加载整个目录，多日构建时后一个日期会把
-    # 前面日期的序列一并读入，日志里就混进别的交易日的记录。
-    bars = data_loader.load_bars_files([bars_gz_path])
-    reference = json.loads(
-        (ref_dir / f"{date}.json").read_text(encoding="utf-8")
-    )
-    # prev_close 必须按 series key（symbol@date）给，与 replay 侧查表口径一致。
-    # 只按裸代码给会让多日构建取到别的交易日的前收，日志里算出的涨幅就跟着错。
-    prev_closes = {}
-    for symbol, by_date in reference["symbols"].items():
-        row = by_date.get(date) or {}
-        if row.get("pre_close"):
-            prev = float(row["pre_close"])
-            prev_closes[data_loader.series_key(symbol, date)] = prev
-            prev_closes[symbol] = prev
-
-    records = log_synth.synthesize_logs(bars, logged, prev_closes)
-    logs_dir.mkdir(parents=True, exist_ok=True)
+    records: List[Dict[str, Any]] = []   # 日志由 generate_logs() 统一生成
     logs_path = logs_dir / f"{date}.jsonl"
-    logs_path.write_text(
-        "\n".join(json.dumps(r, ensure_ascii=False) for r in records) + "\n",
-        encoding="utf-8",
-    )
 
     manifest = {
         "date": date,
         "prev_date": info.get("prev_date"),
-        "symbol_count": len({(r.get("date", ""), r["symbol"]) for r in records}),
+        "symbol_count": info["symbol_count"],
         "bar_count": info["bar_count"],
-        "log_record_count": len(records),
+        "log_record_count": 0,
         "logged_profile": profile,
-        "logged_semantics_hash": sem.semantics_hash(logged),
+
         "fixture_fingerprint": _fingerprint(
             [bars_gz_path, ref_dir / f"{date}.json", logs_path]
         ),
@@ -124,6 +99,49 @@ def build(date: str, symbols: List[str] | None, universe: int,
         json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8"
     )
     return manifest
+
+
+def generate_logs(profile: str) -> Dict[str, Any]:
+    """**所有交易日一起**跑一次重放，再按日期切分写日志。
+
+    为什么必须全量：跨日持仓的退出发生在下一交易日。若逐日单独生成，
+    生成当天时还看不到次日，所有周期都停在 open，退出记录永远是空的
+    ——退出轴因此变成 0 可比。这是 v0.3.1 之前的真实缺陷。
+    """
+    bars_dir = REPO_ROOT / "fixtures" / "bars"
+    ref_dir = REPO_ROOT / "fixtures" / "reference"
+    logs_dir = REPO_ROOT / "fixtures" / "logs"
+    logs_dir.mkdir(parents=True, exist_ok=True)
+
+    all_bars = data_loader.load_bars(bars_dir)
+    if not all_bars:
+        raise FetchError("bars_empty", f"{bars_dir} 没有可用的 K 线")
+
+    from scripts.run_eval import _load_prev_closes
+
+    prev_closes = _load_prev_closes(ref_dir, list(all_bars))
+    config = cfg.load_config()
+    logged = dict(config["semantics"])
+    logged.update(sem.get_profile(profile))
+
+    records = log_synth.synthesize_logs(all_bars, logged, prev_closes)
+    per_date: Dict[str, List[Dict[str, Any]]] = {}
+    for rec in records:
+        per_date.setdefault(str(rec.get("date") or ""), []).append(rec)
+    for date_text, rows in per_date.items():
+        (logs_dir / f"{date_text}.jsonl").write_text(
+            "\n".join(json.dumps(r, ensure_ascii=False) for r in rows) + "\n",
+            encoding="utf-8",
+        )
+
+    return {
+        "dates": sorted(per_date),
+        "per_date": [{"date": d, "records": len(per_date[d])}
+                     for d in sorted(per_date)],
+        "total_records": len(records),
+        "logged_profile": profile,
+        "logged_semantics_hash": sem.semantics_hash(logged),
+    }
 
 
 def main(argv: List[str] | None = None) -> int:
@@ -142,14 +160,17 @@ def main(argv: List[str] | None = None) -> int:
             build(date, args.symbols, args.universe, args.logged_profile)
             for date in dates
         ]
+        # 数据拉完后统一生成一次日志（跨日持仓需要看到全部交易日）
+        log_info = generate_logs(args.logged_profile)
         manifest = manifests[0] if len(manifests) == 1 else {
             "dates": dates,
             "symbol_count": manifests[0]["symbol_count"],
             "bar_count": sum(m["bar_count"] for m in manifests),
-            "log_record_count": sum(m["log_record_count"] for m in manifests),
+            "log_record_count": log_info["total_records"],
             "logged_profile": args.logged_profile,
             "fixture_fingerprint": manifests[0]["fixture_fingerprint"],
-            "per_date": manifests,
+            "per_date": log_info["per_date"],
+            "logged_semantics_hash": log_info["logged_semantics_hash"],
             "provenance": manifests[0]["provenance"],
         }
     except FetchError as exc:

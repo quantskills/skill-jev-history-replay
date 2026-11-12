@@ -1,61 +1,60 @@
 {
   "_comment": "验证文档声称的数字。scripts/verify_claims.py 会逐项与 output/report.json 核对；改代码后若数字漂移，CI 会失败。",
   "fixture": {
-    "dates": 7,
-    "symbol_count": 200,
-    "series_count": 1400,
-    "bar_count": 336000
+    "dates": 14,
+    "symbol_count": 500,
+    "series_count": 7000,
+    "bar_count": 1680000
   },
   "axes": {
     "condition": {
-      "comparable": 9406,
+      "comparable": 46642,
       "match_rate": 1.0
     },
     "signal": {
-      "comparable": 501,
+      "comparable": 2480,
       "match_rate": 1.0
     },
     "wait": {
-      "comparable": 501,
+      "comparable": 2480,
       "match_rate": 1.0
     },
     "entry": {
-      "comparable": 501,
+      "comparable": 2480,
       "match_rate": 1.0
     },
     "exit": {
-      "comparable": 780,
-      "match_rate": 0.859,
+      "comparable": 4028,
+      "match_rate": 0.8751,
       "statuses": {
-        "open_position": 111
+        "open_position": 466
       }
     }
   },
   "total": {
-    "comparable": 11689,
-    "divergent": 110,
-    "one_sided": 326705,
-    "match": 11579,
-    "match_rate": 0.9906
+    "comparable": 58110,
+    "divergent": 503,
+    "one_sided": 1633824,
+    "match": 57607,
+    "match_rate": 0.9913
   },
   "attribution": {
     "verdict": "single_knob",
     "top_knob": "exit_eval",
     "top_explained_rate": 1.0,
-    "joint_diagnosis_applicable": true,
-    "joint_diagnosis_verdict": "single_knob"
+    "joint_diagnosis_applicable": true
   },
   "alignment_conclusion": {
     "verdict": "inconclusive"
   },
   "value_assessment": {
-    "verdict": "inconclusive"
+    "verdict": "negative"
   },
   "provenance": {
     "log_source": "synthetic"
   },
   "summary": {
-    "signal_count": 501,
-    "closed_cycles": 390
+    "signal_count": 2480,
+    "closed_cycles": 2014
   }
 }

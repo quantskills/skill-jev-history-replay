@@ -2,7 +2,7 @@ openapi: 3.1.0
 info:
   title: skill-jev-history-replay
   description: Align JEV's recorded watch conditions with a deterministic historical replayer and attribute every difference to one explicit interpretation knob (timestamp convention, baseline price, breakout field/window, persistence, wait bars, entry price, exit evaluation, T+1, cooldown). Emits a five-axis difference ledger plus single-knob ablation.
-  version: 0.1.0
+  version: 0.13.1
 
 x-skill-info:
   name: skill-jev-history-replay
@@ -47,11 +47,12 @@ x-steps:
     auth_required: true
 
 x-semantics-knobs:
+  # 语义配置项全集，与 scripts/config.py 的 REFERENCE_SEMANTICS 一致（23 项）
   - bar_timestamp
   - baseline_price
   - breakout_field
-  - breakout_includes_current
   - breakout_window
+  - breakout_includes_current
   - persistence_bars
   - warmup_bars
   - signal_gain_pct
@@ -65,6 +66,25 @@ x-semantics-knobs:
   - no_entry_after
   - force_exit_time
   - t_plus_1
+  - fee_bps
+  - slippage_bps
+  - initial_capital
+  - position_pct
+  - lot_size
+
+x-attribution-knobs:
+  # 可做单旋钮消融归因的子集，与 scripts/semantics.py 的 KNOB_VALUES 一致（10 项）
+  # 其余项目是阈值/资金参数，改动它们不构成"解释选择"，不适合做归因。
+  - bar_timestamp
+  - baseline_price
+  - breakout_field
+  - breakout_includes_current
+  - persistence_bars
+  - wait_bars
+  - entry_price
+  - exit_eval
+  - t_plus_1
+  - cooldown_bars
 
 x-outputs:
   - format: json

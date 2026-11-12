@@ -88,6 +88,7 @@ python3 -m pytest tests/ -q -m slow         # 区分度对照，约 2 分钟
 | `test_metrics_correctness.py` | 15 | **统计函数正确性**：精确值对比、蒙特卡洛 Type-I/覆盖率 |
 | `test_fixture_universe.py` | 4 | **14 日标的池恒定**、每条序列 K 线完整、**manifest 与实际夹具对账**、**gzip mtime=0 可重现** |
 | `test_oos_check.py` | 4 | **IN_SAMPLE 基准与当前报告一致**、judge 能识别显著性减弱 |
+| `test_runtime_adapters.py` | 9 | **适配器文件齐备**、声明的脚本/entry 存在、**旋钮清单与代码一致**、版本与 skill.json 一致、**README 实例数字与报告一致** |
 
 ---
 
@@ -270,7 +271,7 @@ python3 scripts/env_check.py      # ok=true
 python3 scripts/validate.py       # ok=true, 0 issues
 python3 scripts/build.py          # 约 31 秒
 python3 scripts/verify_claims.py  # 71/71
-python3 -m pytest tests/ -q       # 224 passed, 1 skipped
+python3 -m pytest tests/ -q       # 234 passed, 1 skipped
 ```
 
 实测（v0.12.8，从 `origin/main` 全新 clone 到 /tmp）：各项全过，
@@ -973,7 +974,7 @@ python3 scripts/value_decomposition.py \
 
 ---
 
-## 6. 验证中发现并修复的缺陷（36 项）
+## 6. 验证中发现并修复的缺陷（39 项）
 
 以下都不是构造的测试用例，而是在真实数据上跑出来的：
 
@@ -1015,6 +1016,9 @@ python3 scripts/value_decomposition.py \
 | 34 | **§1.1 / §8 的验收数字长期过期** | 文档写 `verify_claims 27/27`（实际 71/71）、`pytest 113 passed`（实际 222）、`build 54 秒`（实际 31 秒）。这些数字从 v0.7 起就没跟上，而冷克隆验收正是最容易被人照抄的一节 | 按 v0.12.8 冷克隆实测重写；新增 `test_doc_counts_match_actual` 以实际值对账 |
 | 35 | **`fetch_data.py` 直接运行必崩** | 漏了 `sys.path.insert(0, REPO_ROOT)`，直接 `python3 scripts/fetch_data.py` 会在 `_client()` 里 `from scripts.credentials import ...` 抛 ModuleNotFoundError。只在真正调用凭证时触发，`--help` 与单元测试都发现不了——按 §8 的复现命令手跑才暴露 | 补 sys.path + `test_fetch_data_can_run_as_script` |
 | 36 | **`changed_fields` 不报告 `config_hash` 本身** | `comparable=false` 时 `changed_fields=[]`，而 note 还写着"请确认语义、夹具或日志来源是否变化"——只改了 config_hash 的话读者无从判断哪里变了 | 加 `cur_hash != base_hash` 判断 + `test_changed_config_hash_alone_is_reported` |
+| 37 | **README（中/英）「实例」数字严重过时** | 写的是单日小样本（条件 1,576 项、退出 0.80 / 282 项），而仓库夹具是 14 天，读者跑 `build.py` 得到 28,754 / 0.8896，完全对不上。英文版同样错 | 按实际输出重写 + `test_readme_measured_numbers_match_report` |
+| 38 | **`openai.yaml` 旋钮清单与代码三处不一致** | 声明 18 个旋钮，而 `REFERENCE_SEMANTICS` 可配置键是 23 个、`KNOB_VALUES` 可消融旋钮是 10 个——18 既不是前者也不是后者，是手抄残留 | 拆成 `x-semantics-knobs`（=23，可配置全集）与 `x-attribution-knobs`（=10，可消融子集），并加测试双向对账 |
+| 39 | **`openai.yaml` 版本长期未跟** | `version: 0.1.0` 而 `skill.json` 已是 0.13.0 | 同步 + 测试锁住 |
 
 ---
 
@@ -1044,7 +1048,7 @@ python3 scripts/value_decomposition.py \
 | panda-data | 1.0.6（仅夹具再生） |
 | 三方依赖 | 无（对齐与回放为纯标准库；`python3 -S` 实测通过） |
 | 全量对齐 | 约 31 秒（4,200 序列 × 240 根，1,008,000 根） |
-| 单元测试 | 约 160 秒（224 passed, 1 skipped） |
+| 单元测试 | 约 160 秒（234 passed, 1 skipped） |
 
 ```bash
 git clone https://github.com/quantskills/skill-jev-history-replay

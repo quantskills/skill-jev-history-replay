@@ -1,5 +1,58 @@
 # CHANGELOG
 
+## 0.13.1 — 2026-11-13
+
+这一轮核对**面向用户的文档**（README 中/英）与 **`agents/` 运行时适配器**
+——后者是社区审核的硬性要求。查出 3 个缺陷。
+
+### 缺陷 37：README 的「实例」数字严重过时
+
+README.md 与 README.en.md 的实例表都写着：
+
+| 轴 | 旧值 |
+|---|---|
+| condition | 1,576 项 |
+| signal/wait/entry | 各 168 项 |
+| exit | **0.80（282 项）** |
+
+这是很早的单日小样本。而仓库夹具是 **14 天**，读者照 README 跑
+`python3 scripts/build.py` 得到的是 28,754 项 / 0.8896，**完全对不上**。
+`build.py` 也没有 CLI 参数可以只跑一天，旧数字根本无从复现。
+
+已按实际输出重写，并注明退出轴随 `time_tolerance_minutes` 变化的三个值。
+
+### 缺陷 38：`openai.yaml` 的旋钮清单与代码三处不一致
+
+`x-semantics-knobs` 声明 **18** 个旋钮，而代码里：
+
+| 集合 | 数量 |
+|---|---|
+| `REFERENCE_SEMANTICS` 可配置语义键 | **23** |
+| `KNOB_VALUES` 可做单旋钮消融的旋钮 | **10** |
+
+18 既不是前者也不是后者，是手抄残留。现在拆成两个字段：
+
+- `x-semantics-knobs` = 23，可配置全集
+- `x-attribution-knobs` = 10，可消融子集（阈值/资金类参数不构成"解释选择"，
+  不适合做归因）
+
+### 缺陷 39：`openai.yaml` 版本长期未跟
+
+`version: 0.1.0` 而 `skill.json` 已是 `0.13.0`。
+
+### 新增测试（`tests/test_runtime_adapters.py`，9 例）
+适配器文件齐备、声明的脚本与 entry 真实存在、两组旋钮清单与代码双向对账
+（含子集关系）、版本与 `skill.json` 一致、**README 实例数字与报告一致**。
+
+### 顺带核实
+`openai.yaml` 里声明的各条命令（`validate.py --bars-dir ... --logs-dir ...`、
+`env_check.py --json`、`build_fixtures.py --date ... --universe ...`）
+逐个实跑，参数名全部正确。
+
+### 缺陷台账 36 → 39 项
+
+---
+
 ## 0.13.0 — 2026-11-13
 
 这一轮逐条实跑 **§7 错误路径**那 11 行声明。大部分正确，查出 2 个真实缺陷
@@ -60,7 +113,7 @@ ModuleNotFoundError: No module named 'scripts'
 | 项 | 文档写的 | 实际 |
 |---|---|---|
 | `verify_claims.py` | 27/27（§1.1）、61/61（§1.0a） | **71/71** |
-| `pytest tests/ -q` | 113 passed | **224 passed, 1 skipped** |
+| `pytest tests/ -q` | 113 passed | **234 passed, 1 skipped** |
 | `build.py` | 54 秒 | **31 秒** |
 | Python | 3.12.12 / 3.11.16 | 3.12.12 / **3.9.6**（实测） |
 
@@ -75,7 +128,7 @@ env_check     ok=true
 validate      ok=true, 0 issues
 build         31 秒，exit 0
 verify_claims 71/71
-pytest        224 passed, 1 skipped
+pytest        234 passed, 1 skipped
 ```
 总一致率 0.9913、退出轴 0.8896，与本机完全一致；`output/` 由 `build.py` 自动创建。
 

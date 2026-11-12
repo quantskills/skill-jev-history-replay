@@ -33,7 +33,7 @@ python3 -m pytest tests/ -q -m slow         # 区分度对照，约 2 分钟
 
 | 项 | 结果 |
 |---|---|
-| 用例总数 | 128 |
+| 用例总数 | 130 |
 | 失败 | 0 |
 | 环境 | Python 3.12.12 / 3.11.16 |
 | 全量耗时 | 快测约 47 秒；慢测（区分度对照）另约 2 分钟 |
@@ -45,7 +45,7 @@ python3 -m pytest tests/ -q -m slow         # 区分度对照，约 2 分钟
 | `test_replayer.py` | 20 | 条件判断、连续性、等待/入场、四条退出路径、T+1、时间边界 |
 | `test_cross_day.py` | 6 | 跨日持仓传递、未平仓如实上报、单日行为不变 |
 | `test_aligner.py` | 15 | 五轴对齐、配对唯一性、单边缺失、差异分类、容差分离 |
-| `test_attribution.py` | 9 | 单旋钮解释率、视图一致性、真实差异可归因、多旋钮边界 |
+| `test_attribution.py` | 11 | 单旋钮解释率、视图一致性、**多旋钮漏报成因** |
 | `test_report.py` | 24 | verdict 判定、覆盖率门槛、零冲突门槛、Welch 检验 |
 | `test_end_to_end.py` | 9 | 输入校验、来源判定、产物落盘、确定性 |
 | `test_validation_claims.py` | 9 | **文档数字对账**、防漂移、区分度对照、**陈旧数字扫描** |
@@ -310,6 +310,45 @@ python3 -c "import json;print(json.load(open('output/report.json'))['attribution
 | 1 | `exit_eval` | `bar_close` → `bar_high_low` | 379 | **100%** |
 
 `verdict = single_knob`，`joint_diagnosis.applicable = true`。
+
+### 4.0 这个 100% 有多大的信息量（重要）
+
+合成日志用的 `jev_assumed` 档位，与参考语义 **只差 1 个旋钮**：
+
+| 旋钮 | 参考语义 | 日志档位 |
+|---|---|---|
+| `exit_eval` | `bar_close` | `bar_high_low` |
+
+其余 17 个旋钮完全一致。
+
+因此「归因锁定 `exit_eval`、解释 100%」在相当程度上是**同义反复**：
+我们拿一份只差 `exit_eval` 的日志去测，然后"发现"差异来自 `exit_eval`。
+
+**它能证明的**：链路接通、差异能被正确定位、没有凭空产生别的差异。
+**它不能证明的**：多个旋钮同时不同时的定位能力（见 §4.2，那种情形下方法失效）。
+
+要看真实 JEV 日志与我们的语义到底差几个旋钮，必须等真实日志到位。
+在拿到之前，不应把"归因 100%"当作强证据引用。
+
+#### 多旋钮时的失效实测
+
+构造不同档位的日志，看归因能否定位：
+
+| 日志侧真实差异 | 差异数 | 归因判定 | 首位旋钮 | 解释率 |
+|---|---|---|---|---|
+| 仅 `exit_eval` | 379 | `single_knob` | `exit_eval` | **100%** ✓ |
+| 仅 `wait_bars` | 4,522 | `single_knob` | `wait_bars` | **100%** ✓ |
+| `exit_eval` + `wait_bars` | 4,649 | `multi_knob` | `wait_bars` | 92.0% |
+
+**两个旋钮同时不同时，归因把 `exit_eval` 完全漏掉**——只报 `wait_bars`
+解释 92%，而 `exit_eval` 也是真实成因。
+
+原因：`wait_bars` 的影响量大（4,522 条差异），`exit_eval` 的影响被淹没在
+它的残差里。单旋钮消融无法分离"两个都改了"的情况——它只能回答
+"如果把某一个改对，差异会少多少"，而两个都错时，改对一个仍剩大量差异。
+
+**结论**：`verdict=multi_knob` 时必须人工逐项核对，不能只看 `top_knob`。
+报告已在 `joint_diagnosis` 里标注 `applicable=false`。
 
 **解读**：379 条退出差异**全部**由「退出按收盘价还是按触价判定」造成。
 

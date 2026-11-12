@@ -1,5 +1,44 @@
 # CHANGELOG
 
+## 0.13.4 — 2026-11-13
+
+这一轮针对真实日志导入时最常见的三类坑做压力验证：代码写法、同分钟多条、
+时间边界。
+
+### 缺陷 42：标的代码大小写不归一，导致全部对不上
+
+日志写 `000001.sz`（或 `" 000001.sz "`）而 K 线是 `000001.SZ` 时：
+
+```
+condition 轴: jev_missing=72000, comparable=0, match_rate=null
+```
+
+**一条也配不上**。报告只显示"一致率 null"，看不出真正原因是大小写，
+表现上就像"这份日志和行情毫无关系"。真实日志若用小写代码，
+会静默得到彻底错误的结论。
+
+修复：加载时统一 `strip().upper()`，K 线与日志两处都改。
+
+### 已确认无问题的边界
+| 场景 | 结果 |
+|---|---|
+| 同一标的同一分钟多条 condition | ✅ 保留全部，按出现顺序 |
+| `symbol` 首尾空格 | ✅ 已 strip（现在也统一大写） |
+| 跨午休 `11:30` / `13:01` | ✅ 正常保留，不被缺口检测误判 |
+| 三种时间戳写法 | ✅ 结论完全相同 |
+
+### 新增测试
+- `test_symbol_case_and_whitespace_are_normalized`
+- `test_bar_symbol_case_is_normalized`
+
+### 文档同步
+`log_contract.md` 的 `symbol` 说明改为「去首尾空格并统一大写」，
+不再是容易误解的"完全一致"。
+
+### 缺陷台账 41 → 42 项
+
+---
+
 ## 0.13.3 — 2026-11-13
 
 这一轮用**「外部厂商格式」日志跑端到端**：字段名不同（`code`/`at`/`event`/`matched`）、
@@ -186,7 +225,7 @@ ModuleNotFoundError: No module named 'scripts'
 | 项 | 文档写的 | 实际 |
 |---|---|---|
 | `verify_claims.py` | 27/27（§1.1）、61/61（§1.0a） | **71/71** |
-| `pytest tests/ -q` | 113 passed | **245 passed, 1 skipped** |
+| `pytest tests/ -q` | 113 passed | **247 passed, 1 skipped** |
 | `build.py` | 54 秒 | **31 秒** |
 | Python | 3.12.12 / 3.11.16 | 3.12.12 / **3.9.6**（实测） |
 
@@ -201,7 +240,7 @@ env_check     ok=true
 validate      ok=true, 0 issues
 build         31 秒，exit 0
 verify_claims 71/71
-pytest        245 passed, 1 skipped
+pytest        247 passed, 1 skipped
 ```
 总一致率 0.9913、退出轴 0.8896，与本机完全一致；`output/` 由 `build.py` 自动创建。
 

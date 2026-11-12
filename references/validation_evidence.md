@@ -67,7 +67,7 @@ python3 -m pytest tests/ -q -m slow         # 区分度对照，约 2 分钟
 | 文件 | 用例数 | 覆盖 |
 |---|---|---|
 | `test_semantics.py` | 15 | 旋钮取值校验、哈希敏感性、**默认值与 YAML 一致**、降级可见、**config 未知键必报错**、**文档所列 config 键全部生效** |
-| `test_data_loader.py` | 19 | 格式容错、gzip、字段校验、重复检测、**分钟缺口与午休排除**、**多日 series 键带日期** |
+| `test_data_loader.py` | 21 | 格式容错、gzip、字段校验、重复检测、**分钟缺口与午休排除**、**多日 series 键带日期**、**代码大小写/空格归一** |
 | `test_replayer.py` | 18 | 条件判断、连续性、等待/入场、四条退出路径、T+1、时间边界 |
 | `test_cross_day.py` | 6 | 跨日持仓传递、未平仓如实上报、单日行为不变 |
 | `test_aligner.py` | 18 | 五轴对齐、配对唯一性、单边缺失、差异分类、容差分离、**每轴 match/divergent 必须存在**、**容差必须真正改变判定** |
@@ -272,7 +272,7 @@ python3 scripts/env_check.py      # ok=true
 python3 scripts/validate.py       # ok=true, 0 issues
 python3 scripts/build.py          # 约 31 秒
 python3 scripts/verify_claims.py  # 71/71
-python3 -m pytest tests/ -q       # 245 passed, 1 skipped
+python3 -m pytest tests/ -q       # 247 passed, 1 skipped
 ```
 
 实测（v0.12.8，从 `origin/main` 全新 clone 到 /tmp）：各项全过，
@@ -975,7 +975,7 @@ python3 scripts/value_decomposition.py \
 
 ---
 
-## 6. 验证中发现并修复的缺陷（41 项）
+## 6. 验证中发现并修复的缺陷（42 项）
 
 以下都不是构造的测试用例，而是在真实数据上跑出来的：
 
@@ -1022,6 +1022,7 @@ python3 scripts/value_decomposition.py \
 | 39 | **`openai.yaml` 版本长期未跟** | `version: 0.1.0` 而 `skill.json` 已是 0.13.0 | 同步 + 测试锁住 |
 | 40 | **CI 的 release hygiene 只查文件存在、不查内容** | 社区审核真正看的是：免责声明四个要点、INSTALL 五平台覆盖、SPDX 许可证标识、无占位符、无敏感信息。CI 只做了 `test -f`，内容全对不上也照样绿。 | 扩充 CI 步骤用 Python 断言实际内容；新增 `tests/test_release_compliance.py`（7 例）本地可跑 |
 | 41 | **无法判定的 `hit` 被静默当成 False** | `hit: "也许"`、`hit: null` 落在旧白名单之外，被转成 `False`——把"不知道"变"没命中"。下游完全看不出来，属于最危险的一类静默降级 | 白名单外报 `invalid_hit_value`；补 `test_unrecognized_hit_is_an_error_not_false` 与 `test_hit_accepts_common_boolean_spellings` |
+| 42 | **标的代码大小写不归一，导致全部对不上** | 日志写 `000001.sz`（或带空格）而 K 线是 `000001.SZ` 时，**一条也配不上**：全部变成 `jev_missing`、`comparable=0`、`match_rate=null`。报告完全看不出真正原因是大小写——表现成"日志与行情毫无关系" | 加载时统一 `strip().upper()`（K 线与日志两处）+ `test_symbol_case_and_whitespace_are_normalized` 等 2 例 |
 
 ---
 
@@ -1051,7 +1052,7 @@ python3 scripts/value_decomposition.py \
 | panda-data | 1.0.6（仅夹具再生） |
 | 三方依赖 | 无（对齐与回放为纯标准库；`python3 -S` 实测通过） |
 | 全量对齐 | 约 31 秒（4,200 序列 × 240 根，1,008,000 根） |
-| 单元测试 | 约 160 秒（245 passed, 1 skipped） |
+| 单元测试 | 约 160 秒（247 passed, 1 skipped） |
 
 ```bash
 git clone https://github.com/quantskills/skill-jev-history-replay

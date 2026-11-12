@@ -197,7 +197,7 @@ def load_bars_files(files: List[Path]) -> Dict[str, Dict[str, Any]]:
             missing = [f for f in BAR_REQUIRED if f not in rec]
             if missing:
                 raise LoadError("missing_bar_field", f"{ctx} 缺字段：{missing}")
-            symbol = str(rec["symbol"]).strip()
+            symbol = str(rec["symbol"]).strip().upper()
             if not symbol:
                 raise LoadError("invalid_bar_field", f"{ctx}: symbol 为空")
             time_text = _normalize_time(rec["datetime"], ctx)
@@ -272,7 +272,10 @@ def load_logs(logs_dir: str | Path) -> List[Dict[str, Any]]:
             norm = dict(rec)
             norm["ts"] = _normalize_time(rec["ts"], ctx)
             norm["minute"] = minutes_of(norm["ts"])
-            norm["symbol"] = str(rec["symbol"]).strip()
+            # 代码统一大写：真实日志里 `000001.sz` 与 K 线的 `000001.SZ` 必须能对上。
+            # 不归一的话，日志会全部变成 jev_missing、一致率显示 null，
+            # 而报告看不出真正原因是大小写——一个非常隐蔽的"完全对不上"。
+            norm["symbol"] = str(rec["symbol"]).strip().upper()
             norm["_source_file"] = path.name
             norm["_source_index"] = idx
             records.append(norm)
@@ -299,7 +302,7 @@ def normalize_log_records(records: List[Dict[str, Any]],
         norm = dict(rec)
         norm["ts"] = _normalize_time(rec["ts"], f"record[{idx}]")
         norm["minute"] = minutes_of(norm["ts"])
-        symbol = str(rec["symbol"]).strip()
+        symbol = str(rec["symbol"]).strip().upper()
         date_text = str(rec.get("date") or default_date or "")
         if multi_day:
             if not date_text:

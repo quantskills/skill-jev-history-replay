@@ -132,6 +132,30 @@ def test_normalize_multiday_uses_date_for_series_key():
     assert {r["series"] for r in recs} == {"S@20261111", "S@20261112"}
 
 
+def test_symbol_case_and_whitespace_are_normalized():
+    """代码必须去空格并统一大写。
+
+    真实日志里常出现 `000001.sz` 或带前导空格，而 K 线是 `000001.SZ`。
+    不归一的话日志**一条也配不上**：全部变成 `jev_missing`，
+    报告只显示一致率 null，完全看不出真正原因是大小写。
+    """
+    recs = data_loader.normalize_log_records([
+        {"ts": "09:31", "kind": "condition", "symbol": " 000001.sz ",
+         "hit": True, "date": "20261112"},
+    ], multi_day=True)
+    assert recs[0]["symbol"] == "000001.SZ"
+    assert recs[0]["series"] == "000001.SZ@20261112"
+
+
+def test_bar_symbol_case_is_normalized(tmp_path):
+    """K 线侧同样归一，避免日志大写、K 线小写的反向不匹配。"""
+    path = tmp_path / "20261112.json"
+    _write(path, [{"symbol": "000001.sz", "datetime": "2026-11-12 09:31:00",
+                   "open": 10.0, "high": 10.1, "low": 9.9, "close": 10.0}])
+    bars = data_loader.load_bars(tmp_path)
+    assert "000001.SZ" in bars or "000001.SZ@20261112" in bars
+
+
 def test_group_logs_fills_all_kinds():
     recs = data_loader.normalize_log_records([
         {"ts": "09:31", "kind": "signal", "symbol": "S"},

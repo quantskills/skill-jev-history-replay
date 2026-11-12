@@ -5,6 +5,25 @@
 
 ---
 
+## 0. 文档与实现的绑定
+
+验证文档最怕「写了数字、代码改了、没人复核」。本 skill 把文档里声明的
+关键指标固化成 `references/validation_claims.json`，并由两处强制核对：
+
+```bash
+python3 scripts/verify_claims.py     # CI 中在 build.py 之后运行
+python3 -m pytest tests/test_validation_claims.py -v
+```
+
+任一项与 `output/report.json` 不符即失败，并打印 `actual` vs `claimed`。
+测试里还有一条 `test_claim_checker_catches_drift`，故意篡改一项来证明
+这个校验器不是摆设。
+
+因此：**本文档的数字不是手抄的，是被测试守着的。**
+若后续改动导致指标变化，是测试失败提醒更新文档，而不是让文档继续撒谎。
+
+---
+
 ## 1. 单元测试
 
 ```bash
@@ -13,8 +32,8 @@ python3 -m pytest tests/ -q
 
 | 项 | 结果 |
 |---|---|
-| 用例总数 | 97 |
-| 通过 | 97 |
+| 用例总数 | 102 |
+| 通过 | 102 |
 | 失败 | 0 |
 | 环境 | Python 3.12.12 / 3.11.16 |
 
@@ -28,6 +47,7 @@ python3 -m pytest tests/ -q
 | `test_attribution.py` | 7 | 单旋钮解释率、视图一致性、真实差异可归因 |
 | `test_report.py` | 16 | verdict 判定、统计量、账本截断 |
 | `test_end_to_end.py` | 9 | 输入校验、来源判定、产物落盘、确定性 |
+| `test_validation_claims.py` | 5 | **文档数字与实现对账**、防漂移、内部自洽 |
 
 ---
 
@@ -237,6 +257,7 @@ python3 scripts/env_check.py
 python3 scripts/validate.py
 python3 -m pytest tests/ -v
 python3 scripts/build.py
+python3 scripts/verify_claims.py    # 文档数字对账
 ```
 
 ---

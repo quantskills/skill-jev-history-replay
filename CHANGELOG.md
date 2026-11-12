@@ -1,5 +1,27 @@
 # CHANGELOG
 
+## 0.3.0 — 2026-11-13
+
+新增**文档与实现的自动对账**，把验证文档从"手抄的数字"变成"被测试守着的断言"。
+
+### 新增
+- `references/validation_claims.json`：验证文档声明的全部关键指标
+- `scripts/verify_claims.py`：逐项与 `output/report.json` 比对，不符即非零退出
+- `tests/test_validation_claims.py`（5 例）：
+  - 真实跑端到端后与 claims 对账（不读过期 output）
+  - `test_claim_checker_catches_drift`：篡改一项必须失败，证明校验器不是摆设
+  - 证据文档中引用的一致率必须与 claims 一致
+  - claims 内部加总自洽（comparable = match + divergent 等）
+- CI 在 `build.py` 之后追加 `verify_claims.py`，文档漂移会直接让流水线红
+
+### 为什么
+前几轮出现过两次"文档说 0.9176、实现改后变成 0.8590"的情况。
+人工复核靠不住，把对账变成测试才能长期成立。
+
+### 实测
+102 个测试全通过；24 项 claims 对账全通过。
+
+
 ## 0.2.2 — 2026-11-13
 
 消除全部单边缺失，把被藏起来的真实差异还原为差异。

@@ -26,6 +26,8 @@ jobs:
         run: python scripts/validate.py
       - name: Full alignment run
         run: python scripts/build.py
+      - name: Verify validation-doc claims
+        run: python scripts/verify_claims.py
       - name: Assert report shape
         run: |
           python - <<'PY'

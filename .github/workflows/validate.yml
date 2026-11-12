@@ -32,6 +32,8 @@ jobs:
         run: python scripts/verify_claims.py
       - name: Verdict discrimination controls
         run: python scripts/controls_check.py --quick
+      - name: Per-trade price / return audit
+        run: python scripts/trade_audit.py --sample 300
       - name: Data quality audit (offline)
         run: python scripts/data_quality_audit.py --offline
       - name: Assert report shape

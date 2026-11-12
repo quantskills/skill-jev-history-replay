@@ -152,6 +152,11 @@ python3 -m pytest tests/ -v
 回放器、对齐器、归因器都无需改动。若日志缺少可选字段，对应轴会退化为不可比，
 而不是编造一致——报告里会明确写出来。
 
+> **多日夹具下每条记录必须带 `date`（`YYYYMMDD`）**。`ts` 只有 `HH:MM`，
+> 加载器无法据此判断记录属于哪一天，缺 `date` 会直接抛
+> `LoadError("missing_log_field")`。单日夹具可省略。
+> 合成日志附带的 `_synthetic` / `cross_day` 等字段是内部标记，真实日志不需要写。
+
 ## 许可
 
 GPL-3.0-only，见 `LICENSE`。

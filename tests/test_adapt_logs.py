@@ -94,3 +94,118 @@ def test_adapt_dir_handles_gz_source(tmp_path):
 def test_example_mapping_is_valid_json():
     assert isinstance(adapt_logs.EXAMPLE_MAPPING, dict)
     json.dumps(adapt_logs.EXAMPLE_MAPPING)
+
+
+def test_contract_only_logs_load_end_to_end(tmp_path):
+    """只写 log_contract 列出的字段，也必须能完整跑通。
+
+    这是"真实日志到位后零改动接入"的核心承诺，此前**没有测试**。
+    实际跑下来发现：完全按契约写的日志（不含 `date`）在多日夹具上
+    直接抛 `LoadError("missing_log_field")`——而契约文档当时通篇
+    没提 `date`。也就是说照着文档准备的真实日志会被拒收。
+
+    本用例锁住三件事：
+      1. 只有契约字段 + `date` 的日志能被加载；
+      2. 合成器附带的 `_synthetic` / `cross_day` 等字段不是必需的；
+      3. 加载后 `log_source` 判为 `actual`（而不是误判成合成）。
+    """
+    from scripts.build import run
+
+    logs_dir = tmp_path / "logs"
+    logs_dir.mkdir()
+    date = "20261112"
+    records = [
+        {"symbol": "600519.SH", "ts": "09:31", "kind": "condition",
+         "hit": False, "date": date},
+        {"symbol": "600519.SH", "ts": "09:35", "kind": "condition",
+         "hit": True, "date": date},
+        {"symbol": "600519.SH", "ts": "09:35", "kind": "signal",
+         "signal": "buy", "wait_bars": 1, "date": date},
+        {"symbol": "600519.SH", "ts": "09:35", "kind": "plan", "plan": "enter",
+         "entry_time": "09:36", "entry_price": 1700.0,
+         "wait_bars": 1, "date": date},
+    ]
+    (logs_dir / f"{date}.jsonl").write_text(
+        "\n".join(json.dumps(r, ensure_ascii=False) for r in records) + "\n",
+        encoding="utf-8",
+    )
+
+    # 只给这一天的一根标的 K 线，其余沿用仓库夹具会拖慢测试；
+    # 这里只关心日志能否被接受，不关心评测数值。
+    bars_dir = tmp_path / "bars"
+    bars_dir.mkdir()
+    bars = [{"symbol": "600519.SH",
+             "datetime": f"{date[:4]}-{date[4:6]}-{date[6:]} 09:{m:02d}:00",
+             "open": 1700.0, "high": 1701.0, "low": 1699.0, "close": 1700.0,
+             "volume": 1000}
+            for m in range(30, 60)]
+    (bars_dir / f"{date}.json").write_text(
+        json.dumps(bars), encoding="utf-8")
+    ref = {"600519.SH": {"prev_close": 1690.0}}
+    (tmp_path / "reference").mkdir()
+    (tmp_path / "reference" / f"{date}.json").write_text(
+        json.dumps(ref), encoding="utf-8")
+
+    report = run({
+        "bars_dir": str(bars_dir),
+        "logs_dir": str(logs_dir),
+        "reference_path": str(tmp_path / "reference" / f"{date}.json"),
+        "output_dir": str(tmp_path / "out"),
+    })
+    assert report["provenance"]["log_source"] == "actual", (
+        "契约字段齐全的日志应被判为真实日志，而不是合成"
+    )
+
+
+def test_multiday_logs_without_date_are_rejected_with_clear_error(tmp_path):
+    """多日夹具下缺 `date` 必须报出可操作的错误。
+
+    不能悄悄归到某一天，也不能只报"格式错误"——真实接入时
+    读者需要知道"缺 date"这一条具体原因。
+    """
+    from scripts.data_loader import LoadError, normalize_log_records
+
+    records = [{"symbol": "600519.SH", "ts": "09:31",
+                "kind": "condition", "hit": False}]
+    with pytest.raises(LoadError) as exc:
+        normalize_log_records(records, multi_day=True, default_date="")
+    assert exc.value.code == "missing_log_field"
+    assert "date" in str(exc.value)
+
+
+def test_validate_flags_missing_date_in_multiday(tmp_path):
+    """`validate.py` 必须把"多日日志缺 date"报成 error，而不是只给无关的 warn。
+
+    此前它只报 `log_symbol_not_in_bars`（"300 个序列不在 K 线里"），
+    读者完全看不出真正原因是缺 `date`——诊断指向了错误的修复方向。
+    """
+    from scripts import validate as validate_mod
+
+    bars_dir = tmp_path / "bars"
+    logs_dir = tmp_path / "logs"
+    bars_dir.mkdir()
+    logs_dir.mkdir()
+    for date in ("20261111", "20261112"):
+        iso = f"{date[:4]}-{date[4:6]}-{date[6:]}"
+        # 连续的 30 根，时间不重复（dup 会先触发 duplicate_bar，掩盖本用例）
+        bars = []
+        for i in range(30):
+            minute = 570 + i          # 09:30 起
+            hh, mm = divmod(minute, 60)
+            bars.append({"symbol": "600519.SH", "date": date,
+                         "datetime": f"{iso} {hh:02d}:{mm:02d}:00",
+                         "open": 1700.0, "high": 1701.0, "low": 1699.0,
+                         "close": 1700.0, "volume": 1000})
+        (bars_dir / f"{date}.json").write_text(json.dumps(bars), encoding="utf-8")
+        # 故意不写 date
+        recs = [{"symbol": "600519.SH", "ts": "09:31",
+                 "kind": "condition", "hit": False}]
+        (logs_dir / f"{date}.jsonl").write_text(
+            json.dumps(recs[0], ensure_ascii=False) + "\n", encoding="utf-8")
+
+    result = validate_mod.validate(bars_dir, logs_dir)
+    codes = {i["code"]: i["severity"] for i in result["issues"]}
+    assert codes.get("missing_date_in_multiday") == "error", (
+        f"应报 missing_date_in_multiday error，实际 issues={codes}"
+    )
+    assert result["ok"] is False

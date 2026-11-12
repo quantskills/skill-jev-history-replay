@@ -121,6 +121,17 @@ def test_normalize_accepts_synthetic_records():
     assert recs[0]["_source_file"] == "<synthetic>"
 
 
+def test_normalize_multiday_uses_date_for_series_key():
+    """多日模式下 series 键必须带日期，同一天不同日期不能混成一条序列。"""
+    recs = data_loader.normalize_log_records([
+        {"ts": "09:31", "kind": "condition", "symbol": "S", "hit": False,
+         "date": "20261111"},
+        {"ts": "09:31", "kind": "condition", "symbol": "S", "hit": False,
+         "date": "20261112"},
+    ], multi_day=True)
+    assert {r["series"] for r in recs} == {"S@20261111", "S@20261112"}
+
+
 def test_group_logs_fills_all_kinds():
     recs = data_loader.normalize_log_records([
         {"ts": "09:31", "kind": "signal", "symbol": "S"},

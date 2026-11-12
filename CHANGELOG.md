@@ -1,5 +1,55 @@
 # CHANGELOG
 
+## 0.12.7 — 2026-11-13
+
+这一轮验证**「真实 JEV 日志到位后零改动接入」**这个核心承诺是否成立。
+结论：代码没问题，但**契约文档漏了一条必需字段**，照文档准备的日志会被直接拒收。
+
+### 缺陷 30：契约没写 `date`，纯契约日志无法加载
+
+把合成日志剥成「只保留 `log_contract.md` 列出的字段」，`run()` 立刻失败：
+
+```
+LoadError: 记录 0 在多日模式下缺 date 字段，无法归属到具体交易日
+```
+
+`ts` 只有 `HH:MM`，多日夹具下加载器无法判断记录属于哪一天。
+`log_contract.md` 通篇没提 `date`——**照着文档准备的真实日志会被拒收**。
+
+补上 `date` 后可完整跑通，且 `log_source` 正确判为 `actual`、
+一致率与合成日志相同（0.9895）。这同时证明：合成器附带的
+`_synthetic` / `cross_day` 等字段**不是必需**的。
+
+### 缺陷 31：`validate.py` 对同一问题只报无关的 warn
+
+同一个缺 `date` 的目录，`validate.py` 报的是：
+
+```
+[warn] log_symbol_not_in_bars: 300 个序列在日志里但不在 K 线里
+ok: true
+```
+
+真正原因是缺 `date`，诊断却把修复方向指向标的代码。已改为报
+`missing_date_in_multiday`（`severity=error`，`ok=false`）。
+
+### 修复
+- `log_contract.md` 补 `date` 字段（标注"多日必需"）并说明内部字段非必需
+- `README.md` / `references/data_access.md` 同步这条前提
+- `validate.py` 增加多日缺 `date` 的 error 检查
+- 新增测试：
+  - `test_contract_only_logs_load_end_to_end`（纯契约日志端到端，判为 `actual`）
+  - `test_multiday_logs_without_date_are_rejected_with_clear_error`
+  - `test_validate_flags_missing_date_in_multiday`
+  - `test_normalize_multiday_uses_date_for_series_key`
+- 缺陷台账 29 → 31 项
+
+### 验收（真实 panda 数据）不变
+36,086 可比 / 0.9895；exit 0.8667；价值 negative（82.6% 由 `t_plus_1` 驱动）；
+样本外 5 项结构复现、显著性减弱（p 7e-06 → 0.0488）。
+`alignment_conclusion.verdict` 仍为 **inconclusive**（日志仍是合成）。
+
+---
+
 ## 0.12.6 — 2026-11-13
 
 这一轮核对**文档字段表**与**实际产物**是否一致。查出 3 个真实缺陷。

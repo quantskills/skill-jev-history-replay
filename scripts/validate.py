@@ -100,6 +100,23 @@ def validate(bars_dir: Path, logs_dir: Path) -> Dict[str, Any]:
                                  "message": exc.message, "hint": exc.hint}],
         }
 
+    # 多日夹具下缺 `date` 是**致命**的：加载器按 series_key(symbol, date)
+    # 建索引，date 为空会让全部记录落到 "symbol@"，与 K 线键永远对不上。
+    # 之前这里只报 `log_symbol_not_in_bars` 的 warn（"300 个序列不在 K 线里"），
+    # 完全没指出真正原因，真实日志接入时会被误导。
+    multi_day = len({entry.get("date") for entry in bars.values()}) > 1
+    if multi_day:
+        no_date = sum(1 for r in records if not str(r.get("date") or "").strip())
+        if no_date:
+            issues.append({
+                "severity": "error",
+                "code": "missing_date_in_multiday",
+                "message": (f"{no_date}/{len(records)} 条日志记录缺 `date`，"
+                            f"而 K 线跨 {len({e.get('date') for e in bars.values()})} 个交易日"),
+                "hint": ("多日夹具下每条记录必须带 date（YYYYMMDD），"
+                         "否则无法归属交易日，加载会抛 missing_log_field"),
+            })
+
     series_keys = set(bars)
     unknown_symbols = sorted({
         data_loader.series_key(r["symbol"], str(r.get("date") or ""))

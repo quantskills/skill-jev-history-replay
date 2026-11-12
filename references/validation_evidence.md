@@ -67,7 +67,7 @@ python3 -m pytest tests/ -q -m slow         # 区分度对照，约 2 分钟
 | 文件 | 用例数 | 覆盖 |
 |---|---|---|
 | `test_semantics.py` | 15 | 旋钮取值校验、哈希敏感性、**默认值与 YAML 一致**、降级可见、**config 未知键必报错**、**文档所列 config 键全部生效** |
-| `test_data_loader.py` | 18 | 格式容错、gzip、字段校验、重复检测、**分钟缺口与午休排除** |
+| `test_data_loader.py` | 19 | 格式容错、gzip、字段校验、重复检测、**分钟缺口与午休排除**、**多日 series 键带日期** |
 | `test_replayer.py` | 18 | 条件判断、连续性、等待/入场、四条退出路径、T+1、时间边界 |
 | `test_cross_day.py` | 6 | 跨日持仓传递、未平仓如实上报、单日行为不变 |
 | `test_aligner.py` | 16 | 五轴对齐、配对唯一性、单边缺失、差异分类、容差分离、**每轴 match/divergent 必须存在** |
@@ -83,7 +83,7 @@ python3 -m pytest tests/ -q -m slow         # 区分度对照，约 2 分钟
 | `test_credentials.py` | 6 | **引号去除**、别名回退、缺凭证结构化报错、非法 URL 拒绝 |
 | `test_ci_config.py` | 4 | **CI 配置合法**、步骤齐全、build 先于 tests |
 | `test_ledger_mode.py` | 3 | **账本瘦身**、full 可回溯、per_day 入报告 |
-| `test_adapt_logs.py` | 15 | **外部日志字段映射**、布尔规范化、缺字段必失败 |
+| `test_adapt_logs.py` | 18 | **外部日志字段映射**、布尔规范化、缺字段必失败、**纯契约日志可端到端接入**、**多日缺 date 必报错（加载器与 validate 两处）** |
 | `test_knob_efficacy.py` | 3 | **旋钮全部接线**、指纹稳定性、含当前根必归零 |
 | `test_metrics_correctness.py` | 15 | **统计函数正确性**：精确值对比、蒙特卡洛 Type-I/覆盖率 |
 | `test_fixture_universe.py` | 4 | **14 日标的池恒定**、每条序列 K 线完整、**manifest 与实际夹具对账**、**gzip mtime=0 可重现** |
@@ -958,7 +958,7 @@ python3 scripts/value_decomposition.py \
 
 ---
 
-## 6. 验证中发现并修复的缺陷（29 项）
+## 6. 验证中发现并修复的缺陷（31 项）
 
 以下都不是构造的测试用例，而是在真实数据上跑出来的：
 
@@ -993,6 +993,8 @@ python3 scripts/value_decomposition.py \
 | 27 | **`config` 静默接受拼错的键** | `input_data` 对未知字段报 `unknown_field`（"刻意不做静默忽略"），`config` 却把 `time_tolerence_minutes: 5` 悄悄合并进去、真正生效的仍是默认值 1，评测跑完看着正常却与预期不符 | `load_config` 校验未知键抛 `ConfigError("unknown_config")`；补 `test_config_rejects_unknown_override_key` 与 `test_config_accepts_every_documented_key` |
 | 28 | **`ledger.aggregate.by_axis` 各轴键集不一致** | 文档写"每个轴：match / divergent / one_sided"，但只有 exit 轴出现 `divergent`；按 `row["divergent"]` 取值会在四个轴上 KeyError，`comparable == match + divergent` 也无从校验 | 每轴固定输出 `match`/`divergent`（零也写）+ `test_every_axis_exposes_match_and_divergent_even_when_zero` |
 | 29 | **`sign_test_p` 被舍入成 0.0** | n=1,211 时精确二项 p=3.0e-12，`round(p, 6)` 压成 `0.0`，读者会当成"p 恰为 0"——统计上不可能，也会误判证据强度 | 改用 `float(f"{p:.4g}")` 保留科学计数法 + `test_sign_test_p_never_rounds_to_zero` |
+| 30 | **契约文档没写 `date`，照文档写的日志被拒收** | `log_contract.md` 通篇未提 `date`，但多日夹具下每条记录必须有它：`ts` 只有 `HH:MM`，加载器无法判断属于哪一天，直接 `LoadError("missing_log_field")`。实测把合成日志剥成"纯契约字段"后，`run()` 立刻失败 | 契约补 `date`（多日必需）+ README/data_access 同步；新增 `test_contract_only_logs_load_end_to_end` |
+| 31 | **`validate.py` 对缺 `date` 只报无关 warn** | 同一个缺 `date` 目录，`validate.py` 给的是 `log_symbol_not_in_bars`（"300 个序列不在 K 线里"）且 `ok=true`，完全没指出真正原因，把修复方向指向标的代码而不是日期 | 多日且缺 `date` 时报 `severity=error` + `test_validate_flags_missing_date_in_multiday` |
 
 ---
 

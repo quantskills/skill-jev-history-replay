@@ -20,6 +20,14 @@
 | `ts` | str | ✅ | 记录时刻 |
 | `kind` | str | ✅ | `condition` / `signal` / `plan` / `fill` |
 | `symbol` | str | ✅ | 标的代码，须与 K 线文件中的代码字符串完全一致 |
+| `date` | str | **多日必需** | 交易日 `YYYYMMDD`。**多日夹具下必需**，单日可省略 |
+
+> ⚠️ **多日模式必须有 `date`**。`fixtures/bars/` 里有多个交易日时，加载器无法
+> 从 `ts`（只有 `HH:MM`）推断记录属于哪一天，直接抛
+> `LoadError("missing_log_field")`。单日夹具可省略，此时由文件名补全。
+>
+> 合成日志会在每条记录上附带 `date`、`_synthetic`、`cross_day` 等内部字段；
+> 这些**不是契约要求**，真实日志不需要写。只要满足本表字段即可接入。
 
 ---
 

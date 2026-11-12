@@ -98,6 +98,9 @@ export PANDA_DATA_BASE_URL=<base_url>
 - 对齐结论恒为 `inconclusive`，报告在 `provenance.log_source` 标 `synthetic`；
 - 真实 JEV 日志到位后，**直接替换 `fixtures/logs/` 即可**，
   回放器/对齐器/归因器都不用改；此时 `log_source` 自动变 `actual`。
+- **多日夹具要求每条记录带 `date`（`YYYYMMDD`）**，否则
+  `LoadError("missing_log_field")`。这条曾只在代码里要求、文档没写，
+  照文档准备的真实日志会被直接拒收。
 
 字段契约见 `references/log_contract.md`。若字段名与契约不同，
 先用 `scripts/adapt_logs.py` 显式映射，不要手改日志。

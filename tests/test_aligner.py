@@ -144,3 +144,34 @@ def test_aggregate_rates_exclude_one_sided():
 def test_aggregate_empty_is_none_rate():
     agg = aggregate_rows({"S": []})
     assert agg["total"]["match_rate"] is None
+
+def test_pairing_tolerance_exceeds_verdict_tolerance():
+    """配对容差必须大于判定容差，否则"差 2 分钟"会被误记成单边缺失。"""
+    from scripts.aligner import _pair_cycles
+    cycles = [{"entry_time": "09:33", "signal_time": "09:33"}]
+    plans = [{"ts": "09:31", "minute": 571, "entry_time": "09:31",
+              "exit_time": "09:31"}]
+    pairs = _pair_cycles(cycles, plans, tol_minutes=1, time_field="exit_time")
+    assert pairs[0]["log"] is not None, "超出判定容差但应能配上"
+
+
+def test_nearest_fallback_pairs_far_apart_records():
+    """容差外也应配上最近的记录，标为低置信，而不是单边缺失。"""
+    from scripts.aligner import _pair_cycles
+    cycles = [{"exit_time": "09:53", "signal_time": "09:53"}]
+    plans = [{"ts": "09:31", "minute": 571, "exit_time": "09:31"}]
+    pairs = _pair_cycles(cycles, plans, tol_minutes=1, time_field="exit_time")
+    assert pairs[0]["log"] is not None
+    assert pairs[0].get("low_confidence_pairing") is True
+
+
+def test_entry_axis_ignores_exit_plans():
+    """退出类计划带 entry_time，不能混进入场候选池。"""
+    logs = {"condition": [], "signal": [],
+            "plan": [{"ts": "09:31", "minute": 571, "symbol": "S",
+                      "plan": "exit", "entry_time": "09:31",
+                      "exit_time": "09:31", "exit_reason": "stop_loss"}],
+            "fill": []}
+    out = align_symbol("S", _replay([]), logs, 1, 5.0)
+    entry_rows = [r for r in out["rows"] if r["axis"] == "entry"]
+    assert entry_rows == [], "退出计划不应产生入场轴行"

@@ -95,6 +95,11 @@ def validate(bars_dir: Path, logs_dir: Path) -> Dict[str, Any]:
     for rec in records:
         kind = rec["kind"]
         spec = KIND_FIELDS[kind]
+        # 退出类计划只携带退出信息，不要求入场字段（wait_bars / entry_price）。
+        if kind == "plan" and str(rec.get("plan", "enter")) == "exit":
+            spec = {"required": spec["required"],
+                    "recommended": [f for f in spec["recommended"]
+                                    if f in ("exit_time", "exit_reason")]}
         missing_required = [f for f in spec["required"] if f not in rec]
         if missing_required:
             issues.append({

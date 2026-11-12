@@ -148,22 +148,31 @@ def _pair_signals(replay_signals: List[Dict[str, Any]],
 def _pair_cycles(replay_cycles: List[Dict[str, Any]],
                  log_plans: List[Dict[str, Any]],
                  tol_minutes: int,
-                 time_field: str = "entry_time") -> List[Dict[str, Any]]:
+                 time_field: str = "entry_time",
+                 pair_tolerance_minutes: int | None = None) -> List[Dict[str, Any]]:
     """用指定时刻配对周期与计划。
 
     time_field="entry_time" → 入场/等待轴
     time_field="exit_time"  → 退出轴（跨日周期的入场在昨天、退出在今天，
                                只有按退出时刻配才配对得对）
+
+    **配对容差**与**判定容差**必须分开：
+      - 判定容差（tol_minutes）：配上了之后，差几分钟才算"一致"；
+      - 配对容差（pair_tolerance_minutes）：多大范围内还愿意认为是同一条记录。
+    若两者共用，两个本该"时点差 2 分钟的差异"会先配对失败，
+    再被误记成"单边缺失"，把真实差异藏起来。
     """
     if not log_plans:
         return [{"replay": c, "log": None} for c in replay_cycles]
 
+    search = (pair_tolerance_minutes if pair_tolerance_minutes is not None
+              else max(tol_minutes, 10))
     used: set[int] = set()
     pairs: List[Dict[str, Any]] = []
     for cycle in replay_cycles:
         cycle_time = cycle.get(time_field) or cycle.get("signal_time")
         best_idx = None
-        best_gap = tol_minutes + 1
+        best_gap = search + 1
         for idx, plan in enumerate(log_plans):
             if idx in used:
                 continue
@@ -175,10 +184,30 @@ def _pair_cycles(replay_cycles: List[Dict[str, Any]],
             else:
                 plan_time = plan["minute"]
             gap = abs(minutes_of(cycle_time) - plan_time)
-            if gap <= tol_minutes and gap < best_gap:
+            if gap <= search and gap < best_gap:
                 best_idx, best_gap = idx, gap
         if best_idx is None:
-            pairs.append({"replay": cycle, "log": None})
+            # 容差内没有候选：退回"时间上最近的未用记录"，并标记为低置信配对。
+            # 直接把这种情况记成"单边缺失"会把真实的时点差异藏起来——
+            # 两侧明明都有这笔交易，只是相差得远。
+            nearest_idx = None
+            nearest_gap = None
+            for idx, plan in enumerate(log_plans):
+                if idx in used:
+                    continue
+                plan_time = (minutes_of(plan["exit_time"])
+                             if time_field == "exit_time" and plan.get("exit_time")
+                             else plan["minute"])
+                gap = abs(minutes_of(cycle_time) - plan_time)
+                if nearest_gap is None or gap < nearest_gap:
+                    nearest_idx, nearest_gap = idx, gap
+            if nearest_idx is not None:
+                used.add(nearest_idx)
+                pairs.append({"replay": cycle, "log": log_plans[nearest_idx],
+                              "low_confidence_pairing": True,
+                              "pairing_gap_minutes": nearest_gap})
+            else:
+                pairs.append({"replay": cycle, "log": None})
         else:
             used.add(best_idx)
             pairs.append({"replay": cycle, "log": log_plans[best_idx]})
@@ -221,7 +250,11 @@ def align_symbol(symbol: str, replay: Dict[str, Any], log_groups: Dict[str, List
     exit_cycles = [c for c in (replay.get("exit_cycles") or entry_cycles)
                    if c.get("exit_time")]
     cross_day_exits: List[Dict[str, Any]] = []
-    cycle_pairs = _pair_cycles(entry_cycles, log_groups["plan"], tol_minutes,
+    # 入场轴只能用**入场类**计划记录。退出日的 plan(exit) 也带 entry_time，
+    # 若混进候选池，会把 390 条退出记录误判成"日志有入场、重放没有"。
+    entry_log_plans = [pl for pl in log_groups["plan"]
+                       if str(pl.get("plan", "enter")) == "enter"]
+    cycle_pairs = _pair_cycles(entry_cycles, entry_log_plans, tol_minutes,
                                 time_field="entry_time")
     # 退出轴按**退出时刻**在本序列的退出记录里配对：
     #   - 当日入当日出：日志 plan 的 exit_time 就在这条上；

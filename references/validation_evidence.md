@@ -70,7 +70,7 @@ python3 -m pytest tests/ -q -m slow         # 区分度对照，约 2 分钟
 | `test_data_loader.py` | 19 | 格式容错、gzip、字段校验、重复检测、**分钟缺口与午休排除**、**多日 series 键带日期** |
 | `test_replayer.py` | 18 | 条件判断、连续性、等待/入场、四条退出路径、T+1、时间边界 |
 | `test_cross_day.py` | 6 | 跨日持仓传递、未平仓如实上报、单日行为不变 |
-| `test_aligner.py` | 16 | 五轴对齐、配对唯一性、单边缺失、差异分类、容差分离、**每轴 match/divergent 必须存在** |
+| `test_aligner.py` | 18 | 五轴对齐、配对唯一性、单边缺失、差异分类、容差分离、**每轴 match/divergent 必须存在**、**容差必须真正改变判定** |
 | `test_attribution.py` | 11 | 单旋钮解释率、视图一致性、**多旋钮漏报成因** |
 | `test_report.py` | 27 | verdict 判定、覆盖率门槛、零冲突门槛、Welch 检验、**p 值不得被舍入为 0** |
 | `test_end_to_end.py` | 11 | 输入校验、来源判定、产物落盘、确定性 |
@@ -87,6 +87,7 @@ python3 -m pytest tests/ -q -m slow         # 区分度对照，约 2 分钟
 | `test_knob_efficacy.py` | 3 | **旋钮全部接线**、指纹稳定性、含当前根必归零 |
 | `test_metrics_correctness.py` | 15 | **统计函数正确性**：精确值对比、蒙特卡洛 Type-I/覆盖率 |
 | `test_fixture_universe.py` | 4 | **14 日标的池恒定**、每条序列 K 线完整、**manifest 与实际夹具对账**、**gzip mtime=0 可重现** |
+| `test_oos_check.py` | 4 | **IN_SAMPLE 基准与当前报告一致**、judge 能识别显著性减弱 |
 
 ---
 
@@ -120,20 +121,20 @@ python3 scripts/verify_claims.py  # 61/61 OK
 
 ### 由此发现的账本体积问题
 
-`build.py` 产出的 `output/ledger.jsonl` 有 **185 MB / 1,015,406 行**：
+`build.py` 若写出全量账本，会有约 **185 MB / 1,015,406 行**：
 
 | 状态 | 行数 | 占比 |
 |---|---|---|
-| `jev_missing` | 979,246 | **96.44%** |
-| `match` | 35,707 | 3.52% |
-| `divergent` | 379 | 0.04% |
+| `one_sided`（多为 `jev_missing`） | 979,320 | **96.45%** |
+| `match` | 35,772 | 3.52% |
+| `divergent` | 314 | 0.03% |
 | `open_position` | 74 | 0.01% |
 
 前两类合计 99.96%，但**它们不是差异**：`jev_missing` 是"日志没记这一根"，
-`match` 是一致。真正需要逐行追溯的只有 453 行。
+`match` 是一致。真正需要逐行追溯的只有 388 行（314 divergent + 74 open_position）。
 
 新增 `ledger_mode`（默认 `diff`）：只写需要看的记录。
-**185 MB → 78 KB，缩减 99.96%**。需要全量时设 `ledger_mode: full`。
+**185 MB → 68 KB（69,454 字节），缩减 99.96%**。需要全量时设 `ledger_mode: full`。
 
 同时把分日聚合写进 `report.per_day`，让 `verify_claims` 不必再读那个大文件。
 
@@ -273,7 +274,7 @@ python3 -m pytest tests/ -q       # 113 passed
 ```
 
 在 /tmp 的全新克隆上逐项复跑，结果与本机**完全一致**
-（总一致率 0.9895，各轴数字相同）。clone 后 `output/` 不存在，
+（总一致率 0.9913，各轴数字相同）。clone 后 `output/` 不存在，
 `build.py` 会自动创建——不依赖任何预生成产物。
 
 ### 纯标准库可跑
@@ -405,8 +406,8 @@ python3 scripts/build.py        # 约 54 秒
 | signal | 1,496 | 1,496 | 0 | **1.00** |
 | wait | 1,496 | 1,496 | 0 | **1.00** |
 | entry | 1,496 | 1,496 | 0 | **1.00** |
-| exit | 2,844 | 2,465 | 379 | **0.8667** |
-| **合计** | **36,086** | **35,707** | **379** | **0.9895** |
+| exit | 2,844 | 2,530 | 314 | **0.8896** |
+| **合计** | **36,086** | **35,772** | **314** | **0.9913** |
 
 > **样本变更说明**：v0.6.1 修掉了标的池不一致的缺陷，序列从 7,000 降到 4,200
 > （300 × 14，全期固定）。数字随之变化，但**结构结论不变**：
@@ -613,12 +614,18 @@ python3 scripts/data_quality_audit.py --offline  # 无凭证，只算涨跌停�
 | 时间容差 | 总一致率 | 退出轴一致率 | 冲突数 | 归因首位 |
 |---|---|---|---|---|
 | 0 分钟 | 0.9895 | 0.8667 | 379 | `exit_eval` 100% |
-| 1 分钟 | 0.9895 | 0.8667 | 379 | `exit_eval` 100% |
-| 2 分钟 | 0.9895 | 0.8667 | 379 | `exit_eval` 100% |
-| 5 分钟 | 0.9895 | 0.8667 | 379 | `exit_eval` 100% |
+| 1 分钟（默认） | 0.9913 | 0.8896 | 314 | `exit_eval` 100% |
+| 2 分钟 | 0.9920 | 0.8991 | 287 | `exit_eval` 100% |
+| 5 分钟 | 0.9931 | 0.9121 | 250 | `exit_eval` 100% |
 
-容差 0/1/2/5 分钟四档结果**完全一致**——日志与重放的退出时刻差是**整分钟**的
-离散值，工时点比较天然精确。当前一致率不是靠容差"调"出来的。
+> **v0.12.8 更正**：这张表原先是四档完全相同（0.9895 / 0.8667 / 379），
+> 我当时解释成"退出时刻差是整分钟离散值、比较天然精确"。**那是错的**——
+> 真正原因是 `time_tolerance_minutes` **根本没参与判定**：四处判定都写死
+> `"match" if gap == 0`，容差只影响配对搜索半径。参数调 0→5 结果不变，
+> 不是结论稳，是参数没生效。修复后四档才真正分化（见上表）。
+>
+> 这也说明主结论数字会随容差变化：默认 1 分钟下是 **0.9913 / 0.8896 / 314**。
+> 值本身的变化方向合理——放宽容差让 1–5 分钟的时点抖动不再算冲突。
 
 
 ---
@@ -656,7 +663,7 @@ python3 scripts/controls_check.py --quick   # 2 日 / 120 标的，约 2 分钟
 
 **缺陷 A：只看比率的盲区。** 初版 `consistent` 门槛是"一致率 ≥ 0.98"。
 `exit_eval` 差一个旋钮产生 503 条真实冲突，一致率 0.9913，被误判为 `consistent`
-（数字为 v0.5.0 的 7,000 序列样本；当前样本下同一现象是 93–379 条冲突）。
+（数字为 v0.5.0 的 7,000 序列样本；当前样本、容差 1 分钟下是 314 条冲突）。
 样本量越大，真差异越容易被"稀释"成高比率。
 
 **缺陷 B：绝对容忍额度太宽。** 加绝对门槛时先设成"≤5 条冲突可忽略"。
@@ -684,7 +691,7 @@ python3 -c "import json;print(json.load(open('output/report.json'))['attribution
 
 | 排名 | 旋钮 | 从 → 到 | 解释差异 | 解释率 |
 |---|---|---|---|---|
-| 1 | `exit_eval` | `bar_close` → `bar_high_low` | 379 | **100%** |
+| 1 | `exit_eval` | `bar_close` → `bar_high_low` | 314 | **100%** |
 
 `verdict = single_knob`，`joint_diagnosis.applicable = true`。
 
@@ -713,7 +720,7 @@ python3 -c "import json;print(json.load(open('output/report.json'))['attribution
 
 | 日志侧真实差异 | 差异数 | 归因判定 | 首位旋钮 | 解释率 |
 |---|---|---|---|---|
-| 仅 `exit_eval` | 379 | `single_knob` | `exit_eval` | **100%** ✓ |
+| 仅 `exit_eval` | 314 | `single_knob` | `exit_eval` | **100%** ✓ |
 | 仅 `wait_bars` | 4,522 | `single_knob` | `wait_bars` | **100%** ✓ |
 | `exit_eval` + `wait_bars` | 4,649 | `multi_knob` | `wait_bars` | 92.0% |
 
@@ -727,7 +734,7 @@ python3 -c "import json;print(json.load(open('output/report.json'))['attribution
 **结论**：`verdict=multi_knob` 时必须人工逐项核对，不能只看 `top_knob`。
 报告已在 `joint_diagnosis` 里标注 `applicable=false`。
 
-**解读**：379 条退出差异**全部**由「退出按收盘价还是按触价判定」造成。
+**解读**：314 条退出差异**全部**由「退出按收盘价还是按触价判定」造成。
 
 ### 4.1 大偏差的成因已核实
 
@@ -785,12 +792,12 @@ python3 scripts/oos_check.py            # 需凭证；11 天 × 300 只固定标
 |---|---|---|---|
 | condition | 28,754 / 1.0000 | 14,008 / **1.0000** | ✓ |
 | signal / wait / entry | 各 1,496 / 1.0000 | 各 678 / **1.0000** | ✓ |
-| exit | 2,844 / 0.8667 | 1,222 / **0.8650** | ✓ |
-| 合计 | 36,086 / 0.9895 | 17,264 / **0.9904** | ✓ |
+| exit | 2,844 / 0.8896 | 1,222 / **0.8879** | ✓ |
+| 合计 | 36,086 / 0.9913 | 17,264 / **0.9921** | ✓ |
 | 归因首位 | `exit_eval` 100% | **`exit_eval` 100%** | ✓ |
 | 价值 verdict | `negative` | **`negative`** | ✓ |
 
-**结构结论全部复现**：四轴一致率 1.00、退出轴 0.865 左右、归因锁定
+**结构结论全部复现**：四轴一致率 1.00、退出轴 0.888 左右、归因锁定
 `exit_eval`、价值方向为负。
 
 ### 但显著性强度没有复现（必须如实说明）
@@ -958,7 +965,7 @@ python3 scripts/value_decomposition.py \
 
 ---
 
-## 6. 验证中发现并修复的缺陷（31 项）
+## 6. 验证中发现并修复的缺陷（33 项）
 
 以下都不是构造的测试用例，而是在真实数据上跑出来的：
 
@@ -995,6 +1002,8 @@ python3 scripts/value_decomposition.py \
 | 29 | **`sign_test_p` 被舍入成 0.0** | n=1,211 时精确二项 p=3.0e-12，`round(p, 6)` 压成 `0.0`，读者会当成"p 恰为 0"——统计上不可能，也会误判证据强度 | 改用 `float(f"{p:.4g}")` 保留科学计数法 + `test_sign_test_p_never_rounds_to_zero` |
 | 30 | **契约文档没写 `date`，照文档写的日志被拒收** | `log_contract.md` 通篇未提 `date`，但多日夹具下每条记录必须有它：`ts` 只有 `HH:MM`，加载器无法判断属于哪一天，直接 `LoadError("missing_log_field")`。实测把合成日志剥成"纯契约字段"后，`run()` 立刻失败 | 契约补 `date`（多日必需）+ README/data_access 同步；新增 `test_contract_only_logs_load_end_to_end` |
 | 31 | **`validate.py` 对缺 `date` 只报无关 warn** | 同一个缺 `date` 目录，`validate.py` 给的是 `log_symbol_not_in_bars`（"300 个序列不在 K 线里"）且 `ok=true`，完全没指出真正原因，把修复方向指向标的代码而不是日期 | 多日且缺 `date` 时报 `severity=error` + `test_validate_flags_missing_date_in_multiday` |
+| 32 | **`time_tolerance_minutes` 根本不参与判定** | 四处判定都写死 `"match" if gap == 0`，容差只影响配对搜索半径。把容差 0→1→2→5 调，结果**一模一样**；文档还把这个"四档一致"解释成"时刻差是整分钟离散值、比较天然精确"——把参数没生效说成了结论。真实影响：201 条退出时间冲突中 65 条差值 ≤1 分钟 | 四处改为 `abs(gap) <= tol_minutes`；`test_verdict_tolerance_actually_changes_verdict` 与 `test_entry_and_signal_axes_honour_tolerance` 锁住。修复后四档才真正分化（0.9895/0.9913/0.9920/0.9931） |
+| 33 | **`oos_check.IN_SAMPLE` 硬编码基准会过期** | 修好容差后主样本变成 0.9913/0.8896，但 `IN_SAMPLE` 仍是 0.9895/0.8667，复现判定拿旧基准比新结果 | 同步基准 + `test_oos_check.py` 以 `output/report.json` 反查，主样本一变就红 |
 
 ---
 
@@ -1042,8 +1051,8 @@ python3 scripts/verify_claims.py
 ## 9. 结论与边界
 
 **已验证**：
-- 五轴全部可比：条件/信号/等待/入场一致率 1.00，退出轴 0.8667，总体 0.9895；
-- 379 条退出差异被 `exit_eval` 单一旋钮完整解释（100%），
+- 五轴全部可比：条件/信号/等待/入场一致率 1.00，退出轴 0.8896，总体 0.9913（容差 1 分钟）；
+- 314 条退出差异被 `exit_eval` 单一旋钮完整解释（100%），
   大偏差的 JEV 侧时刻全部指向次日首根触价，与逐条证据一致；
 - 14 天分日一致率见 §3.5，不由单日主导；
 - 未建模状态占比已量化：ST 4.67%、触涨停 1.76%、触跌停 0.64%，

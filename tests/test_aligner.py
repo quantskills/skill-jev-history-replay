@@ -179,6 +179,65 @@ def test_pairing_tolerance_exceeds_verdict_tolerance():
     assert pairs[0]["log"] is not None, "超出判定容差但应能配上"
 
 
+def _tolerance_view(exit_time):
+    cyc = {"signal_time": "09:35", "entry_time": "09:36", "entry_price": 10.0,
+           "exit_time": exit_time, "exit_price": 11.0,
+           "exit_reason": "take_profit", "status": "closed"}
+    return {"details": [], "signals": [{"time": "09:35", "price": 10.0}],
+            "cycles": [cyc], "exit_cycles": [cyc]}
+
+
+def _tolerance_logs():
+    return {
+        "condition": [],
+        "signal": [{"ts": "09:35", "minute": 575, "signal": "buy"}],
+        "plan": [{"ts": "09:36", "minute": 576, "plan": "enter", "symbol": "S",
+                  "entry_time": "09:36", "entry_price": 10.0,
+                  "exit_time": "09:40", "exit_reason": "take_profit"}],
+        "fill": [],
+    }
+
+
+def test_verdict_tolerance_actually_changes_verdict():
+    """`time_tolerance_minutes` 必须真正参与判定，而不只是影响配对半径。
+
+    此前四处判定都写死 `"match" if gap == 0`，于是把容差从 0 调到 5
+    结果**一模一样**；文档还把这种"四档一致"解释成"退出时刻差是整分钟的
+    离散值、工时点比较天然精确"——把一个参数没生效的 bug 说成了结论。
+    """
+    logs = _tolerance_logs()
+
+    def exit_status(tol):
+        rows = align_symbol("S", _tolerance_view("09:43"), logs, tol, 5.0)["rows"]
+        return [r["status"] for r in rows
+                if r["axis"] == "exit" and r.get("field") == "time"][0]
+
+    # 退出时刻差 3 分钟
+    assert exit_status(0) == "divergent"
+    assert exit_status(2) == "divergent"
+    assert exit_status(3) == "match", "容差 3 分钟应刚好容忍 3 分钟的差"
+    assert exit_status(5) == "match"
+
+
+def test_entry_and_signal_axes_honour_tolerance():
+    """entry / signal 轴同样必须受容差控制。
+
+    注意信号轴的配对半径就是 `tol`：差 2 分钟且 tol=0 时配不上，
+    结果是 `replay_only`（单边缺失），而不是 `divergent`。
+    这两种都是"没对上"，但语义不同，断言要按实际口径写。
+    """
+    logs = _tolerance_logs()
+    logs["signal"] = [{"ts": "09:37", "minute": 577, "signal": "buy"}]  # 差 2 分钟
+
+    def signal_status(tol):
+        rows = align_symbol("S", _tolerance_view("09:40"), logs, tol, 5.0)["rows"]
+        return [r["status"] for r in rows if r["axis"] == "signal"][0]
+
+    assert signal_status(0) == "replay_only"   # 配对半径内没有记录
+    assert signal_status(1) == "replay_only"
+    assert signal_status(2) == "match", "tol=2 时应配上且时点差在容差内"
+
+
 def test_nearest_fallback_pairs_far_apart_records():
     """容差外也应配上最近的记录，标为低置信，而不是单边缺失。"""
     from scripts.aligner import _pair_cycles

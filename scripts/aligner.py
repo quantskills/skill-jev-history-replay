@@ -229,9 +229,14 @@ def align_symbol(symbol: str, replay: Dict[str, Any], log_groups: Dict[str, List
         rs, ls = pair["replay"], pair["log"]
         if rs and ls:
             gap = minutes_of(rs["time"]) - ls["minute"]
-            rows.append(_row("signal", symbol, rs["time"], "match" if gap == 0 else "divergent",
+            # 判定容差必须真正参与判定。此前这里写死 `gap == 0`，
+            # `time_tolerance_minutes` 只影响配对搜索半径、不影响判决，
+            # 于是调容差对结果毫无作用（文档却把"四档结果一致"解释成
+            # "时刻差是整分钟离散值"，掩盖了参数没生效的事实）。
+            status = "match" if abs(gap) <= tol_minutes else "divergent"
+            rows.append(_row("signal", symbol, rs["time"], status,
                              ls["ts"], rs["time"], "time", gap,
-                             note="时点错位" if gap else ""))
+                             note="时点错位" if status == "divergent" else ""))
         elif rs:
             rows.append(_row("signal", symbol, rs["time"], "replay_only",
                              None, rs["time"], "time",
@@ -313,10 +318,10 @@ def align_symbol(symbol: str, replay: Dict[str, Any], log_groups: Dict[str, List
         replay_entry_time = rc.get("entry_time")
         if replay_entry_time and jev_entry_time:
             gap = minutes_of(replay_entry_time) - minutes_of(jev_entry_time)
-            status = "match" if gap == 0 else "divergent"
+            status = "match" if abs(gap) <= tol_minutes else "divergent"
             rows.append(_row("entry", symbol, replay_entry_time, status,
                              jev_entry_time, replay_entry_time, "time", gap))
-            if gap:
+            if status == "divergent":
                 changes.append("entry_shifted")
 
         jev_entry_price = lp.get("entry_price")
@@ -356,10 +361,10 @@ def align_symbol(symbol: str, replay: Dict[str, Any], log_groups: Dict[str, List
         replay_exit_time = rc.get("exit_time")
         if replay_exit_time and jev_exit_time:
             gap = minutes_of(replay_exit_time) - minutes_of(jev_exit_time)
-            status = "match" if gap == 0 else "divergent"
+            status = "match" if abs(gap) <= tol_minutes else "divergent"
             rows.append(_row("exit", symbol, replay_exit_time, status,
                              jev_exit_time, replay_exit_time, "time", gap))
-            if gap:
+            if status == "divergent":
                 changes.append("exit_shifted")
         if rc.get("exit_reason") and exit_log and exit_log.get("exit_reason"):
             status = ("match" if rc["exit_reason"] == exit_log["exit_reason"]
@@ -395,7 +400,7 @@ def align_symbol(symbol: str, replay: Dict[str, Any], log_groups: Dict[str, List
         jev_exit_time = lp2.get("exit_time") or lp2.get("ts")
         replay_exit_time = rc2.get("exit_time")
         gap = minutes_of(replay_exit_time) - minutes_of(jev_exit_time)
-        status = "match" if gap == 0 else "divergent"
+        status = "match" if abs(gap) <= tol_minutes else "divergent"
         rows.append(_row("exit", symbol, replay_exit_time, status,
                          jev_exit_time, replay_exit_time, "time", gap))
         if rc2.get("exit_reason") and lp2.get("exit_reason"):

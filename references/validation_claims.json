@@ -26,7 +26,7 @@
     },
     "exit": {
       "comparable": 2844,
-      "match_rate": 0.8667,
+      "match_rate": 0.8896,
       "statuses": {
         "open_position": 74
       }
@@ -34,10 +34,10 @@
   },
   "total": {
     "comparable": 36086,
-    "divergent": 379,
+    "divergent": 314,
     "one_sided": 979320,
-    "match": 35707,
-    "match_rate": 0.9895
+    "match": 35772,
+    "match_rate": 0.9913
   },
   "attribution": {
     "verdict": "single_knob",
@@ -75,39 +75,39 @@
     },
     "20261027": {
       "comparable": 1094,
-      "divergent": 28
+      "divergent": 27
     },
     "20261028": {
       "comparable": 4032,
-      "divergent": 10
+      "divergent": 8
     },
     "20261029": {
       "comparable": 1279,
-      "divergent": 49
+      "divergent": 35
     },
     "20261030": {
       "comparable": 1597,
-      "divergent": 6
+      "divergent": 4
     },
     "20261102": {
       "comparable": 5127,
-      "divergent": 10
+      "divergent": 7
     },
     "20261103": {
       "comparable": 2494,
-      "divergent": 90
+      "divergent": 68
     },
     "20261104": {
       "comparable": 4170,
-      "divergent": 22
+      "divergent": 17
     },
     "20261105": {
       "comparable": 4651,
-      "divergent": 50
+      "divergent": 41
     },
     "20261106": {
       "comparable": 1008,
-      "divergent": 13
+      "divergent": 11
     },
     "20261109": {
       "comparable": 1551,
@@ -119,11 +119,11 @@
     },
     "20261111": {
       "comparable": 2857,
-      "divergent": 53
+      "divergent": 49
     },
     "20261112": {
       "comparable": 1478,
-      "divergent": 23
+      "divergent": 22
     }
   }
 }

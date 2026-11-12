@@ -35,11 +35,13 @@ DEFAULT_DATES = [
     "20260911", "20260914", "20260915",
 ]
 
-# 主样本（in-sample）的实测值，作为复现的对照基准
+# 主样本（in-sample）的实测值，作为复现的对照基准。
+# 注意：这些是**硬编码**的。主样本任何会影响对齐的改动（例如修正容差判定）
+# 都必须同步更新这里，否则"复现判定"会拿旧基准比新结果。
 IN_SAMPLE = {
     "total_comparable": 36086,
-    "total_match_rate": 0.9895,
-    "exit_match_rate": 0.8667,
+    "total_match_rate": 0.9913,
+    "exit_match_rate": 0.8896,
     "attribution_top_knob": "exit_eval",
     "attribution_top_rate": 1.0,
     "value_verdict": "negative",

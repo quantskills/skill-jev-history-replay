@@ -34,7 +34,7 @@ python3 -m pytest tests/ -q -m slow         # 区分度对照，约 2 分钟
 
 | 项 | 结果 |
 |---|---|
-| 用例总数 | 155 |
+| 用例总数 | 158 |
 | 失败 | 0 |
 | 环境 | Python 3.12.12 / 3.11.16 |
 | 全量耗时 | 快测约 47 秒；慢测（区分度对照）另约 2 分钟 |
@@ -52,6 +52,7 @@ python3 -m pytest tests/ -q -m slow         # 区分度对照，约 2 分钟
 | `test_validation_claims.py` | 9 | **文档数字对账**、防漂移、区分度对照、**陈旧数字扫描** |
 | `test_data_quality_audit.py` | 6 | 板块分类、涨跌停口径、离线不把"未核验"当 0、报告回显 |
 | `test_trade_audit.py` | 4 | **逐笔价格/算术反查**、跨日覆盖、故意改价必被抓 |
+| `test_knob_efficacy.py` | 3 | **旋钮全部接线**、指纹稳定性、含当前根必归零 |
 | `test_metrics_correctness.py` | 15 | **统计函数正确性**：精确值对比、蒙特卡洛 Type-I/覆盖率 |
 
 ---
@@ -282,6 +283,42 @@ v0.2.0 时退出轴 `comparable=0`。根因有两层：
 **真实 JEV 日志接入后**，若其覆盖的标的包含停牌/低流动性小票，
 缺口几乎必然出现。届时应先看 `validate.py` 的 `minute_gaps`，
 再决定是剔除这些标的还是改用「时间跨度」而非「根数」做窗口计算。
+
+---
+
+### 3.38 旋钮功效：每个语义旋钮是否真的影响输出
+
+"语义对齐"的前提是每个旋钮都真实生效。若某个旋钮接进了配置、却对重放
+毫无影响，它就是个**装饰性参数**——对齐它毫无意义，而报告仍会显示
+"该旋钮一致"。这类沉默失效比报错难发现得多。
+
+`scripts/knob_efficacy.py` 把每个旋钮单独换成备选值，比较整份交易的指纹
+（全部周期的 信号索引/入场时点与价/退出时点与价/原因/状态）。
+
+| 旋钮 | 改动 | 信号数变化 | 指纹 |
+|---|---|---|---|
+| `bar_timestamp` | `bar_end` → `bar_start` | 278 → 278 | **变化** |
+| `baseline_price` | `prev_close` → `day_open` | 278 → 272 | **变化** |
+| `breakout_field` | `high` → `close` | 278 → 332 | **变化** |
+| `breakout_includes_current` | `False` → `True` | 278 → **0** | **变化** |
+| `persistence_bars` | 2 → 1 | 278 → 433 | **变化** |
+| `wait_bars` | 1 → 0 | 278 → 278 | **变化** |
+| `entry_price` | `next_open` → `signal_close` | 278 → 278 | **变化** |
+| `exit_eval` | `bar_close` → `bar_high_low` | 278 → 278 | **变化** |
+| `t_plus_1` | `True` → `False` | 278 → 552 | **变化** |
+| `cooldown_bars` | 10 → 0 | 278 → 279 | **变化** |
+
+**10/10 全部有效**（3 天 / 900 序列的子集）。
+
+注意三行的信号数没变但指纹变了——`bar_timestamp`、`wait_bars`、
+`entry_price`、`exit_eval` 改的是**时点与价格**，不改变触发次数。
+只看信号数会把它们误判成"无效果"，所以必须比整份交易指纹。
+
+#### 顺带印证一个设计决定
+
+`breakout_includes_current=True` 时信号归零：`close > max(close 含自身)`
+恒假。这正是 `naive_literal` 里把它设为 `False` 的原因——那不是"字面直译"，
+而是配置错误。价值评估要对比两种**都成立**的实现，不是一种实现和一种 bug。
 
 ---
 

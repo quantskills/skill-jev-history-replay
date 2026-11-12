@@ -112,7 +112,14 @@ def verify(report: Dict[str, Any], claims: Dict[str, Any]) -> Dict[str, Any]:
 
         counts = _c.defaultdict(_c.Counter)
         ledger_path = REPO_ROOT / "output" / "ledger.jsonl"
-        if ledger_path.exists():
+        if not ledger_path.exists():
+            results.append({
+                "check": "per_day.ledger_available",
+                "actual": "missing",
+                "claimed": "output/ledger.jsonl 必须存在",
+                "ok": False,
+            })
+        else:
             for line in ledger_path.read_text(encoding="utf-8").splitlines():
                 if not line.strip():
                     continue

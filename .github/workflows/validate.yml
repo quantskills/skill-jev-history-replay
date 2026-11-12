@@ -18,16 +18,17 @@ jobs:
       # 评测本身不需要 panda_data：对齐与回放是纯标准库实现。
       - name: Install test deps
         run: pip install -r requirements-dev.txt
-      - name: Unit tests (fast)
-        run: python -m pytest tests/ -v -m "not slow"
-      - name: Unit tests (slow: verdict discrimination)
-        run: python -m pytest tests/ -v -m slow
       - name: Environment self-check
         run: python scripts/env_check.py
       - name: Contract validation
         run: python scripts/validate.py
+      # build 必须在 tests 之前：per_day 校验要读 output/ledger.jsonl
       - name: Full alignment run
         run: python scripts/build.py
+      - name: Unit tests (fast)
+        run: python -m pytest tests/ -v -m "not slow"
+      - name: Unit tests (slow: verdict discrimination)
+        run: python -m pytest tests/ -v -m slow
       - name: Verify validation-doc claims
         run: python scripts/verify_claims.py
       - name: Verdict discrimination controls

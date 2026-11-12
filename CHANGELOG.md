@@ -1,5 +1,25 @@
 # CHANGELOG
 
+## 0.11.2 — 2026-11-13
+
+新增**报告内部自洽检查**，并修复由此发现的字段不一致。
+
+### 发现
+`by_axis` 的每个轴只存具体状态名（`jev_missing` 等），没有 `one_sided`
+汇总字段。于是"各轴 one_sided 加起来是 0，total 却是 979,320"——
+看起来像数据错乱，实际是命名不统一，读者无法从 by_axis 加总校验 total。
+
+### 修复
+- 每轴补 `one_sided` 汇总字段
+
+### 新增
+- `verify_claims` 增加 10 项内部自洽检查：
+  summary↔aggregate、by_axis 加总、per_day 加总、total 恒等式
+- `tests/test_validation_claims.py` +3 例（含篡改必被抓）
+
+claims 33 → **71 项**。
+
+
 ## 0.11.1 — 2026-11-13
 
 端到端验证 `oos_check.py`（此前只用缓存测过 judge 函数），修复凭证与退出码缺陷。

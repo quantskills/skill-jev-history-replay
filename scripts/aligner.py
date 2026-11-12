@@ -452,8 +452,17 @@ def aggregate_rows(rows_by_symbol: Dict[str, List[Dict[str, Any]]]) -> Dict[str,
     per_axis = {}
     for axis, counts in by_axis.items():
         comparable = counts.get("match", 0) + counts.get("divergent", 0)
+        # 每轴都要给出 one_sided 汇总，与 total 的命名一致。
+        # 否则读者无法从 by_axis 各轴加总校验 total——
+        # 曾出现"各轴 one_sided 加起来是 0，total 却是 97 万"的困惑，
+        # 原因是各轴只存了具体状态名（jev_missing 等）。
+        one_sided = sum(
+            v for k, v in counts.items()
+            if k not in ("match", "divergent")
+        )
         per_axis[axis] = {
             **counts,
+            "one_sided": one_sided,
             "comparable": comparable,
             "match_rate": (
                 round(counts.get("match", 0) / comparable, 4) if comparable else None

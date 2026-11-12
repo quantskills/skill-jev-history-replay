@@ -16,7 +16,32 @@ python3 -m pytest tests/test_validation_claims.py -v
 ```
 
 任一项与 `output/report.json` 不符即失败，并打印 `actual` vs `claimed`。
-当前覆盖 **61 项**：33 项关键指标 + 28 项分日数字（14 天 × 可比/冲突）。
+当前覆盖 **71 项**：
+- 33 项关键指标
+- 28 项分日数字（14 天 × 可比/冲突）
+- **10 项内部自洽**（见下）
+
+#### 报告内部自洽检查
+
+这些数字由**不同代码路径**算出：`summary` 来自 `run_eval`，
+`aggregate` 来自 `aligner`，`per_day` 又一次聚合。任一处口径不一致，
+读者就会拿到互相矛盾的数，而单看每个字段都"像是对的"。
+
+| 检查 | 说明 |
+|---|---|
+| `summary.*` vs `aggregate.total.*` | 一致率与冲突数必须相同 |
+| `by_axis` 各轴加总 = `total` | match / divergent / one_sided 三项 |
+| `per_day` 各日加总 = `total` | 同上 |
+| `total.comparable = match + divergent` | 恒等式 |
+| `total.rows = match + divergent + one_sided` | 恒等式 |
+
+**由此发现并修复的缺陷**：`by_axis` 的每个轴只存了具体状态名
+（`jev_missing` 等），没有 `one_sided` 汇总字段。于是"各轴 one_sided
+加起来是 0，total 却是 97 万"——看起来像数据错乱，实际是命名不统一。
+现已为每轴补 `one_sided` 汇总。
+
+**灵敏性**：篡改 `summary.divergence_items` 后，检查立刻报
+`consistency.summary.divergent: actual=999 expected=379`。
 测试里还有一条 `test_claim_checker_catches_drift`，故意篡改一项来证明
 这个校验器不是摆设。
 
@@ -34,7 +59,7 @@ python3 -m pytest tests/ -q -m slow         # 区分度对照，约 2 分钟
 
 | 项 | 结果 |
 |---|---|
-| 用例总数 | 185 |
+| 用例总数 | 188（187 通过 + 1 跳过） |
 | 失败 | 0 |
 | 环境 | Python 3.12.12 / 3.11.16 |
 | 全量耗时 | 快测约 47 秒；慢测（区分度对照）另约 2 分钟 |

@@ -167,3 +167,38 @@ def test_per_day_numbers_are_verified(report):
         + "\n".join(f"  {f['check']}: actual={f['actual']} claimed={f['claimed']}"
                     for f in per_day_failures)
     )
+
+
+def test_report_internals_are_consistent(report):
+    """报告内部各字段必须互相自洽。
+
+    summary / aggregate / per_day 由不同代码路径算出，任一处口径不一致
+    都会让读者拿到互相矛盾的数，而单看每个字段都"像是对的"。
+    """
+    result = verify_claims.verify(report, {})   # 空 claims：只跑自洽检查
+    failed = [f for f in result["failed"] if f["check"].startswith("consistency.")]
+    assert failed == [], (
+        "报告内部不一致：\n"
+        + "\n".join(f"  {f['check']}: actual={f['actual']} expected={f['claimed']}"
+                    for f in failed)
+    )
+
+
+def test_consistency_check_catches_tampering(report):
+    """篡改 summary 的一个数字，自洽检查必须报错。"""
+    import copy
+
+    tampered = copy.deepcopy(report)
+    tampered["summary"]["divergence_items"] = (
+        tampered["summary"]["divergence_items"] + 1
+    )
+    result = verify_claims.verify(tampered, {})
+    assert not result["ok"]
+    assert any(f["check"].startswith("consistency.") for f in result["failed"])
+
+
+def test_by_axis_one_sided_rollup_exists(report):
+    """每个轴都要有 one_sided 汇总，否则无法从 by_axis 加总校验 total。"""
+    by_axis = report["ledger"]["aggregate"]["by_axis"]
+    for axis, info in by_axis.items():
+        assert "one_sided" in info, f"{axis} 缺 one_sided 汇总"

@@ -46,8 +46,51 @@ def _check(results: List[Dict[str, Any]], name: str, actual: Any, claimed: Any,
     })
 
 
+def _internal_consistency(report: Dict[str, Any],
+                          results: List[Dict[str, Any]]) -> None:
+    """报告内部各字段必须互相自洽。
+
+    这些数字由不同代码路径算出：summary 来自 run_eval，aggregate 来自
+    aligner，per_day 又一次聚合。任何一处口径不一致都会让读者拿到
+    互相矛盾的数，而单看每个字段都"像是对的"。
+    """
+    agg = report.get("ledger", {}).get("aggregate", {})
+    total = agg.get("total", {})
+    by_axis = agg.get("by_axis", {})
+    summary = report.get("summary", {})
+    per_day = report.get("per_day", {})
+
+    def same(name: str, a: Any, b: Any) -> None:
+        _check(results, f"consistency.{name}", a, b)
+
+    # 1) summary 与 aggregate.total 必须一致
+    same("summary.match_rate", summary.get("ledger_match_rate"),
+         total.get("match_rate"))
+    same("summary.divergent", summary.get("divergence_items"),
+         total.get("divergent"))
+
+    # 2) 各轴加总 = total
+    for key in ("match", "divergent", "one_sided"):
+        same(f"by_axis_sum.{key}",
+             sum(v.get(key, 0) for v in by_axis.values()), total.get(key))
+
+    # 3) per_day 加总 = total
+    if per_day:
+        for key in ("match", "divergent", "one_sided"):
+            same(f"per_day_sum.{key}",
+                 sum(b.get(key, 0) for b in per_day.values()), total.get(key))
+
+    # 4) total 内部恒等式
+    comparable = total.get("comparable", 0)
+    same("total.comparable_eq_match_plus_divergent", comparable,
+         total.get("match", 0) + total.get("divergent", 0))
+    same("total.rows_eq_parts", total.get("rows", 0),
+         total.get("match", 0) + total.get("divergent", 0) + total.get("one_sided", 0))
+
+
 def verify(report: Dict[str, Any], claims: Dict[str, Any]) -> Dict[str, Any]:
     results: List[Dict[str, Any]] = []
+    _internal_consistency(report, results)
     agg = report.get("ledger", {}).get("aggregate", {})
     by_axis = agg.get("by_axis", {})
     total = agg.get("total", {})

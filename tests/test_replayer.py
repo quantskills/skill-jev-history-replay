@@ -147,7 +147,9 @@ def test_t_plus_one_defers_same_day_exit(semantics):
     semantics["t_plus_1"] = True
     semantics["stop_loss_pct"] = 0.01
     result = replayer.simulate_symbol("S", bars, semantics, 10.0, 1e6)
-    assert result["cycles"][0]["status"] == "deferred_t_plus_1"
+    # T+1 下当日买入不可当日卖出：持仓以 open 状态带出当日，交给下一交易日
+    assert result["cycles"][0]["status"] == "open"
+    assert result["carry_out"] is not None
 
 
 def test_t_plus_one_off_allows_same_day_exit(semantics):

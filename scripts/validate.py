@@ -78,12 +78,16 @@ def validate(bars_dir: Path, logs_dir: Path) -> Dict[str, Any]:
                                  "message": exc.message, "hint": exc.hint}],
         }
 
-    unknown_symbols = sorted({r["symbol"] for r in records} - set(bars))
+    series_keys = set(bars)
+    unknown_symbols = sorted({
+        data_loader.series_key(r["symbol"], str(r.get("date") or ""))
+        for r in records
+    } - series_keys)
     if unknown_symbols:
         issues.append({
             "severity": "warn",
             "code": "log_symbol_not_in_bars",
-            "message": f"{len(unknown_symbols)} 个标的在日志里但不在 K 线里：{unknown_symbols[:5]}",
+            "message": f"{len(unknown_symbols)} 个序列在日志里但不在 K 线里：{unknown_symbols[:5]}",
             "hint": "这些标的无法对齐，会被忽略",
         })
 

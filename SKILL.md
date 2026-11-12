@@ -144,13 +144,17 @@ python3 scripts/validate.py       # 先检查日志契约，区分"字段缺失"
 - `python3 scripts/build.py` 可独立跑通
 - `python3 -m pytest tests/ -v` 全通过
 - `python3 scripts/validate.py` 对夹具返回 `ok: true`
+- 实测验证记录（`references/validation_evidence.md`）中的数字可用上述命令复现
 - 报告字段稳定，`ledger.jsonl` 每行可追溯到 `symbol + time + axis`
 
 ## 已知局限
-- 单日、A 股分钟级；不含跨日持仓、除权除息、停牌与涨跌停建模
+- A 股分钟级；支持多日（跨日持仓与 T+1 已实现），但不含除权除息、停牌与涨跌停建模
 - 不含撮合排队与部分成交；成交按规则价一次性全额撮合
 - 合成日志的结论只能是 `inconclusive`
 - 若真实日志缺 `wait_bars` / `entry_price` 等字段，对应轴退化为不可比，不会编造一致
+- 跨日持仓的退出在日志侧通常没有独立记录（`plan` 写在入场日），
+  因此这类周期的退出轴不可比，报告中标为 `replay_only` 单列，不进一致率分母
+- 实测验证记录见 `references/validation_evidence.md`，含本轮发现的 9 处缺陷及修复
 
 ## 可被 Alpha 调用
 - 否

@@ -93,7 +93,10 @@ JEV_ASSUMED_PROFILE: Dict[str, Any] = {
     "wait_bars": 1,
     "entry_price": "next_open",
     "exit_eval": "bar_high_low",
-    "t_plus_1": False,
+    # 多日夹具下 T+1 必须与参考语义一致，否则合成日志里的"执行"根本
+    # 无法达成——重放会把当日仓位锁到次日，日志却按当日结算，
+    # 两者差异全部来自这一点，等于用错了对照对象。
+    "t_plus_1": True,
     "cooldown_bars": 10,
 }
 

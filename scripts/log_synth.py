@@ -29,13 +29,22 @@ def synthesize_logs(bars_by_symbol: Dict[str, Dict[str, Any]],
     replay = replay_all(bars_by_symbol, logged_semantics, prev_closes)
     records: List[Dict[str, Any]] = []
 
-    for symbol, result in replay["symbols"].items():
+    # 必须遍历逐序列视图。合并视图（symbols）里一个标的所有交易日的信号
+    # 会被压成一条并共用最后一天的日期，导致日志日期错标。
+    views = replay.get("by_series") or replay["symbols"]
+    for series, result in views.items():
+        symbol = result.get("symbol") or result.get("symbol_key") or series
+        date_text = result.get("date") or ""
+        base = {"symbol": symbol}
+        if date_text:
+            base["date"] = date_text
         details = result["details"]
         prev_state = None
         for detail in details:
             state = bool(detail["hit"])
             if prev_state is None or state != prev_state:
                 records.append({
+                    **base,
                     "ts": detail["time"],
                     "kind": "condition",
                     "symbol": symbol,
@@ -50,7 +59,11 @@ def synthesize_logs(bars_by_symbol: Dict[str, Dict[str, Any]],
                 prev_state = state
 
         for cycle in result["cycles"]:
+            # 只输出在本序列入场的信号；跨日带入的持仓属于前一日的信号
+            if cycle.get("carried_from_previous_day"):
+                continue
             records.append({
+                **base,
                 "ts": cycle["signal_time"],
                 "kind": "signal",
                 "symbol": symbol,
@@ -59,6 +72,7 @@ def synthesize_logs(bars_by_symbol: Dict[str, Dict[str, Any]],
             })
             if cycle.get("entry_time"):
                 records.append({
+                    **base,
                     "ts": cycle["entry_time"],
                     "kind": "plan",
                     "symbol": symbol,
@@ -74,6 +88,7 @@ def synthesize_logs(bars_by_symbol: Dict[str, Dict[str, Any]],
             if cycle.get("entry_time") and cycle.get("exit_time"):
                 tick = round(cycle["entry_price"] * 0.001, 2) or 0.01
                 records.append({
+                    **base,
                     "ts": cycle["entry_time"],
                     "kind": "fill",
                     "symbol": symbol,
@@ -83,6 +98,7 @@ def synthesize_logs(bars_by_symbol: Dict[str, Dict[str, Any]],
                     "status": "filled",
                 })
                 records.append({
+                    **base,
                     "ts": cycle["exit_time"],
                     "kind": "fill",
                     "symbol": symbol,
@@ -96,5 +112,5 @@ def synthesize_logs(bars_by_symbol: Dict[str, Dict[str, Any]],
     # 报告据此判定 log_source，不依赖目录名或人工声明。
     for rec in records:
         rec["_synthetic"] = True
-    records.sort(key=lambda r: (r["symbol"], r["ts"]))
+    records.sort(key=lambda r: (r.get("date", ""), r["symbol"], r["ts"]))
     return records

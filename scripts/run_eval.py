@@ -29,29 +29,46 @@ class ReplayError(ValueError):
 
 
 def _load_prev_closes(reference_path: Optional[Path],
-                      symbols: List[str]) -> Dict[str, float]:
-    """优先读 fixtures/reference 的前收；缺失时回退到当日首根开盘价。"""
+                      series_keys: List[str]) -> Dict[str, float]:
+    """按 series key 取前收价。
+
+    目录内可能有多个 reference 文件（多日夹具）。每个标的的每个交易日
+    各自取自己的前收，绝不复用其它交易日——跨日复用会让涨幅基准错位，
+    而那正是本 skill 要度量的东西之一。
+
+    单日模式下 series key 等于裸代码，行为与旧版一致。
+    """
     out: Dict[str, float] = {}
-    if reference_path and reference_path.exists():
-        payload = json.loads(reference_path.read_text(encoding="utf-8"))
+    ref_dir = reference_path if reference_path and reference_path.is_dir() else (
+        reference_path.parent if reference_path else None
+    )
+    if not ref_dir or not ref_dir.exists():
+        return out
+
+    files = sorted(ref_dir.glob("*.json"))
+    if reference_path and reference_path.is_file():
+        files = [reference_path]
+    for path in files:
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
         for symbol, by_date in payload.get("symbols", {}).items():
-            for _date, row in sorted(by_date.items()):
-                if row.get("pre_close"):
-                    out[symbol] = float(row["pre_close"])
-                    break
+            for date_text, row in by_date.items():
+                pre = row.get("pre_close")
+                if not pre:
+                    continue
+                out.setdefault(data_loader.series_key(symbol, date_text), float(pre))
+                out.setdefault(symbol, float(pre))
     return out
 
 
 def _find_reference(fixtures_root: Path, date: Optional[str]) -> Optional[Path]:
+    """返回 reference 目录（多日模式按目录读全部），兼容旧的单文件路径。"""
     ref_dir = fixtures_root / "reference"
-    if not ref_dir.exists():
-        return None
-    if date:
-        candidate = ref_dir / f"{date}.json"
-        if candidate.exists():
-            return candidate
-    files = sorted(ref_dir.glob("*.json"))
-    return files[-1] if files else None
+    if ref_dir.exists():
+        return ref_dir
+    return None
 
 
 def _run_id() -> str:
@@ -110,8 +127,8 @@ def evaluate(*, bars_dir: str | Path | None = None,
     missing_prev = [s for s in bars if s not in prev_closes]
     if missing_prev:
         # 无前收时用当日首根开盘价近似，并在报告里标注
-        for symbol in missing_prev:
-            prev_closes[symbol] = bars[symbol]["bars"][0]["open"]
+        for series in missing_prev:
+            prev_closes[series] = bars[series]["bars"][0]["open"]
 
     current = replay_all(bars, semantics, prev_closes)
 
@@ -137,7 +154,11 @@ def evaluate(*, bars_dir: str | Path | None = None,
             logged.update(sem.get_profile(profile_name))
         except KeyError as exc:
             raise ReplayError("unknown_profile", str(exc)) from exc
-        logged_semantics = {"profile": profile_name, "hash": sem.semantics_hash(logged)}
+        logged_semantics = {
+            "profile": profile_name,
+            "hash": sem.semantics_hash(logged),
+            "knobs": sem.extract_knobs(logged),
+        }
         log_records = log_synth.synthesize_logs(bars, logged, prev_closes)
         log_source = "synthetic"
 
@@ -146,7 +167,25 @@ def evaluate(*, bars_dir: str | Path | None = None,
     elif any(rec.get("_synthetic") for rec in log_records):
         log_source = "synthetic"
 
-    log_records = data_loader.normalize_log_records(log_records)
+    # 从磁盘读到的合成日志同样要能说明"按哪套档位生成"。
+    # 否则 provenance 只能说"这是合成的"，却说不出合成所用语义，
+    # 读者无法判断差异是否只是档位不同造成的。
+    if log_source == "synthetic" and logged_semantics is None:
+        profile_name = config["logged_profile"]
+        try:
+            logged = dict(config["semantics"])
+            logged.update(sem.get_profile(profile_name))
+        except KeyError as exc:
+            raise ReplayError("unknown_profile", str(exc)) from exc
+        logged_semantics = {
+            "profile": profile_name,
+            "hash": sem.semantics_hash(logged),
+            "knobs": sem.extract_knobs(logged),
+            "source": "disk (fixtures/logs 内含 _synthetic 标记)",
+        }
+
+    multi_day = len({entry.get("date") for entry in bars.values()}) > 1
+    log_records = data_loader.normalize_log_records(log_records, multi_day=multi_day)
     grouped = data_loader.group_logs(log_records)
 
     # --- 对齐 ---
@@ -154,12 +193,15 @@ def evaluate(*, bars_dir: str | Path | None = None,
     price_tol = float(config["price_tolerance_bps"])
     rows_by_symbol: Dict[str, List[Dict[str, Any]]] = {}
     decision_changes: List[Dict[str, Any]] = []
-    for symbol, symbol_replay in current["symbols"].items():
-        groups = grouped.get(symbol) or {
+    # 对齐按序列（symbol@date）逐日进行：跨日周期的入场与退出分属两天，
+    # 只有逐日对齐才能与同日日志正确配对。单日模式下 by_series 与 symbols 同构。
+    series_views = current.get("by_series") or current["symbols"]
+    for series, view in series_views.items():
+        groups = grouped.get(series) or {
             "condition": [], "signal": [], "plan": [], "fill": []
         }
-        aligned = align_symbol(symbol, symbol_replay, groups, tol, price_tol)
-        rows_by_symbol[symbol] = aligned["rows"]
+        aligned = align_symbol(series, view, groups, tol, price_tol)
+        rows_by_symbol[series] = aligned["rows"]
         decision_changes.extend(aligned["decision_changes"])
 
     aggregate = aggregate_rows(rows_by_symbol)

@@ -225,10 +225,14 @@ def assemble(*, run_id: str, generated_at: str, log_source: str, semantics: Dict
                 "actual": "用于对齐的日志来自 JEV 实际输出",
                 "synthetic": "日志由 log_synth 按显式档位生成，仅验证链路",
             }[log_source],
-            "logged_profile": (logged_semantics or {}).get("profile"),
+            "logged_profile": (logged_semantics or {}).get("profile")
+            or (manifest or {}).get("logged_profile"),
             "fixture_manifest": manifest,
         },
         "comparability": comparability,
+        # 合成模式下把"已记录语义"的旋钮全量回显，使读者能直接核对
+        # 日志侧到底按哪套解释生成的，而不是只看一个哈希
+        "logged_semantics": logged_semantics,
         "ledger": ledger,
         "attribution": attribution,
         "alignment_conclusion": alignment,

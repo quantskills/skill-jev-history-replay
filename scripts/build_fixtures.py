@@ -80,15 +80,21 @@ def build(date: str, symbols: List[str] | None, universe: int,
     logged = dict(config["semantics"])
     logged.update(sem.get_profile(profile))
 
-    bars = data_loader.load_bars(bars_dir)
+    # 只对本日文件生成日志。若加载整个目录，多日构建时后一个日期会把
+    # 前面日期的序列一并读入，日志里就混进别的交易日的记录。
+    bars = data_loader.load_bars_files([bars_gz_path])
     reference = json.loads(
         (ref_dir / f"{date}.json").read_text(encoding="utf-8")
     )
+    # prev_close 必须按 series key（symbol@date）给，与 replay 侧查表口径一致。
+    # 只按裸代码给会让多日构建取到别的交易日的前收，日志里算出的涨幅就跟着错。
     prev_closes = {}
     for symbol, by_date in reference["symbols"].items():
-        prev = by_date.get(info.get("prev_date") or "")
-        if prev and prev.get("pre_close"):
-            prev_closes[symbol] = float(prev["pre_close"])
+        row = by_date.get(date) or {}
+        if row.get("pre_close"):
+            prev = float(row["pre_close"])
+            prev_closes[data_loader.series_key(symbol, date)] = prev
+            prev_closes[symbol] = prev
 
     records = log_synth.synthesize_logs(bars, logged, prev_closes)
     logs_dir.mkdir(parents=True, exist_ok=True)
@@ -101,7 +107,7 @@ def build(date: str, symbols: List[str] | None, universe: int,
     manifest = {
         "date": date,
         "prev_date": info.get("prev_date"),
-        "symbol_count": len({r["symbol"] for r in records}),
+        "symbol_count": len({(r.get("date", ""), r["symbol"]) for r in records}),
         "bar_count": info["bar_count"],
         "log_record_count": len(records),
         "logged_profile": profile,
@@ -122,15 +128,30 @@ def build(date: str, symbols: List[str] | None, universe: int,
 
 def main(argv: List[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Build frozen JEV replay fixtures")
-    parser.add_argument("--date", required=True)
+    parser.add_argument("--date", required=True,
+                        help="交易日；多日用逗号分隔，如 20261110,20261111,20261112")
     parser.add_argument("--symbols", nargs="*", default=None)
     parser.add_argument("--universe", type=int, default=200)
     parser.add_argument("--logged-profile", default="jev_assumed",
                         choices=sorted(sem.PROFILES))
     args = parser.parse_args(argv)
 
+    dates = [d.strip() for d in args.date.split(",") if d.strip()]
     try:
-        manifest = build(args.date, args.symbols, args.universe, args.logged_profile)
+        manifests = [
+            build(date, args.symbols, args.universe, args.logged_profile)
+            for date in dates
+        ]
+        manifest = manifests[0] if len(manifests) == 1 else {
+            "dates": dates,
+            "symbol_count": manifests[0]["symbol_count"],
+            "bar_count": sum(m["bar_count"] for m in manifests),
+            "log_record_count": sum(m["log_record_count"] for m in manifests),
+            "logged_profile": args.logged_profile,
+            "fixture_fingerprint": manifests[0]["fixture_fingerprint"],
+            "per_date": manifests,
+            "provenance": manifests[0]["provenance"],
+        }
     except FetchError as exc:
         print(json.dumps({
             "ok": False,

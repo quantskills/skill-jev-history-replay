@@ -1,5 +1,40 @@
 # CHANGELOG
 
+## 0.13.2 — 2026-11-13
+
+这一轮核对**社区审核会看的合规内容**。
+
+### 缺陷 40：CI 的 release hygiene 只查文件存在、不查内容
+
+原步骤只有 `test -f README.en.md` 之类。但社区审核真正看的是：
+
+- README 免责声明是否覆盖**四个要点**（研究用途 / 不保证收益 / 风险边界 / 非官方背书）
+- INSTALL.md 是否覆盖**五个平台**（Claude Code / Codex / Cursor / Hermes / OpenClaw）
+- 许可证是否用 SPDX 的 `GPL-3.0-only`
+- 有没有残留占位符（TODO / 待补充 / `<your-...>`）
+- 有没有泄露凭证值、内网地址、私人邮箱
+
+这些**内容全错也照样能让 CI 变绿**。
+
+### 修复
+- CI `Release hygiene` 步骤扩充为真实内容断言
+- 新增 `tests/test_release_compliance.py`（7 例），本地即可跑：
+  - 免责声明四点（中/英各一遍）
+  - INSTALL 五平台覆盖
+  - SPDX 许可证（skill.json / SKILL.md frontmatter / LICENSE 首行）
+  - 三处 `name` 一致（仓库名 / skill.json / SKILL.md）
+  - 无占位符
+  - **无凭证 / 内网地址 / 私人邮箱**（`git@github.com` 这类 SSH clone 地址已排除）
+  - `entrypoint` 与 `entry_script` 真实存在
+
+### 核对结果（本轮未发现内容问题）
+免责声明四点齐全（中英都有）、INSTALL 覆盖五平台、无占位符、无敏感信息。
+**唯一缺陷是检查本身不到位**——这轮补的就是这层防线。
+
+### 缺陷台账 39 → 40 项
+
+---
+
 ## 0.13.1 — 2026-11-13
 
 这一轮核对**面向用户的文档**（README 中/英）与 **`agents/` 运行时适配器**
@@ -113,7 +148,7 @@ ModuleNotFoundError: No module named 'scripts'
 | 项 | 文档写的 | 实际 |
 |---|---|---|
 | `verify_claims.py` | 27/27（§1.1）、61/61（§1.0a） | **71/71** |
-| `pytest tests/ -q` | 113 passed | **234 passed, 1 skipped** |
+| `pytest tests/ -q` | 113 passed | **241 passed, 1 skipped** |
 | `build.py` | 54 秒 | **31 秒** |
 | Python | 3.12.12 / 3.11.16 | 3.12.12 / **3.9.6**（实测） |
 
@@ -128,7 +163,7 @@ env_check     ok=true
 validate      ok=true, 0 issues
 build         31 秒，exit 0
 verify_claims 71/71
-pytest        234 passed, 1 skipped
+pytest        241 passed, 1 skipped
 ```
 总一致率 0.9913、退出轴 0.8896，与本机完全一致；`output/` 由 `build.py` 自动创建。
 

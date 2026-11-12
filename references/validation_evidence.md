@@ -88,6 +88,7 @@ python3 -m pytest tests/ -q -m slow         # 区分度对照，约 2 分钟
 | `test_metrics_correctness.py` | 15 | **统计函数正确性**：精确值对比、蒙特卡洛 Type-I/覆盖率 |
 | `test_fixture_universe.py` | 4 | **14 日标的池恒定**、每条序列 K 线完整、**manifest 与实际夹具对账**、**gzip mtime=0 可重现** |
 | `test_oos_check.py` | 4 | **IN_SAMPLE 基准与当前报告一致**、judge 能识别显著性减弱 |
+| `test_release_compliance.py` | 7 | **免责声明四点**、INSTALL 五平台、SPDX 许可证、三处 name 一致、无占位符、**无凭证/内网/邮箱泄露**、entry 存在 |
 | `test_runtime_adapters.py` | 9 | **适配器文件齐备**、声明的脚本/entry 存在、**旋钮清单与代码一致**、版本与 skill.json 一致、**README 实例数字与报告一致** |
 
 ---
@@ -271,7 +272,7 @@ python3 scripts/env_check.py      # ok=true
 python3 scripts/validate.py       # ok=true, 0 issues
 python3 scripts/build.py          # 约 31 秒
 python3 scripts/verify_claims.py  # 71/71
-python3 -m pytest tests/ -q       # 234 passed, 1 skipped
+python3 -m pytest tests/ -q       # 241 passed, 1 skipped
 ```
 
 实测（v0.12.8，从 `origin/main` 全新 clone 到 /tmp）：各项全过，
@@ -974,7 +975,7 @@ python3 scripts/value_decomposition.py \
 
 ---
 
-## 6. 验证中发现并修复的缺陷（39 项）
+## 6. 验证中发现并修复的缺陷（40 项）
 
 以下都不是构造的测试用例，而是在真实数据上跑出来的：
 
@@ -1019,6 +1020,7 @@ python3 scripts/value_decomposition.py \
 | 37 | **README（中/英）「实例」数字严重过时** | 写的是单日小样本（条件 1,576 项、退出 0.80 / 282 项），而仓库夹具是 14 天，读者跑 `build.py` 得到 28,754 / 0.8896，完全对不上。英文版同样错 | 按实际输出重写 + `test_readme_measured_numbers_match_report` |
 | 38 | **`openai.yaml` 旋钮清单与代码三处不一致** | 声明 18 个旋钮，而 `REFERENCE_SEMANTICS` 可配置键是 23 个、`KNOB_VALUES` 可消融旋钮是 10 个——18 既不是前者也不是后者，是手抄残留 | 拆成 `x-semantics-knobs`（=23，可配置全集）与 `x-attribution-knobs`（=10，可消融子集），并加测试双向对账 |
 | 39 | **`openai.yaml` 版本长期未跟** | `version: 0.1.0` 而 `skill.json` 已是 0.13.0 | 同步 + 测试锁住 |
+| 40 | **CI 的 release hygiene 只查文件存在、不查内容** | 社区审核真正看的是：免责声明四个要点、INSTALL 五平台覆盖、SPDX 许可证标识、无占位符、无敏感信息。CI 只做了 `test -f`，内容全对不上也照样绿。 | 扩充 CI 步骤用 Python 断言实际内容；新增 `tests/test_release_compliance.py`（7 例）本地可跑 |
 
 ---
 
@@ -1048,7 +1050,7 @@ python3 scripts/value_decomposition.py \
 | panda-data | 1.0.6（仅夹具再生） |
 | 三方依赖 | 无（对齐与回放为纯标准库；`python3 -S` 实测通过） |
 | 全量对齐 | 约 31 秒（4,200 序列 × 240 根，1,008,000 根） |
-| 单元测试 | 约 160 秒（234 passed, 1 skipped） |
+| 单元测试 | 约 160 秒（241 passed, 1 skipped） |
 
 ```bash
 git clone https://github.com/quantskills/skill-jev-history-replay

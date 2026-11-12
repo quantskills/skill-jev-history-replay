@@ -56,8 +56,29 @@ jobs:
         run: |
           test -f README.en.md
           test -f LICENSE
+          test -f INSTALL.md
           test -f agents/cursor-rule.mdc
           test -f agents/portable-loader.md
           test -f agents/openai.yaml
           grep -q '"license": "GPL-3.0-only"' skill.json
+          grep -q 'license: GPL-3.0-only' SKILL.md
           head -1 LICENSE | grep -q "GNU GENERAL PUBLIC LICENSE"
+          # 免责声明四项：研究用途 / 不保证收益 / 风险边界 / 非官方背书
+          python - <<'PY'
+          import sys, pathlib
+          readme = pathlib.Path("README.md").read_text(encoding="utf-8")
+          en = pathlib.Path("README.en.md").read_text(encoding="utf-8")
+          zh_terms = ["免责声明", "不构成", "不保证收益", "风险", "非官方背书"]
+          en_terms = ["Disclaimer", "not investment advice",
+                      "No performance guarantee", "Risk boundary",
+                      "No official endorsement"]
+          missing = ([t for t in zh_terms if t not in readme]
+                     + [t for t in en_terms if t not in en])
+          assert not missing, f"免责声明缺项：{missing}"
+          # INSTALL.md 必须覆盖 5 个平台
+          inst = pathlib.Path("INSTALL.md").read_text(encoding="utf-8")
+          platforms = ["Claude Code", "Codex", "Cursor", "Hermes", "OpenClaw"]
+          gap = [p for p in platforms if p not in inst]
+          assert not gap, f"INSTALL.md 未覆盖平台：{gap}"
+          print("release hygiene: disclaimers and platforms ok")
+          PY

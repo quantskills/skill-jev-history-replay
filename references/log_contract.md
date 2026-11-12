@@ -111,6 +111,26 @@
 
 ---
 
+## 7.5 字段名不一致时用适配器
+
+真实系统的字段名通常与本文契约不同。不要手改日志，也不要靠猜——
+用 `scripts/adapt_logs.py` 显式声明映射：
+
+```bash
+python3 scripts/adapt_logs.py --map-example            # 看模板
+python3 scripts/adapt_logs.py --src raw/ --dst adapted/
+python3 scripts/validate.py --logs-dir adapted/
+```
+
+它会把 `timestamp→ts`、`code→symbol`、`matched→hit`、`action→signal`
+等常见同义词自动映射，并把 `1/0`、`"true"/"false"` 规范成真正的 `bool`。
+**适配后仍缺必需字段会直接报错**，不会让缺陷数据进入对齐。
+
+> 注意 `hit: "false"` 这类字符串：直接加载会因 `bool("false") == True`
+> 把"未命中"读成"命中"。适配器会正确转成 `False`。
+
+---
+
 ## 8. 契约校验
 
 接入前先跑：

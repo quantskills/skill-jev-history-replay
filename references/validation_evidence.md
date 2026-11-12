@@ -32,15 +32,15 @@ python3 -m pytest tests/ -q
 
 | 项 | 结果 |
 |---|---|
-| 用例总数 | 112 |
-| 通过 | 112 |
+| 用例总数 | 115 |
+| 通过 | 115 |
 | 失败 | 0 |
 | 环境 | Python 3.12.12 / 3.11.16 |
 | 全量耗时 | 约 55 秒（含一次真实端到端跑） |
 
 | 文件 | 用例数 | 覆盖 |
 |---|---|---|
-| `test_semantics.py` | 13 | 旋钮取值校验、哈希敏感性、替代值确定性 |
+| `test_semantics.py` | 15 | 旋钮取值校验、哈希敏感性、**默认值与 YAML 一致**、降级可见 |
 | `test_data_loader.py` | 17 | 格式容错、gzip、字段校验、重复检测、异常输入 |
 | `test_replayer.py` | 20 | 条件判断、连续性、等待/入场、四条退出路径、T+1、时间边界 |
 | `test_cross_day.py` | 6 | 跨日持仓传递、未平仓如实上报、单日行为不变 |
@@ -49,6 +49,42 @@ python3 -m pytest tests/ -q
 | `test_report.py` | 24 | verdict 判定、覆盖率门槛、零冲突门槛、Welch 检验 |
 | `test_end_to_end.py` | 9 | 输入校验、来源判定、产物落盘、确定性 |
 | `test_validation_claims.py` | 6 | **文档数字与实现对账**、防漂移、**判定器区分度对照** |
+
+---
+
+## 1.1 冷克隆验收（不依赖任何本地残留）
+
+```bash
+git clone git@github.com:quantskills/skill-jev-history-replay.git /tmp/jev-cleanroom
+cd /tmp/jev-cleanroom
+python3 scripts/env_check.py      # ok=true, blocked=0
+python3 scripts/validate.py       # ok=true
+python3 scripts/build.py          # 54 秒
+python3 scripts/verify_claims.py  # 27/27
+python3 -m pytest tests/ -q       # 113 passed
+```
+
+在 /tmp 的全新克隆上逐项复跑，结果与本机**完全一致**
+（总一致率 0.9913，各轴数字相同）。clone 后 `output/` 不存在，
+`build.py` 会自动创建——不依赖任何预生成产物。
+
+### 纯标准库可跑
+
+系统自带 Python 3.9（无 pyyaml、无 pytest）下 `python3 scripts/build.py`
+同样跑通且**数字完全相同**。对齐与回放确实为零三方依赖。
+
+### 由此发现并修复的缺陷
+
+**缺陷 20：默认值与 YAML 不一致导致静默降级。**
+`config.py` 的 `logs_dir` 默认值是 `None`，而 `replay_config.yaml` 写的是
+`fixtures/logs`。缺 pyyaml 时走默认值 → 悄悄进入合成模式，
+用的是 `log_synth` 现生成的日志，而不是 `fixtures/logs` 里的文件。
+本次因夹具本身就是合成的而没暴露，但真实日志接入后会**静默读不到**。
+
+修复：
+- 默认值与 YAML 逐项对齐（新增测试 `test_code_defaults_match_yaml_config` 守住）
+- 缺 pyyaml 时记录降级原因，并在报告 `provenance.config_warnings` 回显
+  （测试 `test_missing_pyyaml_is_reported` 守住）
 
 ---
 
@@ -349,6 +385,7 @@ v0.4.0 的 `negative` 是选择性样本造成的假阳性，本轮修正了判�
 | 17 | **配对覆盖率过低仍给 verdict** | 3.74% 的子样本被当成全样本证据，报出假的 `negative` | 覆盖率 <10% 强制 `inconclusive`，并补全样本 Welch 检验 |
 | 18 | **`consistent` 只看一致率** | 503 条真实冲突被大样本稀释成 0.9913，误判一致 | 加绝对冲突门槛，且必须为 0 |
 | 19 | **绝对门槛设成"≤5 条"** | 60 标的子集下 3 条冲突又被判一致 | 改为 0；"一致"不接受默认容忍额度 |
+| 20 | **代码默认值与 YAML 不一致** | 缺 pyyaml 时静默走合成模式，真实日志接入会读不到 | 逐项对齐 + 降级原因回显到报告 |
 
 ---
 

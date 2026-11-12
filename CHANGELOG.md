@@ -1,5 +1,29 @@
 # CHANGELOG
 
+## 0.5.1 — 2026-11-13
+
+冷克隆验收：从 GitHub 全新克隆到 /tmp，逐项复跑，结果与本机完全一致。
+过程中发现一处静默降级缺陷。
+
+### 验收方式
+```bash
+git clone git@github.com:quantskills/skill-jev-history-replay.git /tmp/jev-cleanroom
+cd /tmp/jev-cleanroom
+python3 scripts/build.py && python3 scripts/verify_claims.py && python3 -m pytest tests/ -q
+```
+结果：0.9913 总一致率，各轴数字与本机相同；27/27 claims；113 passed。
+另用系统 Python 3.9（无 pyyaml / pytest）跑 build.py，同样跑通且数字相同。
+
+### 修复
+20. **代码默认值与 YAML 不一致**：`config.py` 的 `logs_dir` 默认 `None`，
+    而 `replay_config.yaml` 是 `fixtures/logs`。缺 pyyaml 时走默认值，
+    悄悄进入合成模式——用的是 `log_synth` 现生成的日志，而非 `fixtures/logs`
+    里的文件。本次因夹具本身就是合成的而没暴露，**真实日志接入后会静默读不到**。
+    → 逐项对齐默认值与 YAML；新增 `test_code_defaults_match_yaml_config` 守住。
+    → 缺 pyyaml 时记录降级原因，并在报告 `provenance.config_warnings` 回显；
+      新增 `test_missing_pyyaml_is_reported` 守住。
+
+
 ## 0.5.0 — 2026-11-13
 
 新增**判定器区分度对照**。此前所有测试都在合成日志下跑，而合成日志必然

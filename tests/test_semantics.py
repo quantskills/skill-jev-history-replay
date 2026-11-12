@@ -70,3 +70,58 @@ def test_alternative_value_is_deterministic_and_different():
 def test_get_profile_unknown_raises():
     with pytest.raises(KeyError):
         sem.get_profile("does_not_exist")
+
+def test_code_defaults_match_yaml_config():
+    """内置默认值必须与 config/replay_config.yaml 一致。
+
+    两者不一致会造成静默降级：缺 pyyaml 时走默认值，
+    评测照跑但配置不同（曾出现 logs_dir 默认 None、
+    YAML 为 fixtures/logs，导致悄悄走合成模式）。
+    """
+    import pathlib
+
+    from scripts import config as cfg
+
+    yaml_path = pathlib.Path(cfg.REPO_ROOT) / "config" / "replay_config.yaml"
+    yaml_cfg = cfg._load_yaml_config(yaml_path)
+    assert yaml_cfg, "YAML 配置未能加载（测试环境应有 pyyaml 或文件存在）"
+
+    defaults = cfg._DEFAULTS
+    diffs = []
+    for key, value in yaml_cfg.items():
+        if key == "semantics":
+            continue
+        if key in defaults and defaults[key] != value:
+            diffs.append((key, defaults[key], value))
+    for key, value in yaml_cfg.get("semantics", {}).items():
+        if cfg.REFERENCE_SEMANTICS.get(key) != value:
+            diffs.append((f"semantics.{key}", cfg.REFERENCE_SEMANTICS.get(key), value))
+    assert diffs == [], f"默认值与 YAML 不一致：{diffs}"
+
+
+def test_missing_pyyaml_is_reported():
+    """缺 pyyaml 属有意降级，但必须留下可查的警告，不能静默。"""
+    import builtins
+    import importlib
+    import sys
+
+    real_import = builtins.__import__
+
+    def fake_import(name, *args, **kwargs):
+        if name == "yaml":
+            raise ImportError("simulated")
+        return real_import(name, *args, **kwargs)
+
+    saved = {m: sys.modules.pop(m) for m in list(sys.modules)
+             if m == "yaml" or m.startswith("scripts")}
+    builtins.__import__ = fake_import
+    try:
+        cfg_mod = importlib.import_module("scripts.config")
+        cfg_mod.load_config()
+        warnings = cfg_mod.load_warnings()
+    finally:
+        builtins.__import__ = real_import
+        sys.modules.update(saved)
+
+    assert warnings, "缺 pyyaml 时必须记录降级原因"
+    assert "pyyaml" in warnings[0]

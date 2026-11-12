@@ -59,9 +59,21 @@ REFERENCE_SEMANTICS: Dict[str, Any] = {
     "lot_size": 100,
 }
 
+# 配置降级时记录的原因，供报告回显
+_LOAD_YAML_WARNINGS: list[str] = []
+
+
+def load_warnings() -> list[str]:
+    """返回本次进程内配置加载过程中的降级原因。"""
+    return list(_LOAD_YAML_WARNINGS)
+
+
 _DEFAULTS: Dict[str, Any] = {
     "bars_dir": "fixtures/bars",
-    "logs_dir": None,
+    # 必须与 config/replay_config.yaml 保持一致。
+    # 曾设成 None，导致缺 pyyaml 时静默走合成模式——评测仍能跑，
+    # 但用的是合成日志而不是 fixtures/logs 里的真实日志，属于静默降级。
+    "logs_dir": "fixtures/logs",
     "output_dir": "output",
     # 日志来源标记：actual = 真实 JEV 日志；synthetic = 由 log_synth 生成
     "log_source": "auto",
@@ -87,12 +99,16 @@ def _load_yaml_config(config_path: Path) -> Dict[str, Any]:
         return {}
     try:
         import yaml  # type: ignore[import-untyped]
-
-        with open(config_path, "r", encoding="utf-8") as f:
-            data = yaml.safe_load(f)
-            return data if isinstance(data, dict) else {}
     except ImportError:
+        # 缺 pyyaml 时回退内置默认值。这是**有意的降级**，不是错误，
+        # 但必须可见：调用方应知道本次运行没读到 config/replay_config.yaml。
+        _LOAD_YAML_WARNINGS.append(
+            f"缺少 pyyaml，未加载 {config_path}，使用内置默认值"
+        )
         return {}
+    with open(config_path, "r", encoding="utf-8") as f:
+        data = yaml.safe_load(f)
+    return data if isinstance(data, dict) else {}
 
 
 def _deep_merge(base: Dict[str, Any], override: Dict[str, Any]) -> Dict[str, Any]:

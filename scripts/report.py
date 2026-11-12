@@ -301,6 +301,8 @@ def assemble(*, run_id: str, generated_at: str, log_source: str, semantics: Dict
             "logged_profile": (logged_semantics or {}).get("profile")
             or (manifest or {}).get("logged_profile"),
             "fixture_manifest": manifest,
+            # 配置降级（如缺 pyyaml）必须出现在报告里，不能静默
+            "config_warnings": comparability.get("config_warnings", []),
         },
         "comparability": comparability,
         # 合成模式下把"已记录语义"的旋钮全量回显，使读者能直接核对

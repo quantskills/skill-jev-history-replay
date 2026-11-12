@@ -90,7 +90,9 @@ def evaluate(*, bars_dir: str | Path | None = None,
         overrides["logs_dir"] = str(logs_dir)
     if output_dir is not None:
         overrides["output_dir"] = str(output_dir)
+    cfg._LOAD_YAML_WARNINGS.clear()
     config = cfg.load_config(config_path, overrides)
+    config_warnings = cfg.load_warnings()
 
     semantics = dict(config["semantics"])
     if semantics_override:
@@ -252,6 +254,7 @@ def evaluate(*, bars_dir: str | Path | None = None,
         ],
         "log_source": log_source,
         "missing_prev_close_symbols": missing_prev,
+        "config_warnings": config_warnings,
     }
     comparability["config_hash"] = report.config_hash({
         "semantics_hash": comparability["semantics_hash"],

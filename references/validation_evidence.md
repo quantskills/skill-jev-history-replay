@@ -88,6 +88,7 @@ python3 -m pytest tests/ -q -m slow         # 区分度对照，约 2 分钟
 | `test_metrics_correctness.py` | 15 | **统计函数正确性**：精确值对比、蒙特卡洛 Type-I/覆盖率 |
 | `test_fixture_universe.py` | 4 | **14 日标的池恒定**、每条序列 K 线完整、**manifest 与实际夹具对账**、**gzip mtime=0 可重现** |
 | `test_oos_check.py` | 4 | **IN_SAMPLE 基准与当前报告一致**、judge 能识别显著性减弱 |
+| `test_conclusion_consistency.py` | 5 | **§9 的数字与报告对账**：总体/退出轴一致率、未建模上界、**不得再称容差结果不变**、ST 占比两处一致 |
 | `test_release_compliance.py` | 7 | **免责声明四点**、INSTALL 五平台、SPDX 许可证、三处 name 一致、无占位符、**无凭证/内网/邮箱泄露**、entry 存在 |
 | `test_runtime_adapters.py` | 9 | **适配器文件齐备**、声明的脚本/entry 存在、**旋钮清单与代码一致**、版本与 skill.json 一致、**README 实例数字与报告一致** |
 
@@ -272,7 +273,7 @@ python3 scripts/env_check.py      # ok=true
 python3 scripts/validate.py       # ok=true, 0 issues
 python3 scripts/build.py          # 约 31 秒
 python3 scripts/verify_claims.py  # 71/71
-python3 -m pytest tests/ -q       # 247 passed, 1 skipped
+python3 -m pytest tests/ -q       # 252 passed, 1 skipped
 ```
 
 实测（v0.12.8，从 `origin/main` 全新 clone 到 /tmp）：各项全过，
@@ -581,8 +582,8 @@ python3 scripts/adapt_logs.py --src raw/ --dst adapted/
 
 **未建模占比上界 4.67%，判定 `moderate`。**
 
-实际影响可直接测：本样本中 ST 标的产生了 **47 个信号、41 笔收官交易**，
-占全部交易的 **2.04%**。这些交易在真实市场受 5% 涨跌幅约束，回放未体现。
+实际影响可直接测：本样本中 ST 标的产生了 **52 个信号、47 笔收官交易**，
+占全部交易的 **3.31%**（47/1,422）。这些交易在真实市场受 5% 涨跌幅约束，回放未体现。
 
 ```bash
 python3 scripts/data_quality_audit.py            # 有凭证，含 ST/停牌名单
@@ -975,7 +976,7 @@ python3 scripts/value_decomposition.py \
 
 ---
 
-## 6. 验证中发现并修复的缺陷（42 项）
+## 6. 验证中发现并修复的缺陷（43 项）
 
 以下都不是构造的测试用例，而是在真实数据上跑出来的：
 
@@ -1023,6 +1024,7 @@ python3 scripts/value_decomposition.py \
 | 40 | **CI 的 release hygiene 只查文件存在、不查内容** | 社区审核真正看的是：免责声明四个要点、INSTALL 五平台覆盖、SPDX 许可证标识、无占位符、无敏感信息。CI 只做了 `test -f`，内容全对不上也照样绿。 | 扩充 CI 步骤用 Python 断言实际内容；新增 `tests/test_release_compliance.py`（7 例）本地可跑 |
 | 41 | **无法判定的 `hit` 被静默当成 False** | `hit: "也许"`、`hit: null` 落在旧白名单之外，被转成 `False`——把"不知道"变"没命中"。下游完全看不出来，属于最危险的一类静默降级 | 白名单外报 `invalid_hit_value`；补 `test_unrecognized_hit_is_an_error_not_false` 与 `test_hit_accepts_common_boolean_spellings` |
 | 42 | **标的代码大小写不归一，导致全部对不上** | 日志写 `000001.sz`（或带空格）而 K 线是 `000001.SZ` 时，**一条也配不上**：全部变成 `jev_missing`、`comparable=0`、`match_rate=null`。报告完全看不出真正原因是大小写——表现成"日志与行情毫无关系" | 加载时统一 `strip().upper()`（K 线与日志两处）+ `test_symbol_case_and_whitespace_are_normalized` 等 2 例 |
+| 43 | **§9「结论与边界」的数字无人校验** | 上界写 4.20%（实际 4.67%）、ST 交易占比写 2.04%（实际 3.31%）、「容差 0–5 分钟结果不变」在 v0.12.8 修好容差后已不成立。这一节是读者判断能不能信的依据，却一直没进 `verify_claims` | 按实测更正 + `tests/test_conclusion_consistency.py`（5 例）对账 |
 
 ---
 
@@ -1052,7 +1054,7 @@ python3 scripts/value_decomposition.py \
 | panda-data | 1.0.6（仅夹具再生） |
 | 三方依赖 | 无（对齐与回放为纯标准库；`python3 -S` 实测通过） |
 | 全量对齐 | 约 31 秒（4,200 序列 × 240 根，1,008,000 根） |
-| 单元测试 | 约 160 秒（247 passed, 1 skipped） |
+| 单元测试 | 约 160 秒（252 passed, 1 skipped） |
 
 ```bash
 git clone https://github.com/quantskills/skill-jev-history-replay
@@ -1075,8 +1077,9 @@ python3 scripts/verify_claims.py
   大偏差的 JEV 侧时刻全部指向次日首根触价，与逐条证据一致；
 - 14 天分日一致率见 §3.5，不由单日主导；
 - 未建模状态占比已量化：ST 4.67%、触涨停 1.76%、触跌停 0.64%，
-  上界 4.20%（`moderate`），ST 标的实际产生 2.04% 的交易（§3.4）；
-- 容差 0–5 分钟结果不变；
+  上界 4.67%（`moderate`），ST 标的实际产生 3.31% 的交易（§3.4）；
+- 容差 0/1/2/5 分钟下总一致率为 0.9895 / 0.9913 / 0.9920 / 0.9931，
+  **随容差单调上升**（并非「结果不变」；见 §3.6 的 v0.12.8 更正说明）；
 - 显式语义与字面直译的整体差异 **82.6% 由 `t_plus_1` 一个旋钮驱动**；
   关掉 T+1 后显式语义反而显著更优（p=0.036）。正确结论是
   「T+1 对日内策略有显著代价」，不是「语义显式化无价值」（见 §5.25）；

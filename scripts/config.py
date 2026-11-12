@@ -90,6 +90,9 @@ _DEFAULTS: Dict[str, Any] = {
     "min_cycles": 20,
     # 报告里最多内联多少条账本行（完整账本写 JSONL）
     "max_inline_rows": 50,
+    # 账本落盘模式：diff = 只写非 match 记录（默认，1M 行里 96% 是无信息量的
+    # jev_missing）；full = 全量逐行。
+    "ledger_mode": "diff",
     "semantics": copy.deepcopy(REFERENCE_SEMANTICS),
 }
 

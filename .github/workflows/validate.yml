@@ -27,7 +27,7 @@ jobs:
         run: python scripts/build.py
       - name: Unit tests (fast)
         run: python -m pytest tests/ -v -m "not slow"
-      - name: Unit tests (slow: verdict discrimination)
+      - name: "Unit tests (slow: verdict discrimination)"
         run: python -m pytest tests/ -v -m slow
       - name: Verify validation-doc claims
         run: python scripts/verify_claims.py

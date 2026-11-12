@@ -34,7 +34,7 @@ python3 -m pytest tests/ -q -m slow         # 区分度对照，约 2 分钟
 
 | 项 | 结果 |
 |---|---|
-| 用例总数 | 173 |
+| 用例总数 | 179 |
 | 失败 | 0 |
 | 环境 | Python 3.12.12 / 3.11.16 |
 | 全量耗时 | 快测约 47 秒；慢测（区分度对照）另约 2 分钟 |
@@ -52,9 +52,60 @@ python3 -m pytest tests/ -q -m slow         # 区分度对照，约 2 分钟
 | `test_validation_claims.py` | 9 | **文档数字对账**、防漂移、区分度对照、**陈旧数字扫描** |
 | `test_data_quality_audit.py` | 6 | 板块分类、涨跌停口径、离线不把"未核验"当 0、报告回显 |
 | `test_trade_audit.py` | 4 | **逐笔价格/算术反查**、跨日覆盖、故意改价必被抓 |
+| `test_ci_config.py` | 4 | **CI 配置合法**、步骤齐全、build 先于 tests |
+| `test_ledger_mode.py` | 3 | **账本瘦身**、full 可回溯、per_day 入报告 |
 | `test_adapt_logs.py` | 15 | **外部日志字段映射**、布尔规范化、缺字段必失败 |
 | `test_knob_efficacy.py` | 3 | **旋钮全部接线**、指纹稳定性、含当前根必归零 |
 | `test_metrics_correctness.py` | 15 | **统计函数正确性**：精确值对比、蒙特卡洛 Type-I/覆盖率 |
+
+---
+
+## 1.0a CI 流水线本身
+
+所有轮次都声称「CI 会跑这些步骤」，但从未按 CI 顺序真跑过。
+
+### 发现：流水线从未成功解析
+
+`.github/workflows/validate.yml` 里有一行：
+
+```yaml
+- name: Unit tests (slow: verdict discrimination)
+```
+
+冒号没加引号，YAML 把 `slow` 当成键——**整个文件是无效 YAML**。
+这条流水线从来没跑起来过，而此前每轮都在引用它。
+
+修复后加了 `tests/test_ci_config.py`（4 例）：YAML 合法性、必需步骤齐全、
+`build` 必须排在 `tests` 之前（`per_day` 校验依赖它）、每个 `run` 非空。
+
+### 按 CI 顺序在冷克隆上实跑
+
+```bash
+git clone ... /tmp/jev-ci && cd /tmp/jev-ci
+python3 scripts/env_check.py      # exit 0
+python3 scripts/validate.py       # exit 0, issues []
+python3 scripts/build.py          # exit 0
+python3 scripts/verify_claims.py  # 61/61 OK
+```
+
+### 由此发现的账本体积问题
+
+`build.py` 产出的 `output/ledger.jsonl` 有 **185 MB / 1,015,406 行**：
+
+| 状态 | 行数 | 占比 |
+|---|---|---|
+| `jev_missing` | 979,246 | **96.44%** |
+| `match` | 35,707 | 3.52% |
+| `divergent` | 379 | 0.04% |
+| `open_position` | 74 | 0.01% |
+
+前两类合计 99.96%，但**它们不是差异**：`jev_missing` 是"日志没记这一根"，
+`match` 是一致。真正需要逐行追溯的只有 453 行。
+
+新增 `ledger_mode`（默认 `diff`）：只写需要看的记录。
+**185 MB → 78 KB，缩减 99.96%**。需要全量时设 `ledger_mode: full`。
+
+同时把分日聚合写进 `report.per_day`，让 `verify_claims` 不必再读那个大文件。
 
 ---
 

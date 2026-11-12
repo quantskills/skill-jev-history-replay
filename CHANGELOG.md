@@ -1,5 +1,33 @@
 # CHANGELOG
 
+## 0.11.0 — 2026-11-13
+
+验证 CI 流水线本身。此前每轮都在说"CI 会跑这些步骤"，但从未按 CI 顺序真跑过。
+
+### 发现 1：流水线从未成功解析
+`validate.yml` 里 `- name: Unit tests (slow: verdict discrimination)` 的冒号
+没加引号，YAML 把 `slow` 当成键——**整个文件无效**。这条流水线从来没跑起来过。
+
+修复并新增 `tests/test_ci_config.py`（4 例）：YAML 合法性、必需步骤齐全、
+build 必须排在 tests 之前、每个 run 非空。
+
+### 发现 2：账本 185 MB / 96% 是无信息量记录
+| jev_missing | 979,246 | 96.44% |
+| match | 35,707 | 3.52% |
+| divergent | 379 | 0.04% |
+
+前两类不是差异（`jev_missing` = 日志没记这一根；`match` = 一致），
+真正需要逐行追溯的只有 453 行。
+
+新增 `ledger_mode`（默认 `diff`）：**185 MB → 78 KB，缩减 99.96%**。
+需要全量时设 `ledger_mode: full`。
+
+同时把分日聚合写进 `report.per_day`，`verify_claims` 不再读大文件。
+
+### 按 CI 顺序在冷克隆上实跑
+env_check / validate / build / verify_claims 全部 exit 0，claims 61/61。
+
+
 ## 0.10.0 — 2026-11-13
 
 新增**外部日志适配层**。所有测试日志都出自本库 `log_synth`，格式必然兼容——

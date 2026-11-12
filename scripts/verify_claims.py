@@ -112,7 +112,19 @@ def verify(report: Dict[str, Any], claims: Dict[str, Any]) -> Dict[str, Any]:
 
         counts = _c.defaultdict(_c.Counter)
         ledger_path = REPO_ROOT / "output" / "ledger.jsonl"
-        if not ledger_path.exists():
+
+        # 优先用报告里的 per_day（内存聚合，不依赖落盘账本的完整模式）
+        per_day_block = report.get("per_day")
+        if per_day_block:
+            for day, b in per_day_block.items():
+                counts[day]["match"] = b.get("match", 0)
+                counts[day]["divergent"] = b.get("divergent", 0)
+                counts[day]["_one_sided"] = b.get("one_sided", 0)
+            ledger_path = None   # 已有内存数据，无需读文件
+
+        if ledger_path is None:
+            pass
+        elif not ledger_path.exists():
             results.append({
                 "check": "per_day.ledger_available",
                 "actual": "missing",

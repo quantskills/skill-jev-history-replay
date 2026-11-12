@@ -278,6 +278,23 @@ def evaluate(*, bars_dir: str | Path | None = None,
         alignment=alignment,
         comparability=comparability,
     )
+    # 分日聚合直接写进报告，校验与阅读都不必再读 185MB 的 ledger
+    per_day: Dict[str, Dict[str, int]] = {}
+    for series, rows in rows_by_symbol.items():
+        day = series.split("@")[-1] if "@" in series else "single"
+        bucket = per_day.setdefault(day, {"match": 0, "divergent": 0, "one_sided": 0})
+        for row in rows:
+            st = row.get("status")
+            if st == "match":
+                bucket["match"] += 1
+            elif st == "divergent":
+                bucket["divergent"] += 1
+            else:
+                bucket["one_sided"] += 1
+    for bucket in per_day.values():
+        bucket["comparable"] = bucket["match"] + bucket["divergent"]
+
+    payload["per_day"] = dict(sorted(per_day.items()))
     payload["summary"] = {
         "symbol_count": len(bars),
         "signal_count": current["summary"]["signal_count"],
@@ -299,15 +316,41 @@ def evaluate(*, bars_dir: str | Path | None = None,
     report_path = out_dir / "report.json"
     report_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2),
                            encoding="utf-8")
+    # 账本默认只写**需要看的**记录。
+    #
+    # 1,015,406 行里：`jev_missing` 占 96.4%（日志没记这一根，不是差异），
+    # `match` 占 3.5%（一致，无需逐行看）。两者合计 99.9%，却占了 185MB。
+    # 真正需要逐行追溯的是 `divergent`（真实冲突）与其它单边项。
+    #
+    # diff 模式 = 只写 divergent 以及非 match/non-missing 的状态；
+    # full 模式 = 全量。聚合统计始终用内存数据，不受影响。
+    ledger_mode = config.get("ledger_mode", "diff")
+    keep_all = str(ledger_mode).lower() == "full"
+    _quiet = {"match", "jev_missing"}
+    written = 0
+    skipped = 0
     ledger_path = out_dir / "ledger.jsonl"
     with ledger_path.open("w", encoding="utf-8") as fh:
         for symbol, rows in sorted(rows_by_symbol.items()):
             for row in rows:
+                if not keep_all and row.get("status") in _quiet:
+                    skipped += 1
+                    continue
                 fh.write(json.dumps(row, ensure_ascii=False) + "\n")
+                written += 1
 
     payload["artifacts"] = {
         "report": str(report_path),
         "ledger": str(ledger_path),
+        "ledger_mode": "full" if keep_all else "diff",
+        "ledger_rows_written": written,
+        "ledger_quiet_rows_omitted": skipped,
+        "ledger_note": (
+            "默认 diff 模式只写需要追溯的记录（真实冲突等），"
+            "略过 match 与 jev_missing；"
+            "需要逐行完整账本时把 ledger_mode 设为 full。"
+            "聚合统计用内存数据，不受影响。"
+        ),
     }
     return payload
 

@@ -34,7 +34,7 @@ python3 -m pytest tests/ -q -m slow         # 区分度对照，约 2 分钟
 
 | 项 | 结果 |
 |---|---|
-| 用例总数 | 179 |
+| 用例总数 | 185 |
 | 失败 | 0 |
 | 环境 | Python 3.12.12 / 3.11.16 |
 | 全量耗时 | 快测约 47 秒；慢测（区分度对照）另约 2 分钟 |
@@ -52,6 +52,7 @@ python3 -m pytest tests/ -q -m slow         # 区分度对照，约 2 分钟
 | `test_validation_claims.py` | 9 | **文档数字对账**、防漂移、区分度对照、**陈旧数字扫描** |
 | `test_data_quality_audit.py` | 6 | 板块分类、涨跌停口径、离线不把"未核验"当 0、报告回显 |
 | `test_trade_audit.py` | 4 | **逐笔价格/算术反查**、跨日覆盖、故意改价必被抓 |
+| `test_credentials.py` | 6 | **引号去除**、别名回退、缺凭证结构化报错、非法 URL 拒绝 |
 | `test_ci_config.py` | 4 | **CI 配置合法**、步骤齐全、build 先于 tests |
 | `test_ledger_mode.py` | 3 | **账本瘦身**、full 可回溯、per_day 入报告 |
 | `test_adapt_logs.py` | 15 | **外部日志字段映射**、布尔规范化、缺字段必失败 |

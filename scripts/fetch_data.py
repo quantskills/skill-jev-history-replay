@@ -44,19 +44,16 @@ class FetchError(RuntimeError):
 
 
 def _env(primary: str, fallback: str) -> str:
-    value = os.environ.get(primary) or os.environ.get(fallback) or ""
-    if not value:
-        env_file = Path.home() / ".pandadata" / "pandadata.env"
-        if env_file.exists():
-            for line in env_file.read_text(encoding="utf-8").splitlines():
-                line = line.strip()
-                if line.startswith("export "):
-                    line = line[len("export "):]
-                if "=" in line and not line.startswith("#"):
-                    key, val = line.split("=", 1)
-                    os.environ.setdefault(key.strip(), val.strip())
-            value = os.environ.get(primary) or os.environ.get(fallback) or ""
-    return value
+    """从环境变量或 ~/.pandadata/pandadata.env 取值（去除包裹引号）。"""
+    import os
+
+    from scripts.credentials import FIELDS, load
+
+    values = load()
+    for name, names in FIELDS.items():
+        if primary in names or fallback in names:
+            return values.get(name, "")
+    return os.environ.get(primary) or os.environ.get(fallback) or ""
 
 
 def _client() -> Any:

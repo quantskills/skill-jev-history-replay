@@ -75,24 +75,15 @@ def _fetch_exchange_lists(start: str, end: str) -> Optional[Dict[str, Any]]:
     except ImportError:
         return None
 
-    username = os.environ.get("PANDA_DATA_USERNAME") or os.environ.get("DEFAULT_USERNAME")
-    zinfoid = os.environ.get("PANDA_DATA_PASSWORD") or os.environ.get("DEFAULT_PASSWORD")
-    base_url = os.environ.get("PANDA_DATA_BASE_URL") or os.environ.get("JAVA_SERVICE_BASE_URL")
-    if not all([username, zinfoid, base_url]):
-        env_file = Path.home() / ".pandadata" / "pandadata.env"
-        if env_file.exists():
-            for line in env_file.read_text(encoding="utf-8").splitlines():
-                line = line.strip()
-                if line.startswith("export "):
-                    line = line[len("export "):]
-                if "=" in line and not line.startswith("#"):
-                    k, v = line.split("=", 1)
-                    os.environ.setdefault(k.strip(), v.strip())
-            username = os.environ.get("PANDA_DATA_USERNAME") or os.environ.get("DEFAULT_USERNAME")
-            zinfoid = os.environ.get("PANDA_DATA_PASSWORD") or os.environ.get("DEFAULT_PASSWORD")
-            base_url = os.environ.get("PANDA_DATA_BASE_URL") or os.environ.get("JAVA_SERVICE_BASE_URL")
-    if not all([username, zinfoid, base_url]):
+    from scripts.credentials import CredentialError, require
+
+    try:
+        creds = require()
+    except CredentialError:
         return None
+    username, zinfoid, base_url = (
+        creds["username"], creds["zinfoid"], creds["base_url"]
+    )
 
     try:
         panda_data.init_token(username=username, password=zinfoid, base_url=base_url)

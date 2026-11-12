@@ -1,5 +1,33 @@
 # CHANGELOG
 
+## 0.11.1 — 2026-11-13
+
+端到端验证 `oos_check.py`（此前只用缓存测过 judge 函数），修复凭证与退出码缺陷。
+
+### 发现
+**缺陷 29：凭证值带引号导致 URL 非法。**
+`~/.pandadata/pandadata.env` 写的是 `export X="abc"`，解析保留了双引号，
+`base_url` 变成 `"https://..."`，报 `unknown url type: "https`。
+三个脚本各有一份解析逻辑，都有这个 bug。
+
+**缺陷 30：`oos_check` 无凭证时抛堆栈且退出码为 0。**
+脚本崩了却报成功。
+
+### 修复
+- 新增 `scripts/credentials.py`：去引号、别名回退、URL 合法性校验，
+  三个脚本统一接入
+- `oos_check` 捕获异常 → 结构化 JSON + `exit 2`
+- `tests/test_credentials.py`（6 例）
+
+### 端到端实测（3 天 × 100 只）
+| 合计可比 | 1,597 | 一致率 0.9925 |
+| 归因 | exit_eval 100% | 复现 |
+| 价值 | inconclusive, p=0.083 | **不复现** |
+
+3 天不足以复现价值结论（11 天 p=0.0488，14 天 p=7×10⁻⁶）——
+显著性对样本量高度敏感。工具如实报 `NOT FULLY REPLICATED`。
+
+
 ## 0.11.0 — 2026-11-13
 
 验证 CI 流水线本身。此前每轮都在说"CI 会跑这些步骤"，但从未按 CI 顺序真跑过。

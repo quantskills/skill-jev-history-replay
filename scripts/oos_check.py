@@ -48,26 +48,10 @@ IN_SAMPLE = {
 
 
 def _load_credentials() -> bool:
-    username = os.environ.get("PANDA_DATA_USERNAME") or os.environ.get("DEFAULT_USERNAME")
-    zinfoid = os.environ.get("PANDA_DATA_PASSWORD") or os.environ.get("DEFAULT_PASSWORD")
-    base_url = os.environ.get("PANDA_DATA_BASE_URL") or os.environ.get("JAVA_SERVICE_BASE_URL")
-    if all([username, zinfoid, base_url]):
-        return True
-    env_file = Path.home() / ".pandadata" / "pandadata.env"
-    if not env_file.exists():
-        return False
-    for line in env_file.read_text(encoding="utf-8").splitlines():
-        line = line.strip()
-        if line.startswith("export "):
-            line = line[len("export "):]
-        if "=" in line and not line.startswith("#"):
-            k, v = line.split("=", 1)
-            os.environ.setdefault(k.strip(), v.strip())
-    return bool(
-        (os.environ.get("PANDA_DATA_USERNAME") or os.environ.get("DEFAULT_USERNAME"))
-        and (os.environ.get("PANDA_DATA_PASSWORD") or os.environ.get("DEFAULT_PASSWORD"))
-        and (os.environ.get("PANDA_DATA_BASE_URL") or os.environ.get("JAVA_SERVICE_BASE_URL"))
-    )
+    """凭证是否齐备。解析细节交给 scripts/credentials.py 统一处理。"""
+    from scripts.credentials import is_available
+
+    return is_available()
 
 
 def build_and_evaluate(dates: List[str], universe: int = 300,
@@ -206,7 +190,16 @@ def main(argv: List[str] | None = None) -> int:
 
     dates = ([d.strip() for d in args.dates.split(",") if d.strip()]
              if args.dates else DEFAULT_DATES)
-    result = build_and_evaluate(dates, args.universe)
+    try:
+        result = build_and_evaluate(dates, args.universe)
+    except Exception as exc:   # 网络/凭证/数据问题一律结构化报错，不抛堆栈
+        code = getattr(exc, "code", type(exc).__name__)
+        hint = getattr(exc, "hint", "")
+        print(json.dumps({
+            "ok": False,
+            "error": {"code": code, "message": str(exc), "hint": hint},
+        }, ensure_ascii=False, indent=2))
+        return 2
     summary = summarize(result)
     verdict = judge(summary, IN_SAMPLE)
     payload = {"ok": verdict["ok"], "out_of_sample": summary,

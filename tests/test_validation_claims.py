@@ -82,6 +82,7 @@ def test_claims_are_internally_consistent(report):
     assert a["rows"] == a["match"] + a["divergent"] + a["one_sided"]
     assert a["divergence_items"] == a["divergent"]
 
+@pytest.mark.slow
 def test_verdict_discriminates_semantic_difference(tmp_path):
     """阳性/阴性对照：判定器必须随语义差异变化，而不是永远 inconclusive。
 
@@ -121,3 +122,33 @@ def test_verdict_discriminates_semantic_difference(tmp_path):
     # 关键回归：单旋钮差异不能被判成 consistent
     for case in ("exit_eval", "bar_timestamp", "baseline_price"):
         assert by_case[case]["verdict"] != "consistent"
+
+
+def test_no_stale_numbers_in_evidence_doc():
+    """验证文档里不得残留历史样本的具体数字。
+
+    claims 只覆盖关键指标；文档表格里还有大量数字不受它保护。
+    v0.6.1 换了样本后，一度有 5 处旧数字（7,000 序列、0.9913、46,642 等）
+    没被任何检查发现。
+    """
+    text = EVIDENCE.read_text(encoding="utf-8")
+    hits = verify_claims.scan_stale_tokens(text)
+    assert hits == [], (
+        "验证文档残留历史样本数字：\n"
+        + "\n".join(f"  行 {h['line']}: {h['token']} — {h['text']}"
+                    for h in hits)
+    )
+
+
+def test_stale_scanner_ignores_historical_lines():
+    """标注了版本号的历史叙述允许保留旧数字。"""
+    text = "当前是 4,200 序列。\n上表中 v0.5.0 的 7,000 序列样本已作废。\n"
+    hits = verify_claims.scan_stale_tokens(text)
+    # 第二行含 "v0.5"，应被豁免；该行也不含 STALE_TOKENS 中的 token
+    assert all("v0.5" not in h["text"] for h in hits)
+
+
+def test_stale_scanner_detects_current_description():
+    text = "样本共 1,680,000 根分钟线。"
+    hits = verify_claims.scan_stale_tokens(text)
+    assert hits and hits[0]["token"] == "1,680,000"

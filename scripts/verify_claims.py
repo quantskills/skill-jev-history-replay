@@ -133,6 +133,20 @@ def verify(report: Dict[str, Any], claims: Dict[str, Any]) -> Dict[str, Any]:
     for key, expected in claims.get("summary", {}).items():
         _check(results, f"summary.{key}", summ.get(key), expected)
 
+    # 陈旧数字扫描：claims 只覆盖关键指标，文档表格里还有大量数字
+    # 不受它保护。这里额外扫一遍已知的历史样本 token。
+    evidence_path = REPO_ROOT / "references" / "validation_evidence.md"
+    stale_hits: List[Dict[str, Any]] = []
+    if evidence_path.exists():
+        stale_hits = scan_stale_tokens(evidence_path.read_text(encoding="utf-8"))
+    for hit in stale_hits:
+        results.append({
+            "check": f"evidence.stale_token.line{hit['line']}",
+            "actual": hit["token"],
+            "claimed": "（不应出现）",
+            "ok": False,
+        })
+
     failed = [r for r in results if not r["ok"]]
     return {
         "ok": not failed,
@@ -141,6 +155,31 @@ def verify(report: Dict[str, Any], claims: Dict[str, Any]) -> Dict[str, Any]:
         "failed": failed,
         "results": results,
     }
+
+
+# 文档中出现即为"陈旧值"的具体数字 token。
+# 这些是历史样本的产物，出现在当前描述里就说明文档没跟上代码。
+# 例外：显式标注了版本/日期的历史叙述行不计入（见 _is_historical）。
+STALE_TOKENS = [
+    "1,680,000", "46,642", "58,110", "57,607", "28,754 / 1,680,000",
+]
+
+
+def _is_historical(line: str) -> bool:
+    """判断一行是否属于"历史叙述"（允许保留旧数字）。"""
+    markers = ("v0.4", "v0.5", "v0.6.0", "当时", "历史", "上一版", "旧样本")
+    return any(m in line for m in markers)
+
+
+def scan_stale_tokens(evidence_text: str) -> List[Dict[str, Any]]:
+    hits: List[Dict[str, Any]] = []
+    for lineno, line in enumerate(evidence_text.splitlines(), 1):
+        if _is_historical(line):
+            continue
+        for token in STALE_TOKENS:
+            if token in line:
+                hits.append({"line": lineno, "token": token, "text": line.strip()[:100]})
+    return hits
 
 
 def _claims_file() -> Path:

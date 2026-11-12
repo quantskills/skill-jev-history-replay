@@ -14,8 +14,17 @@ from typing import Any, Dict, List
 import pytest
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+
+
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
+
+
+def pytest_configure(config):
+    config.addinivalue_line(
+        "markers",
+        "slow: 需要跑多组完整端到端（约 2 分钟），CI 单独调度",
+    )
 
 
 def make_bars(prices: List[float], start_minute: int = 9 * 60 + 31) -> List[Dict[str, Any]]:

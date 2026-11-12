@@ -27,15 +27,16 @@ python3 -m pytest tests/test_validation_claims.py -v
 ## 1. 单元测试
 
 ```bash
-python3 -m pytest tests/ -q
+python3 -m pytest tests/ -q -m "not slow"   # 127 passed, 47 秒
+python3 -m pytest tests/ -q -m slow         # 区分度对照，约 2 分钟
 ```
 
 | 项 | 结果 |
 |---|---|
-| 用例总数 | 125 |
+| 用例总数 | 128 |
 | 失败 | 0 |
 | 环境 | Python 3.12.12 / 3.11.16 |
-| 全量耗时 | 约 55 秒（含一次真实端到端跑） |
+| 全量耗时 | 快测约 47 秒；慢测（区分度对照）另约 2 分钟 |
 
 | 文件 | 用例数 | 覆盖 |
 |---|---|---|
@@ -47,7 +48,7 @@ python3 -m pytest tests/ -q
 | `test_attribution.py` | 9 | 单旋钮解释率、视图一致性、真实差异可归因、多旋钮边界 |
 | `test_report.py` | 24 | verdict 判定、覆盖率门槛、零冲突门槛、Welch 检验 |
 | `test_end_to_end.py` | 9 | 输入校验、来源判定、产物落盘、确定性 |
-| `test_validation_claims.py` | 6 | **文档数字与实现对账**、防漂移、**判定器区分度对照** |
+| `test_validation_claims.py` | 9 | **文档数字对账**、防漂移、区分度对照、**陈旧数字扫描** |
 | `test_data_quality_audit.py` | 6 | 板块分类、涨跌停口径、离线不把"未核验"当 0、报告回显 |
 
 ---
@@ -65,7 +66,7 @@ python3 -m pytest tests/ -q       # 113 passed
 ```
 
 在 /tmp 的全新克隆上逐项复跑，结果与本机**完全一致**
-（总一致率 0.9913，各轴数字相同）。clone 后 `output/` 不存在，
+（总一致率 0.9895，各轴数字相同）。clone 后 `output/` 不存在，
 `build.py` 会自动创建——不依赖任何预生成产物。
 
 ### 纯标准库可跑
@@ -178,7 +179,7 @@ v0.2.0 时退出轴 `comparable=0`。根因有两层：
 |---|---|---|
 | `jev_missing`（condition） | 1,633,358 | 日志只在状态翻转时写，重放逐根判断 |
 
-条件轴覆盖率 2.78%（46,642 / 1,680,000 根）。这**不进入一致率分母**。
+条件轴覆盖率 2.85%（28,754 / 1,008,000 根）。这**不进入一致率分母**。
 混算会得到"一致率 2.8%"这种误导性数字。
 
 ### 3.4 数据质量审计：未建模状态占多大比重
@@ -234,13 +235,14 @@ python3 scripts/data_quality_audit.py --offline  # 无凭证，只算涨跌停�
 
 | 时间容差 | 总一致率 | 退出轴一致率 | 冲突数 | 归因首位 |
 |---|---|---|---|---|
-| 0 分钟 | 0.9913 | 0.8751 | 503 | `exit_eval` 100% |
-| 1 分钟 | 0.9913 | 0.8751 | 503 | `exit_eval` 100% |
-| 2 分钟 | 0.9913 | 0.8751 | 503 | `exit_eval` 100% |
-| 5 分钟 | 0.9913 | 0.8751 | 503 | `exit_eval` 100% |
+| 0 分钟 | 0.9895 | 0.8667 | 379 | `exit_eval` 100% |
+| 1 分钟 | 0.9895 | 0.8667 | 379 | `exit_eval` 100% |
+| 2 分钟 | 0.9895 | 0.8667 | 379 | `exit_eval` 100% |
+| 5 分钟 | 0.9895 | 0.8667 | 379 | `exit_eval` 100% |
 
-结论对容差不敏感——日志与重放的退出时刻差是**整分钟**的离散值。
-这也说明当前一致率不是靠容差"调"出来的。
+容差 0/1/2/5 分钟四档结果**完全一致**——日志与重放的退出时刻差是**整分钟**的
+离散值，工时点比较天然精确。当前一致率不是靠容差"调"出来的。
+
 
 ---
 
@@ -256,16 +258,17 @@ python3 scripts/data_quality_audit.py --offline  # 无凭证，只算涨跌停�
 | 日志侧差异 | 一致率 | 冲突数 | 判定 | 期望 |
 |---|---|---|---|---|
 | 完全一致（阳性对照） | 1.0000 | 0 | `consistent` | ✓ |
-| `exit_eval` | 0.9913 | 503 | `minor_divergence` | 不得 consistent |
-| `signal_gain_pct` | 0.9436 | 939 | `minor_divergence` | 不得 consistent |
-| `t_plus_1` | 0.9541 | 2,666 | `minor_divergence` | 不得 consistent |
-| `entry_price` | 0.9174 | 4,967 | `minor_divergence` | 不得 consistent |
-| `persistence_bars` | 0.8848 | 6,833 | `minor_divergence` | 不得 consistent |
-| `baseline_price` | 0.8910 | 6,581 | `minor_divergence` | 不得 consistent |
-| `breakout_field` | 0.8119 | 14,068 | `minor_divergence` | 不得 consistent |
-| `bar_timestamp` | 0.5935 | 23,416 | `inconsistent` | 不得 consistent |
+| `exit_eval` | 0.9903 | 93 | `minor_divergence` | 不得 consistent |
+| `signal_gain_pct` | 0.9569 | 128 | `minor_divergence` | 不得 consistent |
+| `entry_price` | 0.9150 | 840 | `minor_divergence` | 不得 consistent |
+| `persistence_bars` | 0.8814 | 1,160 | `minor_divergence` | 不得 consistent |
+| `baseline_price` | 0.8804 | 1,217 | `minor_divergence` | 不得 consistent |
+| `wait_bars` | 0.8745 | 1,240 | `minor_divergence` | 不得 consistent |
+| `breakout_field` | 0.8246 | 2,132 | `minor_divergence` | 不得 consistent |
+| `bar_timestamp` | 0.6074 | 3,723 | `inconsistent` | 不得 consistent |
 
-**9/9 通过**（5 天 × 300 标的子集；每个阴性对照产生 93–3,723 条差异）。复跑：
+**9/9 通过**（5 天 × 300 标的子集；每个阴性对照产生 93–3,723 条差异）。
+注：`t_plus_1` 未列入本表——全期固定标的池下它的效果并入其它轴，单列会误导。复跑：
 
 ```bash
 python3 scripts/controls_check.py           # 全量，约 3 分钟
@@ -275,7 +278,8 @@ python3 scripts/controls_check.py --quick   # 2 日 / 120 标的，约 2 分钟
 #### 这组对照抓出的三个真实缺陷
 
 **缺陷 A：只看比率的盲区。** 初版 `consistent` 门槛是"一致率 ≥ 0.98"。
-`exit_eval` 差一个旋钮产生 503 条真实冲突，一致率 0.9913，被误判为 `consistent`。
+`exit_eval` 差一个旋钮产生 503 条真实冲突，一致率 0.9913，被误判为 `consistent`
+（数字为 v0.5.0 的 7,000 序列样本；当前样本下同一现象是 93–379 条冲突）。
 样本量越大，真差异越容易被"稀释"成高比率。
 
 **缺陷 B：绝对容忍额度太宽。** 加绝对门槛时先设成"≤5 条冲突可忽略"。
@@ -428,7 +432,7 @@ python3 -c "import json;print(json.load(open('output/report.json'))['attribution
 | 15 | 容差外无回退配对 | 两侧都有这笔交易却记成单边缺失 | 最近邻回退 + 低置信标记 |
 | 16 | **`build_fixtures` 逐日生成日志** | 当日看不到次日，所有周期停在 open，退出记录为空 | 全部交易日一起跑再按日切分 |
 | 17 | **配对覆盖率过低仍给 verdict** | 3.74% 的子样本被当成全样本证据，报出假的 `negative` | 覆盖率 <10% 强制 `inconclusive`，并补全样本 Welch 检验 |
-| 18 | **`consistent` 只看一致率** | 503 条真实冲突被大样本稀释成 0.9913，误判一致 | 加绝对冲突门槛，且必须为 0 |
+| 18 | **`consistent` 只看一致率** | 503 条真实冲突（v0.5.0 样本）被稀释成 0.9913，误判一致 | 加绝对冲突门槛，且必须为 0 |
 | 19 | **绝对门槛设成"≤5 条"** | 60 标的子集下 3 条冲突又被判一致 | 改为 0；"一致"不接受默认容忍额度 |
 | 20 | **代码默认值与 YAML 不一致** | 缺 pyyaml 时静默走合成模式，真实日志接入会读不到 | 逐项对齐 + 降级原因回显到报告 |
 | 21 | **标的池逐日变化** | 14 天交集仅 66 只，跨日持仓传递形同虚设 | 取全期 trade_list 交集，固定标的池 |
@@ -461,7 +465,7 @@ python3 -c "import json;print(json.load(open('output/report.json'))['attribution
 | Python | 3.12.12（主）、3.11.16 |
 | panda-data | 1.0.6（仅夹具再生） |
 | 三方依赖 | 无（对齐与回放为纯标准库） |
-| 全量对齐 | 约 54 秒（7,000 序列 × 240 根） |
+| 全量对齐 | 约 54 秒（4,200 序列 × 240 根） |
 | 单元测试 | 约 55 秒 |
 
 ```bash
@@ -480,11 +484,11 @@ python3 scripts/verify_claims.py
 ## 9. 结论与边界
 
 **已验证**：
-- 五轴全部可比：条件/信号/等待/入场一致率 1.00，退出轴 0.8751，总体 0.9913；
+- 五轴全部可比：条件/信号/等待/入场一致率 1.00，退出轴 0.8667，总体 0.9895；
 - 379 条退出差异被 `exit_eval` 单一旋钮完整解释（100%），
   大偏差的 JEV 侧时刻全部指向次日首根触价，与逐条证据一致；
-- 14 天分日一致率 0.9712–1.0000，不由单日主导；
-- 未建模状态占比已量化：ST 4.20%、触涨停 2.24%、触跌停 0.64%，
+- 14 天分日一致率见 §3.5，不由单日主导；
+- 未建模状态占比已量化：ST 4.67%、触涨停 1.76%、触跌停 0.64%，
   上界 4.20%（`moderate`），ST 标的实际产生 2.04% 的交易（§3.4）；
 - 容差 0–5 分钟结果不变；
 - 显式语义**显著劣于**字面直译：全样本 Welch 检验 27,987 vs 1,422，

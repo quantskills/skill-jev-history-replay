@@ -32,8 +32,8 @@ python3 -m pytest tests/ -q
 
 | 项 | 结果 |
 |---|---|
-| 用例总数 | 109 |
-| 通过 | 109 |
+| 用例总数 | 112 |
+| 通过 | 112 |
 | 失败 | 0 |
 | 环境 | Python 3.12.12 / 3.11.16 |
 | 全量耗时 | 约 55 秒（含一次真实端到端跑） |
@@ -46,9 +46,9 @@ python3 -m pytest tests/ -q
 | `test_cross_day.py` | 6 | 跨日持仓传递、未平仓如实上报、单日行为不变 |
 | `test_aligner.py` | 15 | 五轴对齐、配对唯一性、单边缺失、差异分类、容差分离 |
 | `test_attribution.py` | 9 | 单旋钮解释率、视图一致性、真实差异可归因、多旋钮边界 |
-| `test_report.py` | 21 | verdict 判定、覆盖率门槛、Welch 检验、统计量 |
+| `test_report.py` | 24 | verdict 判定、覆盖率门槛、零冲突门槛、Welch 检验 |
 | `test_end_to_end.py` | 9 | 输入校验、来源判定、产物落盘、确定性 |
-| `test_validation_claims.py` | 5 | **文档数字与实现对账**、防漂移、内部自洽 |
+| `test_validation_claims.py` | 6 | **文档数字与实现对账**、防漂移、**判定器区分度对照** |
 
 ---
 
@@ -164,6 +164,48 @@ v0.2.0 时退出轴 `comparable=0`。根因有两层：
 
 结论对容差不敏感——日志与重放的退出时刻差是**整分钟**的离散值。
 这也说明当前一致率不是靠容差"调"出来的。
+
+---
+
+### 3.6 判定器区分度（阳性/阴性对照）
+
+一个**永远返回 `inconclusive`** 的判定器也能"通过"所有合成日志测试——
+因为合成日志下本来就应该 inconclusive。那样等到真实日志到位，
+判定器能不能正确区分三种结论，根本没被验证过。
+
+`scripts/controls_check.py` 做受控对照：用参考语义生成日志后**抹掉
+`_synthetic` 标记**（使其被当作真实日志），再看判定器能否随语义差异变化。
+
+| 日志侧差异 | 一致率 | 冲突数 | 判定 | 期望 |
+|---|---|---|---|---|
+| 完全一致（阳性对照） | 1.0000 | 0 | `consistent` | ✓ |
+| `exit_eval` | 0.9913 | 503 | `minor_divergence` | 不得 consistent |
+| `signal_gain_pct` | 0.9436 | 939 | `minor_divergence` | 不得 consistent |
+| `t_plus_1` | 0.9541 | 2,666 | `minor_divergence` | 不得 consistent |
+| `entry_price` | 0.9174 | 4,967 | `minor_divergence` | 不得 consistent |
+| `persistence_bars` | 0.8848 | 6,833 | `minor_divergence` | 不得 consistent |
+| `baseline_price` | 0.8910 | 6,581 | `minor_divergence` | 不得 consistent |
+| `breakout_field` | 0.8119 | 14,068 | `minor_divergence` | 不得 consistent |
+| `bar_timestamp` | 0.5935 | 23,416 | `inconsistent` | 不得 consistent |
+
+**9/9 通过。** 复跑：
+
+```bash
+python3 scripts/controls_check.py           # 全量，约 3 分钟
+python3 scripts/controls_check.py --quick   # 2 日 / 120 标的，约 2 分钟
+```
+
+#### 这组对照抓出的两个真实缺陷
+
+**缺陷 A：只看比率的盲区。** 初版 `consistent` 门槛是"一致率 ≥ 0.98"。
+`exit_eval` 差一个旋钮产生 503 条真实冲突，一致率 0.9913，被误判为 `consistent`。
+样本量越大，真差异越容易被"稀释"成高比率。
+
+**缺陷 B：绝对容忍额度太宽。** 加绝对门槛时先设成"≤5 条冲突可忽略"。
+结果 60 标的子集下 `exit_eval` 只产生 3 条冲突，又落回 `consistent`。
+**"一致"的含义就是没有冲突**，不能给真实冲突留默认额度——现改为必须为 0。
+
+这两条都是对照实验抓出来的，不是凭空想到的。
 
 ---
 
@@ -305,6 +347,8 @@ v0.4.0 的 `negative` 是选择性样本造成的假阳性，本轮修正了判�
 | 15 | 容差外无回退配对 | 两侧都有这笔交易却记成单边缺失 | 最近邻回退 + 低置信标记 |
 | 16 | **`build_fixtures` 逐日生成日志** | 当日看不到次日，所有周期停在 open，退出记录为空 | 全部交易日一起跑再按日切分 |
 | 17 | **配对覆盖率过低仍给 verdict** | 3.74% 的子样本被当成全样本证据，报出假的 `negative` | 覆盖率 <10% 强制 `inconclusive`，并补全样本 Welch 检验 |
+| 18 | **`consistent` 只看一致率** | 503 条真实冲突被大样本稀释成 0.9913，误判一致 | 加绝对冲突门槛，且必须为 0 |
+| 19 | **绝对门槛设成"≤5 条"** | 60 标的子集下 3 条冲突又被判一致 | 改为 0；"一致"不接受默认容忍额度 |
 
 ---
 
@@ -358,7 +402,8 @@ python3 scripts/verify_claims.py
 - 14 天分日一致率 0.9712–1.0000，不由单日主导；
 - 容差 0–5 分钟结果不变；
 - 显式语义与字面直译的收益差异**不可证**：配对覆盖率仅 3.74%，
-  全样本 Welch 检验 p=0.35，两种口径都不显著。
+  全样本 Welch 检验 p=0.35，两种口径都不显著；
+- 判定器有真实区分度：9 组阳性/阴性对照全部按预期判定（§3.6）。
 
 **方法边界（已验证并记录）**：
 - 单旋钮消融仅在「少数旋钮不同」时有效；多旋钮同时偏移时输出

@@ -169,3 +169,43 @@ def test_welch_test_no_difference():
     b = [0.01, -0.01] * 100
     r = metrics.welch_test(a, b)
     assert r["diff"] == 0 or abs(r["diff"]) < 1e-12
+
+
+def test_high_rate_with_many_conflicts_is_not_consistent():
+    """纯比率阈值的盲区：样本大时几百条真冲突会被稀释成"高一致率"。"""
+    agg = {"total": {"match": 57607, "divergent": 503, "comparable": 58110,
+                     "match_rate": 0.9913, "one_sided": 0, "rows": 58110}}
+    out = report.build_alignment_conclusion(agg, 503, "actual")
+    assert out["verdict"] == "minor_divergence", \
+        "503 条真实冲突不应被判为 consistent"
+    assert "稀释" in out["reason"] or "真实冲突" in out["reason"]
+    assert out["divergent_abs"] == 503
+
+
+def test_consistent_requires_zero_conflicts():
+    """哪怕只有 1 条真实冲突，也不能叫"一致"。
+
+    实测教训：60 标的子集下 exit_eval 只产生 3 条冲突，一致率 0.994，
+    旧规则（允许 ≤5 条）把它判成 consistent——那确实是一次误判。
+    """
+    clean = {"total": {"match": 10000, "divergent": 0, "comparable": 10000,
+                       "match_rate": 1.0, "one_sided": 0, "rows": 10000}}
+    assert report.build_alignment_conclusion(clean, 0, "actual")["verdict"] == "consistent"
+
+    for divergent in (1, 3, 10, 50):
+        agg = {"total": {"match": 10000 - divergent, "divergent": divergent,
+                         "comparable": 10000,
+                         "match_rate": (10000 - divergent) / 10000,
+                         "one_sided": 0, "rows": 10000}}
+        out = report.build_alignment_conclusion(agg, divergent, "actual")
+        assert out["verdict"] != "consistent", f"{divergent} 条真实冲突不应判 consistent"
+
+
+def test_consistent_gate_documented():
+    agg = {"total": {"match": 100, "divergent": 0, "comparable": 100,
+                     "match_rate": 1.0, "one_sided": 0, "rows": 100}}
+    out = report.build_alignment_conclusion(agg, 0, "actual")
+    gate = out["consistent_gate"]
+    assert gate["min_rate"] == 0.98
+    assert gate["max_divergent_abs"] == 0
+    assert gate["max_divergent_ratio"] == 0.0

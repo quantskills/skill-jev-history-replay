@@ -140,12 +140,36 @@ def build_value_assessment(baseline_replay: Dict[str, Any],
     }
 
 
+# `consistent` 的双重门槛。
+#
+# 只看一致率会有盲区：样本极大时，几百条真实冲突会被"稀释"成高比率。
+# 实测中只差 `exit_eval` 一个旋钮就产生 503 条冲突，一致率却仍有 0.9913，
+# 按纯比率会误判为 consistent。所以必须同时约束冲突的绝对数量。
+CONSISTENT_MIN_RATE = 0.98
+# 真实冲突的绝对上限：**0**。
+# 曾经设成 5，结果 60 标的子集里 exit_eval 只产生 3 条冲突，
+# 就落进"可忽略"区间被判 consistent——而它确实是语义不一致。
+# "一致"的含义就是没有冲突，不能给真实冲突留默认容忍额度。
+# 若某类冲突确属噪声，应由上游过滤，而不是在这里放宽。
+CONSISTENT_MAX_DIVERGENT_ABS = 0
+CONSISTENT_MAX_DIVERGENT_RATIO = 0.0
+
+
 def build_alignment_conclusion(aggregate: Dict[str, Any],
                                divergence_rows: int,
                                log_source: str) -> Dict[str, Any]:
     total = aggregate["total"]
     rate = total["match_rate"]
     comparable = total["comparable"]
+    divergent = total.get("divergent", divergence_rows)
+    divergent_ratio = (divergent / comparable) if comparable else 0.0
+
+    # consistent 的绝对门槛：真实冲突必须少到可以忽略
+    negligible_conflicts = (
+        divergent <= CONSISTENT_MAX_DIVERGENT_ABS
+        or divergent_ratio <= CONSISTENT_MAX_DIVERGENT_RATIO
+    )
+
     if comparable == 0:
         verdict = "inconclusive"
         reason = "没有任何可对照的项（日志侧未记录可对齐字段，或重放无输出）"
@@ -155,15 +179,26 @@ def build_alignment_conclusion(aggregate: Dict[str, Any],
             "日志为合成数据，只能证明对齐链路可运行；"
             "对 JEV 实际语义的判定必须等真实日志到位后重跑"
         )
-    elif rate is not None and rate >= 0.98:
+    elif rate is not None and rate >= CONSISTENT_MIN_RATE and negligible_conflicts:
         verdict = "consistent"
-        reason = "在可比项上语义一致"
+        reason = (
+            f"在 {comparable:,} 个可比项上一致率 {rate:.4f}，"
+            f"且仅有 {divergent} 条真实冲突"
+        )
+    elif rate is not None and rate >= CONSISTENT_MIN_RATE:
+        # 高比率但冲突数不可忽略 —— 这是纯比率阈值的盲区，必须降级
+        verdict = "minor_divergence"
+        reason = (
+            f"一致率虽达 {rate:.4f}，但存在 {divergent} 条真实冲突"
+            f"（占可比项 {divergent_ratio:.2%}），不可判为一致；"
+            "高比率是被样本量稀释的结果"
+        )
     elif rate is not None and rate >= 0.8:
         verdict = "minor_divergence"
-        reason = "存在可归因的局部差异"
+        reason = f"一致率 {rate:.4f}，存在 {divergent} 条可归因的局部差异"
     else:
         verdict = "inconsistent"
-        reason = "语义不可互换，需按账本逐项修正"
+        reason = f"一致率 {rate:.4f}，语义不可互换，需按账本逐项修正"
     return {
         "verdict": verdict,
         "reason": reason,
@@ -173,6 +208,15 @@ def build_alignment_conclusion(aggregate: Dict[str, Any],
         "match_rate_ci95": (
             metrics.wilson_interval(total["match"], comparable) if comparable else None
         ),
+        "divergent_abs": divergent,
+        "divergent_ratio": round(divergent_ratio, 6),
+        "consistent_gate": {
+            "min_rate": CONSISTENT_MIN_RATE,
+            "max_divergent_abs": CONSISTENT_MAX_DIVERGENT_ABS,
+            "max_divergent_ratio": CONSISTENT_MAX_DIVERGENT_RATIO,
+            "note": "consistent 需同时满足：一致率达门槛 且 真实冲突数可忽略（绝对值或占比任一达标）。"
+                    "只看比率会在样本量大时把真差异稀释成假一致。",
+        },
     }
 
 

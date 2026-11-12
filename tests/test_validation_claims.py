@@ -81,3 +81,33 @@ def test_claims_are_internally_consistent(report):
     assert a["comparable"] == a["match"] + a["divergent"]
     assert a["rows"] == a["match"] + a["divergent"] + a["one_sided"]
     assert a["divergence_items"] == a["divergent"]
+
+def test_verdict_discriminates_semantic_difference(tmp_path):
+    """阳性/阴性对照：判定器必须随语义差异变化，而不是永远 inconclusive。
+
+    只跑 2 天 / 60 标的的微缩版，控制测试时长；完整版见
+    `python3 scripts/controls_check.py`。
+    """
+    from scripts.controls_check import _subset, run_controls
+
+    bars_dir = REPO_ROOT / "fixtures" / "bars"
+    ref_dir = REPO_ROOT / "fixtures" / "reference"
+    sub_bars, sub_ref = _subset(bars_dir, ref_dir, days=2, max_symbols=60)
+    result = run_controls(sub_bars, sub_ref)
+
+    assert result["failed"] == [], (
+        "判定器未能区分语义差异：\n"
+        + "\n".join(f"  {r['case']}: {r['verdict']} — {r['why']}"
+                    for r in result["failed"])
+    )
+
+    by_case = {r["case"]: r for r in result["results"]}
+    # 阳性对照：完全一致必须 consistent 且零冲突
+    pos = by_case["positive_control"]
+    assert pos["verdict"] == "consistent"
+    assert pos["divergent"] == 0
+    assert pos["log_source"] == "actual"
+
+    # 关键回归：单旋钮差异不能被判成 consistent
+    for case in ("exit_eval", "bar_timestamp", "baseline_price"):
+        assert by_case[case]["verdict"] != "consistent"

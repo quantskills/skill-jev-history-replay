@@ -1,5 +1,42 @@
 # CHANGELOG
 
+## 0.5.0 — 2026-11-13
+
+新增**判定器区分度对照**。此前所有测试都在合成日志下跑，而合成日志必然
+`inconclusive`——一个永远返回 `inconclusive` 的判定器也能全部通过。
+真实日志到位后能不能正确区分三种结论，从未被验证过。
+
+### 新增
+- `scripts/controls_check.py`：受控阳性/阴性对照
+  - 用参考语义生成日志后抹掉 `_synthetic` 标记，使其被当作真实日志
+  - 阳性：完全一致 → 必须 `consistent` 且 0 冲突
+  - 阴性：单旋钮差异 × 8 → 判定必须随之变化
+- `tests/test_validation_claims.py` +1 例：微缩版对照进单元测试
+- CI 增加 `controls_check.py --quick`
+
+### 修复
+18. **`consistent` 只看一致率**：`exit_eval` 差一个旋钮产生 503 条真实冲突，
+    一致率 0.9913 被误判为 `consistent`。样本越大，真差异越容易被稀释。
+    → 加绝对冲突门槛。
+19. **绝对门槛设成"≤5 条"**：60 标的子集下 3 条冲突又落回 `consistent`。
+    → 改为**必须为 0**。"一致"不接受默认的冲突容忍额度。
+
+### 实测对照（9/9 通过）
+| 日志侧差异 | 一致率 | 冲突 | 判定 |
+|---|---|---|---|
+| 完全一致 | 1.0000 | 0 | `consistent` ✓ |
+| `exit_eval` | 0.9913 | 503 | `minor_divergence` |
+| `signal_gain_pct` | 0.9436 | 939 | `minor_divergence` |
+| `t_plus_1` | 0.9541 | 2,666 | `minor_divergence` |
+| `entry_price` | 0.9174 | 4,967 | `minor_divergence` |
+| `persistence_bars` | 0.8848 | 6,833 | `minor_divergence` |
+| `baseline_price` | 0.8910 | 6,581 | `minor_divergence` |
+| `breakout_field` | 0.8119 | 14,068 | `minor_divergence` |
+| `bar_timestamp` | 0.5935 | 23,416 | `inconsistent` |
+
+两个缺陷都是对照实验抓出来的，不是凭空想到的。
+
+
 ## 0.4.1 — 2026-11-13
 
 **撤回 v0.4.0 的 `negative` 结论。** 它建立在 3.74% 的配对子样本上，不可外推。

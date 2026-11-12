@@ -91,10 +91,20 @@ def verify(report: Dict[str, Any], claims: Dict[str, Any]) -> Dict[str, Any]:
         _check(results, "alignment_conclusion.verdict", ac.get("verdict"),
                claims["alignment_conclusion"]["verdict"])
 
-    va = report.get("value_assessment", {}).get("verdict", {})
-    if "verdict" in claims.get("value_assessment", {}):
+    va_block = report.get("value_assessment", {})
+    va = va_block.get("verdict", {})
+    claims_va = claims.get("value_assessment", {})
+    if "verdict" in claims_va:
         _check(results, "value_assessment.verdict", va.get("verdict"),
-               claims["value_assessment"]["verdict"])
+               claims_va["verdict"])
+    if "paired_coverage" in claims_va:
+        _check(results, "value_assessment.paired_coverage",
+               va_block.get("decision_changes", {}).get("paired_coverage"),
+               claims_va["paired_coverage"], tol=5e-4)
+    if "welch_p" in claims_va:
+        _check(results, "value_assessment.welch_p",
+               va_block.get("effect_size", {}).get("full_sample_welch", {}).get("p"),
+               claims_va["welch_p"], tol=5e-3)
 
     prov = report.get("provenance", {})
     if "log_source" in claims.get("provenance", {}):

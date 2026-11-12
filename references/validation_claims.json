@@ -48,7 +48,9 @@
     "verdict": "inconclusive"
   },
   "value_assessment": {
-    "verdict": "negative"
+    "verdict": "inconclusive",
+    "paired_coverage": 0.0374,
+    "welch_p": 0.350006
   },
   "provenance": {
     "log_source": "synthetic"

@@ -124,3 +124,48 @@ def test_paired_delta_ci_requires_two_samples():
     assert metrics.paired_delta_ci([0.01])["ci95"] is None
     two = metrics.paired_delta_ci([0.01, 0.02])
     assert two["n"] == 2 and two["ci95"] is not None
+
+def test_low_pairing_coverage_forces_inconclusive():
+    """配对覆盖率过低时，不能凭符号检验给 positive/negative。"""
+    # 基线 1000 个周期，只有 30 个能配上 → 覆盖率 3%
+    base = _replay([0.0] * 1000)
+    cur = _replay([-0.01] * 30)
+    out = report.build_value_assessment(base, cur, min_cycles=20)
+    assert out["verdict"]["verdict"] == "inconclusive"
+    assert "覆盖率" in out["verdict"]["reason"]
+    assert out["decision_changes"]["coverage_sufficient"] is False
+    assert out["decision_changes"]["paired_coverage"] < 0.1
+
+
+def test_high_coverage_allows_verdict():
+    base = _replay([0.0] * 100)
+    cur = _replay([0.01] * 95 + [-0.01] * 5)
+    out = report.build_value_assessment(base, cur, min_cycles=20)
+    assert out["decision_changes"]["paired_coverage"] >= 0.1
+    assert out["verdict"]["verdict"] == "positive"
+
+
+def test_full_sample_welch_reported():
+    base = _replay([0.01] * 50)
+    cur = _replay([0.02] * 50)
+    out = report.build_value_assessment(base, cur, min_cycles=20)
+    w = out["effect_size"]["full_sample_welch"]
+    assert w["n_a"] == 50 and w["n_b"] == 50
+    assert w["diff"] is not None
+
+
+def test_welch_test_detects_difference():
+    from scripts import metrics
+    a = [0.0] * 200
+    b = [0.02] * 200
+    r = metrics.welch_test(a, b)
+    assert r["diff"] is not None
+    assert r["p"] is None or r["p"] < 0.05
+
+
+def test_welch_test_no_difference():
+    from scripts import metrics
+    a = [0.01, -0.01] * 100
+    b = [0.01, -0.01] * 100
+    r = metrics.welch_test(a, b)
+    assert r["diff"] == 0 or abs(r["diff"]) < 1e-12

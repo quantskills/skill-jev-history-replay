@@ -55,6 +55,45 @@ def paired_delta_ci(deltas: List[float], z: float = 1.96) -> dict:
     }
 
 
+def all_closed_returns(rep: dict) -> List[float]:
+    """取出全部收官周期的净收益，不做配对。
+
+    配对检验只覆盖两套语义重叠的周期；当交易集合差异很大时覆盖率极低。
+    全样本检验不依赖配对，可作为独立佐证。
+    """
+    out: List[float] = []
+    for _symbol, result in rep["symbols"].items():
+        for cycle in result["cycles"]:
+            if cycle["status"] == "closed" and cycle["net_return_pct"] is not None:
+                out.append(cycle["net_return_pct"])
+    return out
+
+
+def welch_test(a: List[float], b: List[float]) -> dict:
+    """Welch 两样本 t 检验（不假设方差相等），返回均值差、标准误、t 与近似 p。"""
+    if len(a) < 2 or len(b) < 2:
+        return {"n_a": len(a), "n_b": len(b), "mean_a": None, "mean_b": None,
+                "diff": None, "se": None, "t": None, "p": None}
+    ma, mb = mean(a), mean(b)
+    va = sum((x - ma) ** 2 for x in a) / (len(a) - 1)
+    vb = sum((x - mb) ** 2 for x in b) / (len(b) - 1)
+    se = math.sqrt(va / len(a) + vb / len(b))
+    if se == 0:
+        return {"n_a": len(a), "n_b": len(b), "mean_a": round(ma, 8),
+                "mean_b": round(mb, 8), "diff": round(mb - ma, 8), "se": 0.0,
+                "t": None, "p": None}
+    t = (mb - ma) / se
+    # 正态近似（样本量远大于 30，t 分布与正态几乎一致）
+    p = math.erfc(abs(t) / math.sqrt(2))
+    return {
+        "n_a": len(a), "n_b": len(b),
+        "mean_a": round(ma, 8), "mean_b": round(mb, 8),
+        "diff": round(mb - ma, 8),
+        "se": round(se, 8), "t": round(t, 4), "p": round(p, 6),
+        "note": "Welch 检验，正态近似；不依赖配对，不受配对覆盖率影响",
+    }
+
+
 def pair_cycles(naive: dict, reference: dict) -> Tuple[List[float], List[float]]:
     """按 (symbol, signal_index) 配对两个配置的周期净收益。
 

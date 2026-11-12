@@ -30,14 +30,30 @@ def build_value_assessment(baseline_replay: Dict[str, Any],
 
     paired_base, paired_cur = metrics.pair_cycles(baseline_replay, current_replay)
     deltas = [b - a for a, b in zip(paired_base, paired_cur)]
+    coverage = (len(deltas) / base_cycles) if base_cycles else 0.0
 
     wins = sum(1 for d in deltas if d > 0)
     losses = sum(1 for d in deltas if d < 0)
     p_value = metrics.sign_test_p(wins, losses)
     n = len(deltas)
 
-    comparable = n >= min_cycles and cur_cycles > 0 and base_cycles > 0
-    if not comparable:
+    # 配对覆盖率：配对周期占基线周期的比例。
+    # 两套语义的交易集合可能差异极大（本案例 45,507 vs 2,014），
+    # 配对检验只测重叠部分。覆盖率过低时，结论不能代表全样本，
+    # 必须降级为 inconclusive 并在报告里显式说明，而不是照给 positive/negative。
+    min_coverage = 0.10
+    low_coverage = coverage < min_coverage
+
+    comparable = (n >= min_cycles and cur_cycles > 0 and base_cycles > 0
+                  and not low_coverage)
+    if not comparable and low_coverage and n >= min_cycles:
+        verdict = "inconclusive"
+        reason = (
+            f"配对覆盖率仅 {coverage:.2%}（{n}/{base_cycles}），"
+            f"低于 {min_coverage:.0%} 门槛：两套语义的交易集合差异过大，"
+            "配对检验只覆盖重叠部分的少数周期，不能代表全样本"
+        )
+    elif not comparable:
         verdict = "inconclusive"
         reason = f"配对周期数 {n} < min_cycles={min_cycles}，或某一侧无成交"
     elif n == 0:
@@ -68,6 +84,11 @@ def build_value_assessment(baseline_replay: Dict[str, Any],
         )
 
     delta_stats = metrics.paired_delta_ci(deltas)
+    # 全样本检验：不依赖配对，不受覆盖率影响，作为独立佐证。
+    full_sample = metrics.welch_test(
+        metrics.all_closed_returns(baseline_replay),
+        metrics.all_closed_returns(current_replay),
+    )
     return {
         "baseline": {
             "profile": "naive_literal",
@@ -88,9 +109,17 @@ def build_value_assessment(baseline_replay: Dict[str, Any],
             "cycles_added": cur_cycles - base_cycles,
             "cycles_removed": max(0, base_cycles - cur_cycles),
             "paired_cycle_count": n,
+            "paired_coverage": round(coverage, 4),
+            "coverage_threshold": min_coverage,
+            "coverage_sufficient": not low_coverage,
+            "note": (
+                "配对覆盖率 = 配对周期 / 基线周期。覆盖率低说明两套语义选出的交易"
+                "集合差异很大，配对检验只测重叠部分，结论不可外推到全样本。"
+            ),
         },
         "effect_size": {
             "paired_net_pct_delta": delta_stats,
+            "full_sample_welch": full_sample,
             "win_loss": {"wins": wins, "losses": losses, "ties": n - wins - losses},
             "sign_test_p": None if p_value is None else round(p_value, 6),
             "magnitude_note": "符号检验判断方向（多数周期是否改善），均值差判断幅度；两者可背离——少数大幅亏损能主导均值而多数周期只小赢",
@@ -106,7 +135,7 @@ def build_value_assessment(baseline_replay: Dict[str, Any],
         "verdict": {
             "verdict": verdict,
             "reason": reason,
-            "rule": "配对周期数 >= min_cycles 且符号检验双侧 p<0.05：胜多于负 → positive，负多于胜 → negative；样本不足或胜/负不显著 → inconclusive。均值差只作幅度参考，不单独决定方向（少数大亏可主导均值）",
+            "rule": "配对周期数 >= min_cycles、配对覆盖率 >= 10%，且符号检验双侧 p<0.05：胜多于负 → positive，负多于胜 → negative；样本不足、覆盖率不足或胜/负不显著 → inconclusive。均值差与全样本 Welch 检验只作佐证，不单独决定方向",
         },
     }
 

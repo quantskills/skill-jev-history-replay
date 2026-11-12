@@ -1,5 +1,50 @@
 # CHANGELOG
 
+## 0.12.9 — 2026-11-13
+
+这一轮做**真实冷克隆验收**（§1.1）并核对 §8 复现环境。流程本身全过，
+但发现文档里的验收数字长期过期。
+
+### 缺陷 34：§1.1 / §8 的验收数字都是旧值
+
+从 `origin/main` 全新 clone 到 /tmp 逐项实跑，对照文档：
+
+| 项 | 文档写的 | 实际 |
+|---|---|---|
+| `verify_claims.py` | 27/27（§1.1）、61/61（§1.0a） | **71/71** |
+| `pytest tests/ -q` | 113 passed | **223 passed, 1 skipped** |
+| `build.py` | 54 秒 | **31 秒** |
+| Python | 3.12.12 / 3.11.16 | 3.12.12 / **3.9.6**（实测） |
+
+冷克隆验收是最容易被读者照着跑的一节，数字不对会让人以为环境有问题。
+已全部按实测重写，并新增 `test_doc_counts_match_actual`：
+直接跑 `verify_claims` 与 `pytest --collect-only`，把真实值对回文档。
+（实测有效：把 `71/71` 改成 `99/99`，测试立刻报 `实际 71/71`。）
+
+### 冷克隆实测结果（全部通过）
+```
+env_check     ok=true
+validate      ok=true, 0 issues
+build         31 秒，exit 0
+verify_claims 71/71
+pytest        223 passed, 1 skipped
+```
+总一致率 0.9913、退出轴 0.8896，与本机完全一致；`output/` 由 `build.py` 自动创建。
+
+### 纯标准库这条也真验了
+系统 Python 3.9.6 跑通，数字相同。再用 `python3 -S`（屏蔽 site-packages，
+等价于无任何三方包）复跑，仍是同一组数字，且报告正确回显：
+
+```
+config_warnings: ['缺少 pyyaml，未加载 config/replay_config.yaml，使用内置默认值']
+```
+
+说明缺 pyyaml 不会静默降级——YAML 值与内置默认值逐项对齐。
+
+### 缺陷台账 33 → 34 项
+
+---
+
 ## 0.12.8 — 2026-11-13
 
 这一轮核对**验证文档里的表格本身**是否成立——逐张拿真实数据复算。

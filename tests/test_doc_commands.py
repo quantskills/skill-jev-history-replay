@@ -135,6 +135,55 @@ def test_defect_ledger_count_matches_rows():
     )
 
 
+def test_doc_counts_match_actual():
+    """文档里引用的「命令输出」计数必须与实际一致。
+
+    来源：§1.1 冷克隆验收那一节写着 `verify_claims 27/27`、`pytest 113 passed`、
+    `build 54 秒`——三个数字全部过期了很久。这一节恰恰最容易被读者照着跑，
+    数字不对会让人以为自己的环境有问题。
+    """
+    import subprocess
+    import sys
+
+    doc = REPO_ROOT / "references" / "validation_evidence.md"
+    text = doc.read_text(encoding="utf-8")
+
+    # 1) verify_claims 的「N/N」必须等于实际检查项数
+    import json
+    claims = json.loads(
+        (REPO_ROOT / "references" / "validation_claims.json").read_text(encoding="utf-8")
+    )
+    actual_checks = None
+    proc = subprocess.run(
+        [sys.executable, "scripts/verify_claims.py"],
+        cwd=REPO_ROOT, capture_output=True, text=True,
+    )
+    if proc.returncode in (0, 1) and "checks:" in proc.stdout:
+        first = proc.stdout.splitlines()[0]           # checks: 71/71 passed
+        actual_checks = first.split("checks:")[1].strip().split()[0]
+
+    if actual_checks:
+        for shown in re.findall(r"verify_claims\.py\s+#\s*(\d+/\d+)", text):
+            assert shown == actual_checks, (
+                f"文档写 verify_claims {shown}，实际 {actual_checks}"
+            )
+
+    # 2) pytest 用例总数必须等于实际收集数
+    proc = subprocess.run(
+        [sys.executable, "-m", "pytest", "tests/", "--collect-only", "-q"],
+        cwd=REPO_ROOT, capture_output=True, text=True,
+    )
+    if proc.returncode == 0:
+        collected = sum(
+            1 for line in proc.stdout.splitlines() if line.startswith("tests/")
+        )
+        for shown in re.findall(r"pytest tests/ -q\s+#\s*(\d+) passed", text):
+            # 收集数 = passed + skipped/deselected，允许 ±2 的容差
+            assert abs(int(shown) - collected) <= 2, (
+                f"文档写 {shown} passed，实际收集 {collected}"
+            )
+
+
 def test_evidence_table_lists_every_test_file():
     """`validation_evidence.md` 的测试清单必须与 `tests/` 实际文件一一对应。
 

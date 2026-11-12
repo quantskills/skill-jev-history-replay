@@ -77,7 +77,7 @@ python3 -m pytest tests/ -q -m slow         # 区分度对照，约 2 分钟
 | `test_validation_claims.py` | 13 | **文档数字对账**、防漂移、区分度对照、**陈旧数字扫描** |
 | `test_data_quality_audit.py` | 6 | 板块分类、涨跌停口径、离线不把"未核验"当 0、报告回显 |
 | `test_trade_audit.py` | 4 | **逐笔价格/算术反查**、跨日覆盖、故意改价必被抓 |
-| `test_doc_commands.py` | 7 | **文档引用的脚本必须存在 / 可解析**、**证据表格与实际测试文件一致**、**表格用例数 = pytest 收集数**、**README 目录树列全脚本**、**缺陷标题数 = 表行数** |
+| `test_doc_commands.py` | 8 | **文档引用的脚本必须存在 / 可解析**、**证据表格与实际测试文件一致**、**表格用例数 = pytest 收集数**、**README 目录树列全脚本**、**缺陷标题数 = 表行数**、**文档里的命令输出计数与实际一致** | **文档引用的脚本必须存在 / 可解析**、**证据表格与实际测试文件一致**、**表格用例数 = pytest 收集数**、**README 目录树列全脚本**、**缺陷标题数 = 表行数** |
 | `test_compare_baseline.py` | 7 | **冻结基线**、同配置给 delta、异配置拒绝、结构化错误 |
 | `test_value_decomposition.py` | 4 | **T+1 强制隔夜**、拆解前提、summary 形状 |
 | `test_credentials.py` | 6 | **引号去除**、别名回退、缺凭证结构化报错、非法 URL 拒绝 |
@@ -116,7 +116,7 @@ git clone ... /tmp/jev-ci && cd /tmp/jev-ci
 python3 scripts/env_check.py      # exit 0
 python3 scripts/validate.py       # exit 0, issues []
 python3 scripts/build.py          # exit 0
-python3 scripts/verify_claims.py  # 61/61 OK
+python3 scripts/verify_claims.py  # 71/71 OK
 ```
 
 ### 由此发现的账本体积问题
@@ -266,21 +266,29 @@ python3 scripts/compare_baseline.py compare output/report.json --against baselin
 ```bash
 git clone git@github.com:quantskills/skill-jev-history-replay.git /tmp/jev-cleanroom
 cd /tmp/jev-cleanroom
-python3 scripts/env_check.py      # ok=true, blocked=0
-python3 scripts/validate.py       # ok=true
-python3 scripts/build.py          # 54 秒
-python3 scripts/verify_claims.py  # 27/27
-python3 -m pytest tests/ -q       # 113 passed
+python3 scripts/env_check.py      # ok=true
+python3 scripts/validate.py       # ok=true, 0 issues
+python3 scripts/build.py          # 约 31 秒
+python3 scripts/verify_claims.py  # 71/71
+python3 -m pytest tests/ -q       # 223 passed, 1 skipped
 ```
 
-在 /tmp 的全新克隆上逐项复跑，结果与本机**完全一致**
-（总一致率 0.9913，各轴数字相同）。clone 后 `output/` 不存在，
-`build.py` 会自动创建——不依赖任何预生成产物。
+实测（v0.12.8，从 `origin/main` 全新 clone 到 /tmp）：各项全过，
+总一致率 0.9913、退出轴 0.8896，与本机**完全一致**。`output/` 在 clone 后
+不存在，由 `build.py` 自动创建——不依赖任何预生成产物。
 
 ### 纯标准库可跑
 
-系统自带 Python 3.9（无 pyyaml、无 pytest）下 `python3 scripts/build.py`
-同样跑通且**数字完全相同**。对齐与回放确实为零三方依赖。
+系统自带 Python 3.9.6 下 `python3 scripts/build.py` 跑通，数字完全相同
+（0.9913 / 0.8896）。再用 `python3 -S`（屏蔽 site-packages，等价于无任何
+三方包）复跑，仍得同一组数字，且报告正确回显降级原因：
+
+```
+config_warnings: ['缺少 pyyaml，未加载 config/replay_config.yaml，使用内置默认值']
+```
+
+对齐与回放确实为零三方依赖；缺 pyyaml 不会静默降级——YAML 里的值与
+内置默认值逐项对齐，只丢 YAML 注释与可覆盖性。
 
 ### 由此发现并修复的缺陷
 
@@ -395,7 +403,7 @@ gross/net 不符（`test_audit_detects_wrong_entry_price`）。
 ```bash
 python3 scripts/env_check.py    # ok=true, blocked=0
 python3 scripts/validate.py     # ok=true
-python3 scripts/build.py        # 约 54 秒
+python3 scripts/build.py        # 约 31 秒
 ```
 
 ### 3.1 五轴结果
@@ -965,7 +973,7 @@ python3 scripts/value_decomposition.py \
 
 ---
 
-## 6. 验证中发现并修复的缺陷（33 项）
+## 6. 验证中发现并修复的缺陷（34 项）
 
 以下都不是构造的测试用例，而是在真实数据上跑出来的：
 
@@ -1004,6 +1012,7 @@ python3 scripts/value_decomposition.py \
 | 31 | **`validate.py` 对缺 `date` 只报无关 warn** | 同一个缺 `date` 目录，`validate.py` 给的是 `log_symbol_not_in_bars`（"300 个序列不在 K 线里"）且 `ok=true`，完全没指出真正原因，把修复方向指向标的代码而不是日期 | 多日且缺 `date` 时报 `severity=error` + `test_validate_flags_missing_date_in_multiday` |
 | 32 | **`time_tolerance_minutes` 根本不参与判定** | 四处判定都写死 `"match" if gap == 0`，容差只影响配对搜索半径。把容差 0→1→2→5 调，结果**一模一样**；文档还把这个"四档一致"解释成"时刻差是整分钟离散值、比较天然精确"——把参数没生效说成了结论。真实影响：201 条退出时间冲突中 65 条差值 ≤1 分钟 | 四处改为 `abs(gap) <= tol_minutes`；`test_verdict_tolerance_actually_changes_verdict` 与 `test_entry_and_signal_axes_honour_tolerance` 锁住。修复后四档才真正分化（0.9895/0.9913/0.9920/0.9931） |
 | 33 | **`oos_check.IN_SAMPLE` 硬编码基准会过期** | 修好容差后主样本变成 0.9913/0.8896，但 `IN_SAMPLE` 仍是 0.9895/0.8667，复现判定拿旧基准比新结果 | 同步基准 + `test_oos_check.py` 以 `output/report.json` 反查，主样本一变就红 |
+| 34 | **§1.1 / §8 的验收数字长期过期** | 文档写 `verify_claims 27/27`（实际 71/71）、`pytest 113 passed`（实际 222）、`build 54 秒`（实际 31 秒）。这些数字从 v0.7 起就没跟上，而冷克隆验收正是最容易被人照抄的一节 | 按 v0.12.8 冷克隆实测重写；新增 `test_doc_counts_match_actual` 以实际值对账 |
 
 ---
 
@@ -1029,11 +1038,11 @@ python3 scripts/value_decomposition.py \
 
 | 项 | 值 |
 |---|---|
-| Python | 3.12.12（主）、3.11.16 |
+| Python | 3.12.12（主）、3.9.6（系统自带，实测通过） |
 | panda-data | 1.0.6（仅夹具再生） |
-| 三方依赖 | 无（对齐与回放为纯标准库） |
-| 全量对齐 | 约 54 秒（4,200 序列 × 240 根） |
-| 单元测试 | 约 55 秒 |
+| 三方依赖 | 无（对齐与回放为纯标准库；`python3 -S` 实测通过） |
+| 全量对齐 | 约 31 秒（4,200 序列 × 240 根，1,008,000 根） |
+| 单元测试 | 约 160 秒（223 passed, 1 skipped） |
 
 ```bash
 git clone https://github.com/quantskills/skill-jev-history-replay

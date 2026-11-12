@@ -60,6 +60,10 @@
 │   ├── fetch_data.py               ← 拉取分钟 K 线（需凭证）
 │   ├── build_fixtures.py           ← 生成发布用夹具
 │   ├── validate.py                 ← 日志契约校验
+│   ├── oos_check.py                ← 样本外复现（需凭证）
+│   ├── data_quality_audit.py       ← 未建模状态占比
+│   ├── controls_check.py           ← 判定器区分度对照
+│   ├── verify_claims.py            ← 文档数字对账
 │   ├── env_check.py                ← 环境自检
 │   └── config.py                   ← 配置合并
 ├── tests/                          ← 单元测试（纯合成数据，秒级）

@@ -145,6 +145,7 @@ python3 scripts/validate.py       # 先检查日志契约，区分"字段缺失"
 - `python3 -m pytest tests/ -v` 全通过
 - `python3 scripts/validate.py` 对夹具返回 `ok: true`
 - 实测验证记录（`references/validation_evidence.md`）中的数字可用上述命令复现
+- 样本外复现：`python3 scripts/oos_check.py`（需凭证，约 5 分钟）
 - 报告字段稳定，`ledger.jsonl` 每行可追溯到 `symbol + time + axis`
 
 ## 已知局限

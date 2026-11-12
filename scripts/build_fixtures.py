@@ -116,8 +116,10 @@ def build(date: str, symbols: List[str] | None, universe: int,
         "log_record_count": 0,
         "logged_profile": profile,
 
+        # fingerprint 只覆盖本函数产出的文件。日志由 generate_logs() 统一生成，
+        # 此时可能还不存在——把它算进来会让单独调用 build() 时崩溃。
         "fixture_fingerprint": _fingerprint(
-            [bars_gz_path, ref_dir / f"{date}.json", logs_path]
+            [p for p in (bars_gz_path, ref_dir / f"{date}.json", logs_path) if p.exists()]
         ),
         "provenance": {
             "bars": "panda-data==1.0.6 get_stock_min / get_stock_daily，仅生成阶段调用",

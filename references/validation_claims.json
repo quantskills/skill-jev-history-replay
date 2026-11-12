@@ -41,7 +41,9 @@
   "attribution": {
     "verdict": "single_knob",
     "top_knob": "exit_eval",
-    "top_explained_rate": 1.0
+    "top_explained_rate": 1.0,
+    "joint_diagnosis_applicable": true,
+    "joint_diagnosis_verdict": "single_knob"
   },
   "alignment_conclusion": {
     "verdict": "inconclusive"

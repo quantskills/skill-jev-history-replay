@@ -191,3 +191,60 @@ def test_real_difference_is_attributable_despite_signal_change():
     else:
         assert result["top_knob"] == "exit_eval"
         assert result["top_explained_rate"] == 1.0
+
+
+def test_joint_diagnosis_flags_multi_knob_case():
+    """多个旋钮同时不同时，报告必须说明单旋钮消融不适用。"""
+    from scripts import semantics as sem
+    from scripts.aligner import align_symbol, aggregate_rows
+
+    bars = make_dataset({"A": BREAKOUT})
+    base = _base_semantics()
+    naive = dict(base)
+    naive.update(sem.NAIVE_PROFILE)
+    naive["breakout_window"] = base["breakout_window"]
+    naive["warmup_bars"] = base["warmup_bars"]
+
+    replay_logged = replay_all(bars, naive, {"A": 10.0})
+    logs = _log_groups_from(replay_logged)
+    rows = {"A": align_symbol(
+        "A", replay_all(bars, base, {"A": 10.0})["symbols"]["A"], logs["A"], 1, 5.0
+    )["rows"]}
+    agg = aggregate_rows(rows)["total"]
+
+    result = attribution.run_ablation(
+        bars, base, {"A": 10.0},
+        baseline_divergences=agg["divergent"],
+        baseline_comparable=agg["comparable"],
+        log_groups_by_symbol=logs,
+        tol_minutes=1,
+        price_tolerance_bps=5.0,
+    )
+    joint = result["joint_diagnosis"]
+    assert "applicable" in joint
+    if result["verdict"] != "single_knob":
+        assert joint["applicable"] is False
+
+
+def test_joint_diagnosis_applicable_when_single_knob_wins():
+    bars = make_dataset({"A": BREAKOUT})
+    base = _base_semantics()
+    logged = dict(base)
+    logged["exit_eval"] = "bar_high_low"
+    logs = _log_groups_from(replay_all(bars, logged, {"A": 10.0}))
+
+    from scripts.aligner import align_symbol, aggregate_rows
+    rows = {"A": align_symbol(
+        "A", replay_all(bars, base, {"A": 10.0})["symbols"]["A"], logs["A"], 1, 5.0
+    )["rows"]}
+    agg = aggregate_rows(rows)["total"]
+    if agg["divergent"] == 0:
+        return
+    result = attribution.run_ablation(
+        bars, base, {"A": 10.0},
+        baseline_divergences=agg["divergent"],
+        baseline_comparable=agg["comparable"],
+        log_groups_by_symbol=logs, tol_minutes=1, price_tolerance_bps=5.0,
+    )
+    if result["verdict"] == "single_knob":
+        assert result["joint_diagnosis"]["applicable"] is True

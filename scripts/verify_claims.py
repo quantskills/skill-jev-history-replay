@@ -80,6 +80,12 @@ def verify(report: Dict[str, Any], claims: Dict[str, Any]) -> Dict[str, Any]:
             _check(results, f"attribution.{key}", attr.get(key),
                    claims["attribution"][key])
 
+    jd = attr.get("joint_diagnosis", {})
+    if "joint_diagnosis_applicable" in claims.get("attribution", {}):
+        _check(results, "attribution.joint_diagnosis.applicable",
+               jd.get("applicable"),
+               claims["attribution"]["joint_diagnosis_applicable"])
+
     ac = report.get("alignment_conclusion", {})
     if "verdict" in claims.get("alignment_conclusion", {}):
         _check(results, "alignment_conclusion.verdict", ac.get("verdict"),

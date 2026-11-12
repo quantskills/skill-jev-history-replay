@@ -126,6 +126,32 @@ def run_ablation(bars_by_symbol: Dict[str, Dict[str, Any]],
         verdict = "multi_knob"
     else:
         verdict = "unexplained"
+    # 单旋钮消融的适用边界：它假定"只有少数旋钮不同"。
+    # 若每个旋钮单独改动都解释不了多少，且方向并不一致（有的增加、有的减少），
+    # 说明多个旋钮同时不同——这已超出单旋钮可解范围，结论只能是
+    # "无法定位"，而不是"某个旋钮只解释 24%"这种半吊子结论。
+    other = [r for r in ranked if r is not top]
+    opposite_moves = 0
+    for r in other:
+        trial = r.get("trial_divergences")
+        if trial is not None and trial > baseline_div:
+            opposite_moves += 1
+    joint = {
+        "applicable": verdict in ("single_knob",),
+        "explanation": (
+            "单旋钮消融在多个语义旋钮同时不同时不可解。"
+            "若把最可能的那一个旋钮调到正确值，差异也不见明显下降，"
+            "说明差异由多因素叠加，需要联合搜索而非逐个消融。"
+        ),
+        "knobs_moving_opposite": opposite_moves,
+        "knobs_ranked": len(ranked),
+        "diagnosis": (
+            "multiple_knobs_shifted"
+            if verdict in ("multi_knob", "unexplained") and opposite_moves >= max(1, len(ranked)//3)
+            else "inconclusive_attribution"
+        ),
+    }
+
     return {
         "baseline_divergences": baseline_div,
         "knobs_tested": len(ranked),
@@ -133,8 +159,10 @@ def run_ablation(bars_by_symbol: Dict[str, Dict[str, Any]],
         "top_knob": top["knob"] if top else None,
         "top_explained_rate": top["explained_rate"] if top else None,
         "verdict": verdict,
+        "joint_diagnosis": joint,
         "note": (
             "explained_rate = (基线差异 - 换一个旋钮后的差异) / 基线差异；"
-            "单旋钮达到阈值即认定该旋钮为主要成因，否则属多因素或未归因。"
+            "单旋钮达到阈值即认定该旋钮为主要成因。"
+            "若多个旋钮同时不同，单旋钮消融不适用——见 joint_diagnosis。"
         ),
     }

@@ -1,0 +1,94 @@
+openapi: 3.1.0
+info:
+  title: skill-jev-history-replay
+  description: Align JEV's recorded watch conditions with a deterministic historical replayer and attribute every difference to one explicit interpretation knob (timestamp convention, baseline price, breakout field/window, persistence, wait bars, entry price, exit evaluation, T+1, cooldown). Emits a five-axis difference ledger plus single-knob ablation.
+  version: 0.1.0
+
+x-skill-info:
+  name: skill-jev-history-replay
+  type: build
+  category: evaluation
+  entry: scripts/build.py
+  tags: [quant, build, evaluation, replay, semantic-alignment, difference-ledger]
+
+x-steps:
+  - id: align
+    script: scripts/build.py
+    description: Run replay, align against JEV logs, attribute divergences, and emit report.json plus ledger.jsonl
+    args:
+      bars_dir: "fixtures/bars"
+      logs_dir: "fixtures/logs"
+      output_dir: "output/"
+    auth_required: false
+    output: "output/report.json, output/ledger.jsonl"
+
+  - id: validate_contract
+    script: scripts/validate.py
+    description: Validate the bars and log contract, separating missing-field errors from semantic divergence
+    args: "--bars-dir fixtures/bars --logs-dir fixtures/logs"
+    auth_required: false
+
+  - id: self_check
+    script: scripts/env_check.py
+    description: Report environment readiness as structured JSON; missing panda_data is a warning, not a blocker
+    args: "--json"
+    auth_required: false
+
+  - id: compare_baseline
+    script: scripts/compare_baseline.py
+    description: Freeze a run or compare against a frozen baseline; refuses to interpret deltas when config_hash differs
+    args: "freeze output/report.json --name v1"
+    auth_required: false
+
+  - id: build_fixtures
+    script: scripts/build_fixtures.py
+    description: Regenerate bars, reference prices and synthetic logs (requires panda_data credentials)
+    args: "--date 20261112 --universe 300"
+    auth_required: true
+
+x-semantics-knobs:
+  - bar_timestamp
+  - baseline_price
+  - breakout_field
+  - breakout_includes_current
+  - breakout_window
+  - persistence_bars
+  - warmup_bars
+  - signal_gain_pct
+  - wait_bars
+  - entry_price
+  - exit_eval
+  - stop_loss_pct
+  - take_profit_pct
+  - max_hold_bars
+  - cooldown_bars
+  - no_entry_after
+  - force_exit_time
+  - t_plus_1
+
+x-outputs:
+  - format: json
+    path: output/report.json
+    description: Provenance, comparability, ledger aggregate, attribution, alignment conclusion, value assessment, applicability
+  - format: jsonl
+    path: output/ledger.jsonl
+    description: Per-item difference ledger across condition / signal / wait / entry / exit
+
+x-evaluation-policy:
+  mode: replay-only
+  live_trading_access: false
+  note: "只读对齐：不假设可访问 JEV 内部推理或自定义 API。对齐基于本地夹具与调用方日志，全程不连接实盘、不产生委托。日志为 synthetic 时对齐结论恒为 inconclusive。跨 run 比对须保持 semantics_hash、夹具指纹、容差与日志来源一致。"
+  models_under_test:
+    - id: deterministic-replayer
+      role: subject
+
+x-requirements:
+  runtime: python >= 3.10
+  packages:
+    - panda-data==1.0.6 (fixture generation only)
+    - pyyaml (optional)
+    - pytest (dev)
+  env:
+    - PANDA_DATA_USERNAME
+    - PANDA_DATA_PASSWORD
+    - PANDA_DATA_BASE_URL

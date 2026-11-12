@@ -1,0 +1,4 @@
+# 运行依赖：仅在「生成夹具」时需要。
+# 对齐与回放（replayer / aligner / attribution / metrics）为纯标准库实现，
+# 不 import panda_data，因此评测执行阶段无需安装任何三方包。
+panda-data==1.0.6

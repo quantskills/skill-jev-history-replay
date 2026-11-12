@@ -1,0 +1,25 @@
+{
+  "name": "skill-jev-history-replay",
+  "version": "0.1.0",
+  "entrypoint": "SKILL.md",
+  "runtime": "python>=3.10",
+  "license": "GPL-3.0-only",
+  "data_source": "PandaData",
+  "entry_script": "scripts/build.py",
+  "evaluation": {
+    "mode": "replay-only",
+    "live_trading_access": false,
+    "description": "对齐与回放全程基于本地夹具，不连接实盘账户、真实交易网关或生产委托通道；不产生任何委托。panda_data 仅在夹具生成阶段调用。",
+    "models_under_test": [
+      {
+        "id": "deterministic-replayer",
+        "role": "subject",
+        "description": "内置确定性重放器，代表显式声明语义下的条件判断与执行；无随机数、无时钟依赖",
+        "budget": { "tokens": 0, "timeout_s": 0 }
+      }
+    ],
+    "group_by": "model_id",
+    "comparability_policy": "跨 run 比对必须保持 semantics_hash、夹具指纹、容差与日志来源一致，四者计入 config_hash；不一致时明确标记不可比。"
+  },
+  "data_source_note": "仅夹具生成阶段使用 panda-data==1.0.6；对齐与回放阶段只读本地 fixture，无凭证需求"
+}

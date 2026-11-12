@@ -1,0 +1,50 @@
+name: validate
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      # 评测本身不需要 panda_data：对齐与回放是纯标准库实现。
+      - name: Install test deps
+        run: pip install -r requirements-dev.txt
+      - name: Unit tests
+        run: python -m pytest tests/ -v
+      - name: Environment self-check
+        run: python scripts/env_check.py
+      - name: Contract validation
+        run: python scripts/validate.py
+      - name: Full alignment run
+        run: python scripts/build.py
+      - name: Assert report shape
+        run: |
+          python - <<'PY'
+          import json
+          report = json.load(open("output/report.json"))
+          for key in ("provenance", "comparability", "ledger", "attribution",
+                      "alignment_conclusion", "value_assessment", "applicability"):
+              assert key in report, f"missing {key}"
+          assert report["alignment_conclusion"]["verdict"] == "inconclusive", \
+              "synthetic logs must not yield a determinate alignment verdict"
+          assert report["comparability"]["config_hash"], "config_hash missing"
+          print("report shape ok")
+          PY
+      - name: Release hygiene
+        run: |
+          test -f README.en.md
+          test -f LICENSE
+          test -f agents/cursor-rule.mdc
+          test -f agents/portable-loader.md
+          test -f agents/openai.yaml
+          grep -q '"license": "GPL-3.0-only"' skill.json
+          head -1 LICENSE | grep -q "GNU GENERAL PUBLIC LICENSE"

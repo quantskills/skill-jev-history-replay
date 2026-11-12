@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+
+# Skill runtime output
+output/
+
+# 冻结基线（本地快照，不随仓库发布）
+baselines/
+
+# 日志
+*.log
+
+# 注：fixtures/bars、fixtures/reference、fixtures/logs 随仓库发布。
+# 它们是确定性、无凭证的冻结夹具，保证 clone 后即可离线复现。
+# 需要重建时：
+#   python3 scripts/build_fixtures.py --date YYYYMMDD --universe 300

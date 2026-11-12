@@ -1,0 +1,69 @@
+---
+description: JEV watch-condition / history-replay semantic alignment — rebuild watch conditions with explicitly declared semantics, align against JEV logs, and emit a five-axis difference ledger (condition, signal, wait, entry, exit) with single-knob ablation attribution.
+globs: []
+alwaysApply: false
+---
+
+# skill-jev-history-replay
+
+Alignment skill for JEV watch conditions. Turns every implicit interpretation choice into a named knob, replays deterministically, aligns against the JEV log, and attributes each divergence to one knob.
+
+## When to use
+
+- You need to check whether JEV's recorded signal times match a reproducible replayer
+- You need to quantify how each interpretation choice (timestamp convention, baseline price, wait bars, exit evaluation) changes decisions
+- You only have read-only logs and no access to JEV internals or custom APIs
+
+## Quick start
+
+```bash
+python3 scripts/env_check.py
+python3 scripts/validate.py
+python3 scripts/build.py
+python3 -m pytest tests/ -v
+```
+
+Python API:
+
+```python
+from scripts.build import run
+
+report = run({
+    "bars_dir": "fixtures/bars",
+    "logs_dir": "fixtures/logs",
+    "semantics": {"wait_bars": 2, "entry_price": "signal_close"},
+})
+print(report["alignment_conclusion"])
+```
+
+## Five alignment axes
+
+| Axis | Key | Meaning |
+|---|---|---|
+| `condition` | decision time | one side fires, the other does not |
+| `signal` | signal time (±1 min) | trigger timing mismatch or one-sided |
+| `wait` | paired signal | bars between signal and entry differ |
+| `entry` | paired cycle | entry time or price differ |
+| `exit` | paired cycle | exit time, price or reason differ |
+
+## Verdict rules
+
+- Alignment: `consistent` (≥0.98), `minor_divergence` (≥0.80), `inconsistent` (<0.80), `inconclusive` (no comparable items **or** synthetic logs)
+- Value: sign test over paired cycles; mean delta is reported as magnitude only
+
+## Outputs
+
+- `output/report.json` — provenance, comparability, ledger aggregate, attribution, conclusions, applicability
+- `output/ledger.jsonl` — one row per aligned item
+
+## Dependencies
+
+- Python 3.10+
+- panda-data==1.0.6 (fixture generation only)
+- PyYAML (optional)
+
+## Notes
+
+Read-only alignment. Never connects to a live account or places orders. Synthetic logs can only prove the pipeline runs — the alignment verdict stays `inconclusive` until real JEV logs are supplied.
+
+Research and educational use only. Not investment advice.

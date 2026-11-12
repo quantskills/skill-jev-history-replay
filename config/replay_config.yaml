@@ -1,0 +1,76 @@
+# JEV 语义对齐配置
+# 优先级：run() 参数 > 环境变量(JEV_*) > 本文件 > 代码内置默认值
+#
+# 注意：semantics 下的每个键都是"解释选择"，会进入 semantics_hash。
+# 改动任何一项都必须重跑评测，且不能与旧结果直接比较。
+
+bars_dir: fixtures/bars
+# 日志目录为空时自动走合成模式（log_source=synthetic）
+logs_dir: fixtures/logs
+output_dir: output
+
+# 对齐容差
+time_tolerance_minutes: 1
+price_tolerance_bps: 5
+
+# 归因：单旋钮解释率达到该阈值即认定为主要成因
+explained_rate_threshold: 0.95
+
+# 价值判定所需的最小配对周期数
+min_cycles: 20
+
+# 报告内联账本行数上限（完整账本写入 output/ledger.jsonl）
+max_inline_rows: 50
+
+# 无真实日志时，合成日志采用的"已记录语义"档位
+logged_profile: jev_assumed
+
+semantics:
+  # 分钟线时间戳语义：bar_end = 该分钟收盘时刻（panda_data 实测口径）
+  bar_timestamp: bar_end
+
+  # 涨幅基准价
+  baseline_price: prev_close
+
+  # 突破参照字段与窗口
+  breakout_field: high
+  breakout_window: 20
+  breakout_includes_current: false
+
+  # 连续性要求
+  persistence_bars: 2
+
+  # 预热：不足这么多根不产生判断
+  warmup_bars: 20
+
+  # 触发所需最小涨幅
+  signal_gain_pct: 0.01
+
+  # 信号 → 入场
+  wait_bars: 1
+  entry_price: next_open
+
+  # 退出判定
+  exit_eval: bar_close
+  stop_loss_pct: 0.005
+  take_profit_pct: 0.01
+  max_hold_bars: 30
+
+  # 同标的冷却
+  cooldown_bars: 10
+
+  # 时间边界
+  no_entry_after: "14:45"
+  force_exit_time: "14:45"
+
+  # A 股 T+1
+  t_plus_1: true
+
+  # 成本（单边）
+  fee_bps: 5
+  slippage_bps: 2
+
+  # 仓位
+  initial_capital: 1000000
+  position_pct: 0.1
+  lot_size: 100

@@ -59,7 +59,7 @@ python3 -m pytest tests/ -q -m slow         # 区分度对照，约 2 分钟
 
 | 项 | 结果 |
 |---|---|
-| 用例总数 | 199（198 通过 + 1 跳过） |
+| 用例总数 | 203（201 通过 + 1 跳过 + 1 慢测单独跑） |
 | 失败 | 0 |
 | 环境 | Python 3.12.12 / 3.11.16 |
 | 全量耗时 | 快测约 47 秒；慢测（区分度对照）另约 2 分钟 |
@@ -77,6 +77,7 @@ python3 -m pytest tests/ -q -m slow         # 区分度对照，约 2 分钟
 | `test_validation_claims.py` | 9 | **文档数字对账**、防漂移、区分度对照、**陈旧数字扫描** |
 | `test_data_quality_audit.py` | 6 | 板块分类、涨跌停口径、离线不把"未核验"当 0、报告回显 |
 | `test_trade_audit.py` | 4 | **逐笔价格/算术反查**、跨日覆盖、故意改价必被抓 |
+| `test_doc_commands.py` | 3 | **文档引用的脚本必须存在**、禁止他 skill 脚本名、docstring、语法 |
 | `test_compare_baseline.py` | 7 | **冻结基线**、同配置给 delta、异配置拒绝、结构化错误 |
 | `test_value_decomposition.py` | 4 | **T+1 强制隔夜**、拆解前提、summary 形状 |
 | `test_credentials.py` | 6 | **引号去除**、别名回退、缺凭证结构化报错、非法 URL 拒绝 |
@@ -157,6 +158,37 @@ Welch 的分母用错，都会让所有"显著"失去意义。
 
 > 这些验证的是"实现是否符合统计定义"，不是"统计方法是否适用于本数据"。
 > 后者由 §5 的覆盖率闸门与 §4.5 的样本外复现共同约束。
+
+---
+
+## 1.0d 文档命令可执行性
+
+一条容易被忽略的验收项：**文档里写的命令，是否真能跑**。
+
+### 发现：整篇 data_access.md 是别的 skill 的模板
+
+`references/data_access.md` 曾通篇写着 fixture_generator.py、
+replay_engine.py、constraints_evaluator.py——**这些都不是本 skill 的文件**。
+读者照文档跑会直接报"文件不存在"。
+
+（早前重写过一次，但后来某次 `rsync --delete` 把发布副本的旧版本反向覆盖了回来。）
+
+### 修复
+- 整篇重写 `data_access.md`，只列本 skill 真实存在的脚本与接口
+- 新增 `tests/test_doc_commands.py`（4 例）：
+  - **文档引用的每个 `scripts/*.py` 必须真实存在**
+  - 明确禁止其它 skill 的脚本名（fixture_generator / replay_engine 等）
+  - 每个脚本要有模块 docstring
+  - 每个脚本语法可解析
+
+### 逐条实跑文档命令
+| 命令 | 退出码 |
+|---|---|
+| `python3 scripts/env_check.py` | 0 |
+| `python3 scripts/validate.py` | 0 |
+| `python3 scripts/data_quality_audit.py --offline` | 0 |
+| `python3 scripts/verify_claims.py` | 0 |
+| `python3 scripts/build.py` | 0 |
 
 ---
 

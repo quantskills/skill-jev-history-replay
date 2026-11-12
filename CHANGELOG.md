@@ -1,5 +1,27 @@
 # CHANGELOG
 
+## 0.12.3 — 2026-11-13
+
+验证「文档里写的命令能不能跑」，发现整篇 `data_access.md` 是别的 skill 的模板。
+
+### 发现
+`references/data_access.md` 通篇写着 `scripts/fixture_generator.py`、
+`replay_engine.py`、`constraints_evaluator.py`——**这些都不是本 skill 的文件**。
+读者照文档跑会直接报"文件不存在"。
+
+（早前重写过一次，但某次 `rsync --delete` 把发布副本的旧版本反向覆盖了回来。）
+
+### 修复
+- 整篇重写 `data_access.md`：只列真实存在的脚本、凭证解析、实测接口口径
+- 新增 `tests/test_doc_commands.py`（4 例）：
+  文档引用的每个脚本必须存在、禁止他 skill 脚本名、脚本需 docstring、语法可解析
+
+### 逐条实跑
+env_check / validate / data_quality_audit --offline / verify_claims / build 全部 exit 0。
+
+202 passed / 1 skipped；claims 71/71。
+
+
 ## 0.12.2 — 2026-11-13
 
 补上冻结基线功能的测试。README 与 api_guide 都写了 freeze/compare/list，

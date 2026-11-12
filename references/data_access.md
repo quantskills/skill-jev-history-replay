@@ -1,132 +1,144 @@
 # 数据接入说明 / Data Access
 
-给需要复现或扩展本 skill 的其他 AI 阅读。**核心结论先说**：
+**核心结论先说**：
 
-> 评测执行阶段**不需要任何凭证、不访问任何外部服务**。
-> 只有「再生夹具」这一步才调用 panda_data，且已生成的夹具已随仓库发布。
+> 对齐与回放阶段**不需要任何凭证、不访问任何外部服务**，只读本地 fixture。
+> 只有「重新生成夹具」和「样本外复现」两步才调用 `panda_data`。
 
 ---
 
-## 1. 通道一：panda_data Python SDK（仅再生夹具时使用）
+## 1. 调用 panda_data 的脚本
+
+| 脚本 | 用途 | 何时调用 |
+|---|---|---|
+| `scripts/fetch_data.py` | 拉取指定日期的分钟 K 线与前收价 | 手动取数 |
+| `scripts/build_fixtures.py` | 生成整套夹具（K线 + 前收 + 合成日志 + 质量审计） | 重建夹具 |
+| `scripts/oos_check.py` | 样本外复现（自动拉数 → 建夹具 → 评测） | 复现检验 |
+| `scripts/data_quality_audit.py` | 量化未建模状态占比；**无凭证时自动降级为离线模式** | 审计 |
+
+其余脚本（`build.py` / `validate.py` / `adapt_logs.py` / `trade_audit.py` /
+`knob_efficacy.py` / `value_decomposition.py` / `compare_baseline.py` /
+`verify_claims.py` / `controls_check.py` / `env_check.py`）**不 import panda_data**。
+
+### 依赖
 
 | 项 | 值 |
 |---|---|
-| 包名 / 版本 | `panda-data==1.0.6`（见 `requirements.txt`，已固定） |
+| 包名 / 版本 | `panda-data==1.0.6`（`requirements.txt` 已固定） |
 | Python | `>=3.10` |
 | 认证入口 | `panda_data.init_token(username=..., password=..., base_url=...)` |
-| SDK 服务根 | `https://pandadata.pandaaiquant.com`（SDK 默认值） |
-| 调用位置 | `scripts/fixture_generator.py` |
-| 使用时机 | **仅** `python3 scripts/fixture_generator.py` |
-
-### 凭证：只从环境变量读取，绝不写入仓库
-
-| 环境变量 | 含义 |
-|---|---|
-| `PANDA_DATA_USERNAME` | Pandadata 账号用户名 |
-| `PANDA_DATA_PASSWORD` | 明文密码（SDK 内部自行哈希） |
-| `PANDA_DATA_BASE_URL` | 服务地址（可选，缺省用 SDK 默认） |
-
-```bash
-export PANDA_DATA_USERNAME=<your_username>
-export PANDA_DATA_PASSWORD=<your_password>
-python3 scripts/fixture_generator.py --date 20251110
-```
-
-**兼容回退**：上游 SDK 也认 `DEFAULT_USERNAME` / `DEFAULT_PASSWORD` / `JAVA_SERVICE_BASE_URL`。本 skill 优先读 `PANDA_DATA_*`，缺失时回退到这三个历史变量（见 `_env_first()`）。
-
-**本地凭证文件**：若环境变量不全，会尝试读 `~/.pandadata/pandadata.env`（`KEY=VALUE` 每行一条），用 `setdefault` 注入进程环境——同样不落盘到仓库。
-
-**缺失时行为**：`_try_init_pandadata()` 返回 `None`，生成器退化为「仅手工夹具」模式并给出 warning，**不抛异常**。这是刻意的：保证无凭证环境仍可跑通。
-
-### 实际用到的接口
-
-| 接口 | 用途 |
-|---|---|
-| `get_suspended_list(start_date, end_date, is_suspended=True)` | 取停牌标的 |
-| `get_st_list(start_date, end_date, is_st=True)` | 取 ST 标的 |
-| `get_trade_list(start_date, end_date)` | 取在售股票列表 |
-| `get_stock_daily(...)` | 取日线，构造涨跌停场景 |
-
-> 契约以 [`quantskills/skill-pandadata-api`](https://github.com/quantskills/skill-pandadata-api) 为准（固定 commit `3f573a41`）。参数名、字段名以该仓库为准，不要凭记忆写。
+| 凭证解析 | `scripts/credentials.py`（**唯一实现**） |
 
 ---
 
-## 2. 通道二：合成夹具（占多数，不需要凭证）
+## 2. 凭证
 
-`fixtures/generated/` 共 **109** 个夹具，来源分布：
-
-| 来源 | 数量 | 标记 |
+| 环境变量 | 别名 | 含义 |
 |---|---|---|
-| panda_data 真实数据 | 26 | 带 `"_source": "pandadata_*"` 字段 |
-| 手工合成 | 83 | 无 `_source` 字段 |
-
-### 真实数据衍生（26 个）
-
-| 文件 | 量 | `_source` | 真实部分 |
-|---|---|---|---|
-| `suspended_*.json` | 9 | `pandadata_suspended` | 标的代码来自真实停牌列表 |
-| `st_*.json` | 10 | `pandadata_st` | 标的代码来自真实 ST 列表 |
-| `limit_up_*.json` | 7 | `pandadata_limit_up` | 标的代码来自真实交易列表 + 日线 |
-
-> 注意：**代码是真实的，价格与盈亏是构造的**。例如 `suspended_000407_SZ_20251110.json` 用了真实停牌代码 `000407.SZ`，但 `price: 5.0`、`pnl_pct: -0.02` 是合成值——目的是稳定触发特定约束，而非还原当日行情。
-
-### 手工合成（83 个）
-
-按要触发的约束命名，覆盖 12 条硬约束的边界：
-
-```
-t_plus_1_*.json        10   当日买入锁定
-position_limit_*.json  10   超仓位上限
-force_close_*.json     10   强平窗口内买入
-refusal_*.json         10   缺行情必须拒单
-limit_up_down_*.json   10   涨跌停禁单
-st_filter_*.json       10   ST 过滤
-capital_check_*.json    5   资金不足
-price_deviation_*.json  5   价格偏离（软约束）
-suspended_*.json       10   停牌过滤
-hk_normal / future_margin / crypto_t0   3   跨市场样例
-```
-
-这些是**确定性构造**的边界值，用于精确验证判定器，不依赖任何外部数据。
-
----
-
-## 3. 为什么评测阶段完全离线
-
-```
-fixture_generator.py  ──(panda_data)──▶  fixtures/generated/*.json
-                                              │
-                                              ▼
-run_eval.py / build.py  ──(只读本地 JSON)──▶  replay_engine
-```
-
-- `constraints_evaluator.py`、`replay_engine.py`、`injector.py` **不 import panda_data**，纯标准库
-- `env_check.py` 在缺 panda_data 时报告 `warn` 而非 `blocked`——正是因为评测不需要它
-- CI 不安装 panda_data，10 秒内跑完 166 个测试
-
-**所以**：clone 之后直接 `python3 scripts/build.py` 就能跑，无需申请账号。
-
----
-
-## 4. 给其他 AI 的三条操作约定
-
-1. **不要试图把凭证写进代码、配置或文档**。只能用环境变量或 `~/.pandadata/pandadata.env`。仓库的 `.gitignore` 不保护凭证文件，泄露风险由使用者自负。
-2. **不要假设真实价格**。带 `_source: pandadata_*` 的夹具，只有代码来自真实数据，数值是构造的。要真实行情请自行通过 `get_stock_daily_post` 获取。
-3. **接口以契约为准**。`skill-pandadata-api` 的 commit `3f573a41` 是唯一权威来源。SDK 签名曾发生过变化（本 skill 的 v0.2 就把 `date=` 改成了 `start_date=`/`end_date=`），凭记忆调用容易失败。
-
----
-
-## 5. 复现命令
+| `PANDA_DATA_USERNAME` | `DEFAULT_USERNAME` | 账号 |
+| `PANDA_DATA_PASSWORD` | `DEFAULT_PASSWORD` | 密码 |
+| `PANDA_DATA_BASE_URL` | `JAVA_SERVICE_BASE_URL` | 服务地址 |
 
 ```bash
-# 完整评测（无需凭证）
+export PANDA_DATA_USERNAME=<username>
+export PANDA_DATA_PASSWORD=<password>
+export PANDA_DATA_BASE_URL=<base_url>
+```
+
+**兼容本地文件**：`~/.pandadata/pandadata.env`，每行 `KEY=VALUE` 或
+`export KEY=VALUE`。值可以带引号（`export X="abc"`），`credentials.py` 会自动去引号。
+
+> **踩过的坑**：曾直接把值 strip 进 URL，引号被带进去，panda_data 报
+> `unknown url type: "https`。现已统一到 `scripts/credentials.py`，
+> 并校验 `base_url` 必须以 `http://` / `https://` 开头。
+
+**缺失时行为**：抛 `CredentialError`，调用方转成结构化 JSON 并返回**非零退出码**。
+不会静默降级成"没有数据"。
+
+---
+
+## 3. 实际用到并被验证的接口
+
+| 接口 | 签名要点 | 用途 |
+|---|---|---|
+| `get_stock_min` | `symbol=[...], start_date, end_date, fields=[...]` | 单日分钟 K 线，240 根/标的 |
+| `get_stock_daily` | `symbol=[...], start_date, end_date, fields=[...]` | 前收 `pre_close` 与当日 OHLC |
+| `get_prev_trade_date` | `date='YYYYMMDD', exchange='SH', n=1` | 前一交易日 |
+| `get_trade_list` | `date='YYYYMMDD', exchange='SH'` | 当日可交易标的池 |
+| `get_st_list` | `start_date, end_date, is_st=True` | ST 名单 |
+| `get_suspended_list` | `start_date, end_date, is_suspended=True` | 停牌名单 |
+
+> **实测口径（2026-11-13，panda-data 1.0.6）**
+> - 分钟线时间戳是**该分钟结束时刻**：09:31 覆盖 09:30–09:31；每日 240 根。
+>   这是 `semantics.bar_timestamp` 默认 `bar_end` 的依据。
+> - `get_trade_list` 的 `exchange` 只接受 `SH` / `HK` / `US`，传 `SZ` 报 `100006`；
+>   A 股全市场用 `exchange='SH'` 一次取回（含深市代码）。
+> - `get_stock_min` 支持一次传多标的（实测 300 标的、72,000 根，约 3 秒）。
+> - `get_prev_trade_date` 在 1.0.6 中是 `date=` 而非 `nature_date=`。
+
+> 契约以 [`quantskills/skill-pandadata-api`](https://github.com/quantskills/skill-pandadata-api)
+> 为准。SDK 签名曾变更，凭记忆调用容易失败。
+
+---
+
+## 4. 已发布夹具（默认路径，不需要凭证）
+
+| 文件 | 内容 |
+|---|---|
+| `fixtures/bars/{date}.json.gz` | 300 只 × 240 根分钟线 × 14 日 |
+| `fixtures/reference/{date}.json` | 每标的前收与当日 OHLC |
+| `fixtures/logs/{date}.jsonl` | JEV 侧日志（**合成**） |
+| `fixtures/manifest.json` | 指纹、生成参数、`logged_profile`、数据质量审计 |
+
+### 合成日志不是 JEV 真实输出
+
+`fixtures/logs/*.jsonl` 由 `scripts/log_synth.py` 按 `jev_assumed` 档位、
+基于**同一份真实分钟线**生成。因此：
+
+- 对齐结论恒为 `inconclusive`，报告在 `provenance.log_source` 标 `synthetic`；
+- 真实 JEV 日志到位后，**直接替换 `fixtures/logs/` 即可**，
+  回放器/对齐器/归因器都不用改；此时 `log_source` 自动变 `actual`。
+
+字段契约见 `references/log_contract.md`。若字段名与契约不同，
+先用 `scripts/adapt_logs.py` 显式映射，不要手改日志。
+
+---
+
+## 5. 为什么对齐阶段完全离线
+
+```
+fetch_data / build_fixtures  ──(panda_data)──▶  fixtures/*
+                                                    │
+                                                    ▼
+build.py / run_eval  ──(只读本地文件)──▶  replayer → aligner → attribution → report
+```
+
+- `replayer.py` / `aligner.py` / `attribution.py` / `metrics.py` 纯标准库
+- CI 不安装 panda_data，测试 80 秒内跑完
+- clone 后直接 `python3 scripts/build.py` 即可，无需账号
+
+---
+
+## 6. 复现命令
+
+```bash
+# 完整对齐（无需凭证）
 python3 scripts/build.py
+python3 scripts/verify_claims.py
 
-# 仅手工夹具（无需凭证）
-python3 scripts/fixture_generator.py --manual-only
+# 环境与契约自检
+python3 scripts/env_check.py
+python3 scripts/validate.py
 
-# 再生真实数据衍生夹具（需要凭证）
+# 数据质量审计（无凭证时自动离线）
+python3 scripts/data_quality_audit.py
+
+# 再生夹具（需要凭证）
 export PANDA_DATA_USERNAME=...
 export PANDA_DATA_PASSWORD=...
-python3 scripts/fixture_generator.py --date 20251110
+export PANDA_DATA_BASE_URL=...
+python3 scripts/build_fixtures.py --date 20261104,...,20261112 --universe 300
+
+# 样本外复现（需要凭证）
+python3 scripts/oos_check.py
 ```

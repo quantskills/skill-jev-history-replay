@@ -66,18 +66,18 @@ python3 -m pytest tests/ -q -m slow         # 区分度对照，约 2 分钟
 
 | 文件 | 用例数 | 覆盖 |
 |---|---|---|
-| `test_semantics.py` | 15 | 旋钮取值校验、哈希敏感性、**默认值与 YAML 一致**、降级可见 |
-| `test_data_loader.py` | 22 | 格式容错、gzip、字段校验、重复检测、**分钟缺口与午休排除** |
-| `test_replayer.py` | 20 | 条件判断、连续性、等待/入场、四条退出路径、T+1、时间边界 |
+| `test_semantics.py` | 13 | 旋钮取值校验、哈希敏感性、**默认值与 YAML 一致**、降级可见 |
+| `test_data_loader.py` | 18 | 格式容错、gzip、字段校验、重复检测、**分钟缺口与午休排除** |
+| `test_replayer.py` | 18 | 条件判断、连续性、等待/入场、四条退出路径、T+1、时间边界 |
 | `test_cross_day.py` | 6 | 跨日持仓传递、未平仓如实上报、单日行为不变 |
 | `test_aligner.py` | 15 | 五轴对齐、配对唯一性、单边缺失、差异分类、容差分离 |
 | `test_attribution.py` | 11 | 单旋钮解释率、视图一致性、**多旋钮漏报成因** |
-| `test_report.py` | 24 | verdict 判定、覆盖率门槛、零冲突门槛、Welch 检验 |
-| `test_end_to_end.py` | 9 | 输入校验、来源判定、产物落盘、确定性 |
-| `test_validation_claims.py` | 9 | **文档数字对账**、防漂移、区分度对照、**陈旧数字扫描** |
+| `test_report.py` | 26 | verdict 判定、覆盖率门槛、零冲突门槛、Welch 检验 |
+| `test_end_to_end.py` | 11 | 输入校验、来源判定、产物落盘、确定性 |
+| `test_validation_claims.py` | 13 | **文档数字对账**、防漂移、区分度对照、**陈旧数字扫描** |
 | `test_data_quality_audit.py` | 6 | 板块分类、涨跌停口径、离线不把"未核验"当 0、报告回显 |
 | `test_trade_audit.py` | 4 | **逐笔价格/算术反查**、跨日覆盖、故意改价必被抓 |
-| `test_doc_commands.py` | 3 | **文档引用的脚本必须存在**、禁止他 skill 脚本名、docstring、语法 |
+| `test_doc_commands.py` | 6 | **文档引用的脚本必须存在 / 可解析**、**证据表格与实际测试文件一致**、**表格用例数 = pytest 收集数**、**README 目录树列全脚本** |
 | `test_compare_baseline.py` | 7 | **冻结基线**、同配置给 delta、异配置拒绝、结构化错误 |
 | `test_value_decomposition.py` | 4 | **T+1 强制隔夜**、拆解前提、summary 形状 |
 | `test_credentials.py` | 6 | **引号去除**、别名回退、缺凭证结构化报错、非法 URL 拒绝 |
@@ -86,6 +86,7 @@ python3 -m pytest tests/ -q -m slow         # 区分度对照，约 2 分钟
 | `test_adapt_logs.py` | 15 | **外部日志字段映射**、布尔规范化、缺字段必失败 |
 | `test_knob_efficacy.py` | 3 | **旋钮全部接线**、指纹稳定性、含当前根必归零 |
 | `test_metrics_correctness.py` | 15 | **统计函数正确性**：精确值对比、蒙特卡洛 Type-I/覆盖率 |
+| `test_fixture_universe.py` | 2 | **14 日标的池恒定**、每条序列 K 线完整 |
 
 ---
 
@@ -175,11 +176,15 @@ replay_engine.py、constraints_evaluator.py——**这些都不是本 skill 的�
 
 ### 修复
 - 整篇重写 `data_access.md`，只列本 skill 真实存在的脚本与接口
-- 新增 `tests/test_doc_commands.py`（4 例）：
-  - **文档引用的每个 `scripts/*.py` 必须真实存在**
-  - 明确禁止其它 skill 的脚本名（fixture_generator / replay_engine 等）
+- 新增 `tests/test_doc_commands.py` 的脚本存在性/可解析性用例：
+  - **文档里作为命令或路径出现的每个 `scripts/*.py` 必须真实存在**
   - 每个脚本要有模块 docstring
   - 每个脚本语法可解析
+
+  > 注：早期版本还有一条"禁止出现其它 skill 脚本名"的用例，因为会同时命中
+  > 本节自己的反例叙述（`fixture_generator.py` 作为"不存在"的例子被提到）而删除。
+  > 真正的防线是第一条：只有写成 `python3 ` + `scripts/` 路径、或行内代码包住
+  > `scripts/` 路径这种**让读者去执行**的写法才被收集并校验；正文里的普通提及不算。
 
 ### 逐条实跑文档命令
 | 命令 | 退出码 |
@@ -189,6 +194,31 @@ replay_engine.py、constraints_evaluator.py——**这些都不是本 skill 的�
 | `python3 scripts/data_quality_audit.py --offline` | 0 |
 | `python3 scripts/verify_claims.py` | 0 |
 | `python3 scripts/build.py` | 0 |
+
+### 补充：静态结构类声明同样会漂移
+
+命令能跑，不等于读者能照文档找到文件。本轮又查出两类结构失真：
+
+| 问题 | 实际 |
+|---|---|
+| `README.md` 的 `scripts/` 目录树 | 漏列 7 个脚本 |
+| `README.en.md` 同处 | 漏列 12 个脚本 |
+| 两份 README 的 `references/` | 均漏列 `validation_evidence.md` |
+| 本证据文档的逐文件用例数 | **8 个文件与 pytest 收集数不符**（如 `test_report.py` 写 24 实为 26、`test_semantics.py` 写 15 实为 13） |
+| 本证据文档的测试清单 | 漏列 `test_fixture_universe.py` |
+
+`verify_claims` 只对账关键研究指标，不检查这类结构性描述，所以它们一直没人发现。
+
+修复后加了三条**以实际文件/实际收集结果为唯一真相**的测试：
+
+| 测试 | 断言 |
+|---|---|
+| `test_readme_trees_list_every_script` | 两份 README 的树都列全 `scripts/*.py` |
+| `test_evidence_table_lists_every_test_file` | 表格的测试文件集合 == `tests/` |
+| `test_evidence_table_counts_match_collection` | 表格每格 == `pytest --collect-only` 计数 |
+
+第三条特意用 pytest 自己的收集结果，而不是数 `def`——参数化与 fixture
+会让两者不等（当前 `def` 数 194，实际收集 206）。
 
 ---
 

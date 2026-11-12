@@ -1,5 +1,36 @@
 # CHANGELOG
 
+## 0.12.4 — 2026-11-13
+
+验证「README / 证据文档里的结构性声明是否与实际一致」。
+
+### 发现
+1. **README 的 `scripts/` 目录树漏了 7 个文件**（`data_loader.py`、
+   `adapt_logs.py`、`credentials.py`、`trade_audit.py`、`knob_efficacy.py`、
+   `value_decomposition.py`），`references/` 也漏了 `validation_evidence.md`。
+   **英文版 `README.en.md` 漏得更多**（同样的 7 个，外加 `oos_check.py`、
+   `data_quality_audit.py`、`controls_check.py`、`verify_claims.py`、`config.py`）。
+   读者照树结构去找会找不到。
+2. **证据文档的逐文件用例数整体失真**：8 个文件与 `pytest --collect-only`
+   的实际收集数不符（如 `test_report.py` 写 24 实为 26、
+   `test_semantics.py` 写 15 实为 13）。`verify_claims` 只对账关键指标，不管这张表。
+3. **证据表格漏列 `test_fixture_universe.py`**。
+4. 1.0d 节写「4 例」，实际只有 3 例（后来那条第 4 例早已被删）。
+
+### 修复
+- README（中/英）目录树补全脚本与 reference 条目
+- 逐文件用例数按 `pytest --collect-only` 的实际收集数全部改正
+- 表格补上 `test_fixture_universe.py`
+- `test_doc_commands.py` 新增 3 条防漂移用例：
+  - **证据表格的测试文件集合 == `tests/` 实际文件集合**
+  - **证据表格每个文件的用例数 == pytest 实际收集数**（以 `--collect-only` 为唯一真相，
+    避免手数 `def` 被参数化/fixture 干扰）
+  - **README（中/英）的 `scripts/` 目录树必须列全所有脚本**
+- 已实测：把 `test_aligner.py` 的数字改成 99，新测试立刻失败并报 `99 vs 15`
+
+### 结果
+`verify_claims` 71/71；全量 205 passed / 1 skipped。
+
 ## 0.12.3 — 2026-11-13
 
 验证「文档里写的命令能不能跑」，发现整篇 `data_access.md` 是别的 skill 的模板。

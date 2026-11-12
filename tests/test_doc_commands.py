@@ -86,3 +86,86 @@ def test_scripts_are_importable():
         except SyntaxError as exc:
             failures.append(f"{path.name}: {exc}")
     assert failures == [], failures
+
+
+def test_readme_trees_list_every_script():
+    """README（中/英）的 `scripts/` 目录树必须列全所有脚本。
+
+    来源：README 的树曾缺 7 个脚本（data_loader / adapt_logs / credentials /
+    trade_audit / knob_efficacy / value_decomposition），英文版缺失更多。
+    读者照树去找会找不到文件。
+    """
+    actual = {p.name for p in SCRIPTS.glob("*.py") if p.name != "__init__.py"}
+    tree_line = re.compile(r"^[│├└─\s]+([a-z_]+\.py)\s", re.MULTILINE)
+
+    problems = {}
+    for name in ("README.md", "README.en.md"):
+        doc = REPO_ROOT / name
+        if not doc.exists():
+            problems[name] = ["文件不存在"]
+            continue
+        listed = set(tree_line.findall(doc.read_text(encoding="utf-8")))
+        missing = sorted(actual - listed)
+        if missing:
+            problems[name] = f"未列出：{missing}"
+    assert problems == {}, problems
+
+
+def test_evidence_table_lists_every_test_file():
+    """`validation_evidence.md` 的测试清单必须与 `tests/` 实际文件一一对应。
+
+    这条是防漂移的：前面已经有两次文档写着「4 例」而实际只有 3 例、
+    以及新增测试文件后表格没跟上。数字本身由 `verify_claims` 与 pytest
+    输出对账，这里只守住「有没有漏列」。
+    """
+    doc = REPO_ROOT / "references" / "validation_evidence.md"
+    listed = set(re.findall(r"\| `(test_[a-z0-9_]+\.py)` \|", doc.read_text(encoding="utf-8")))
+    actual = {p.name for p in (REPO_ROOT / "tests").glob("test_*.py")}
+
+    assert actual - listed == set(), f"测试文件未在证据文档中列出：{sorted(actual - listed)}"
+    assert listed - actual == set(), f"证据文档列了不存在的测试文件：{sorted(listed - actual)}"
+
+
+def test_evidence_table_counts_match_collection():
+    """证据文档里每个测试文件的用例数，必须等于 pytest 实际收集到的数量。
+
+    此前表格整体失真（8 个文件的数字与实际不符，总量 204 vs 实际 192），
+    而 `verify_claims` 只对账关键指标、不检查这张表。
+    这里用 pytest 自己的 `--collect-only` 作为唯一真相，
+    避免"手数 def 个数"被参数化、fixture 影响。
+    """
+    import subprocess
+    import sys
+
+    doc = REPO_ROOT / "references" / "validation_evidence.md"
+    claimed = {
+        name: int(count)
+        for name, count in re.findall(
+            r"\| `(test_[a-z0-9_]+\.py)` \| (\d+) \|",
+            doc.read_text(encoding="utf-8"),
+        )
+    }
+    assert claimed, "证据文档里没有测试清单表格？"
+
+    proc = subprocess.run(
+        [sys.executable, "-m", "pytest", "tests/", "--collect-only", "-q"],
+        cwd=REPO_ROOT, capture_output=True, text=True,
+    )
+    assert proc.returncode == 0, proc.stderr[-2000:]
+
+    actual: dict = {}
+    for line in proc.stdout.splitlines():
+        if not line.startswith("tests/"):
+            continue
+        name = line.split("::", 1)[0].split("/", 1)[1]
+        actual[name] = actual.get(name, 0) + 1
+
+    mismatches = {
+        name: (claimed[name], actual.get(name))
+        for name in sorted(set(claimed) | set(actual))
+        if claimed.get(name) != actual.get(name)
+    }
+    assert mismatches == {}, (
+        "证据文档的用例数与实际收集不一致（文档, 实际）：\n"
+        + "\n".join(f"  {n}: {c} vs {a}" for n, (c, a) in mismatches.items())
+    )

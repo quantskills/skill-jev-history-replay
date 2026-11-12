@@ -40,23 +40,35 @@ Each of these changes the per-bar decision and fill price, and none of them is v
 │   ├── build.py                    ← Standard entry: run(input_data, config=None)
 │   ├── run_eval.py                 ← Orchestration
 │   ├── semantics.py                ← Knob registry and hash
+│   ├── data_loader.py              ← Bar/log loading, gap detection, series keys
 │   ├── replayer.py                 ← Deterministic replayer
 │   ├── aligner.py                  ← Five-axis difference ledger
 │   ├── attribution.py              ← Single-knob ablation
 │   ├── log_synth.py                ← Synthetic log fallback
+│   ├── adapt_logs.py               ← External log field mapping
 │   ├── report.py                   ← Report assembly and verdict rules
 │   ├── metrics.py                  ← Wilson interval, sign test
+│   ├── trade_audit.py              ← Per-trade price / return audit
+│   ├── knob_efficacy.py            ← Knob wiring effectiveness check
+│   ├── value_decomposition.py      ← Return decomposition (e.g. T+1)
 │   ├── compare_baseline.py         ← freeze / compare / list
+│   ├── credentials.py              ← Credential loading (single implementation)
 │   ├── fetch_data.py               ← Minute bars (credentials required)
 │   ├── build_fixtures.py           ← Published fixture builder
 │   ├── validate.py                 ← Log contract validator
-│   └── env_check.py                ← Environment self-check
+│   ├── oos_check.py                ← Out-of-sample reproduction
+│   ├── data_quality_audit.py       ← Unmodelled-state share
+│   ├── controls_check.py           ← Verdict discrimination controls
+│   ├── verify_claims.py            ← Validation-doc number reconciliation
+│   ├── env_check.py                ← Environment self-check
+│   └── config.py                   ← Config merge
 ├── tests/                          ← Unit tests (synthetic data, sub-second)
 ├── references/
 │   ├── api_guide.md
 │   ├── log_contract.md
 │   ├── semantics_matrix.md
-│   └── data_access.md
+│   ├── data_access.md
+│   └── validation_evidence.md
 └── fixtures/                       ← Published, deterministic fixtures
 ```
 

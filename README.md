@@ -50,13 +50,19 @@
 │   ├── build.py                    ← 标准入口 run(input_data, config=None)
 │   ├── run_eval.py                 ← 编排：加载 → 重放 → 对齐 → 归因 → 报告
 │   ├── semantics.py                ← 语义旋钮注册表与哈希
+│   ├── data_loader.py              ← K线/日志读取、缺口检测、序列键
 │   ├── replayer.py                 ← 确定性重放器
 │   ├── aligner.py                  ← 五轴差异账本
 │   ├── attribution.py              ← 单旋钮消融归因
 │   ├── log_synth.py                ← 合成日志（无真实日志时）
+│   ├── adapt_logs.py               ← 外部日志字段映射适配
 │   ├── report.py                   ← 报告组装与判定规则
 │   ├── metrics.py                  ← Wilson 区间 / 符号检验
+│   ├── trade_audit.py              ← 逐笔价格/算术反查
+│   ├── knob_efficacy.py            ← 旋钮接线有效性核验
+│   ├── value_decomposition.py      ← T+1 等旋钮的收益拆解
 │   ├── compare_baseline.py         ← 冻结基线 freeze/compare/list
+│   ├── credentials.py              ← 凭证加载（唯一实现）
 │   ├── fetch_data.py               ← 拉取分钟 K 线（需凭证）
 │   ├── build_fixtures.py           ← 生成发布用夹具
 │   ├── validate.py                 ← 日志契约校验
@@ -71,7 +77,8 @@
 │   ├── api_guide.md                ← 接口与字段
 │   ├── log_contract.md             ← 日志契约
 │   ├── semantics_matrix.md         ← 语义旋钮全表与取值含义
-│   └── data_access.md              ← 数据接入说明
+│   ├── data_access.md              ← 数据接入说明
+│   └── validation_evidence.md      ← 验收证据与缺陷记录
 ├── fixtures/                       ← 已发布夹具（确定性）
 │   ├── bars/                       ← 分钟 K 线
 │   ├── reference/                  ← 前收与当日 OHLC

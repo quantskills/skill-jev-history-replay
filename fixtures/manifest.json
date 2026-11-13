@@ -142,5 +142,6 @@
   "provenance": {
     "bars": "panda-data==1.0.6 get_stock_min / get_stock_daily，仅生成阶段调用",
     "logs": "synthetic：由 log_synth 按 logged_profile 生成，非 JEV 真实输出"
-  }
+  },
+  "universe_policy": "全期固定（14 日 trade_list 交集，按代码排序等距抽样）"
 }

@@ -179,3 +179,22 @@ def test_fixture_logs_match_current_replayer():
         "夹具日志已过期，请重新运行 scripts/build_fixtures.py 生成日志。"
         f"样例：{mismatched[:3]}"
     )
+
+
+def test_manifest_records_universe_policy():
+    """manifest 必须记录标的池策略。
+
+    `validation_claims.json` 一直声明着 `universe_policy`，但代码从不写这个
+    字段、`verify_claims` 也从不检查它——等于 claims 在声称一件产物里
+    根本不存在的事。读者无法核实"全期固定"是否属实。
+    """
+    import json as _json
+
+    manifest_path = REPO_ROOT / "fixtures" / "manifest.json"
+    if not manifest_path.exists():
+        pytest.skip("没有 manifest.json")
+    manifest = _json.loads(manifest_path.read_text(encoding="utf-8"))
+
+    policy = manifest.get("universe_policy")
+    assert policy, "manifest 未记录 universe_policy"
+    assert "全期固定" in policy, f"多日夹具的标的池策略应为全期固定，实际：{policy}"

@@ -264,6 +264,28 @@ def verify(report: Dict[str, Any], claims: Dict[str, Any]) -> Dict[str, Any]:
                    tol=5e-4)
 
     prov = report.get("provenance", {})
+
+    # fixture 段：此前 claims 里写了 5 个字段，但**从未被检查**——
+    # 一整块死数据，连"universe_policy"这种代码根本不写的字段也在里面。
+    fixture_claims = claims.get("fixture")
+    if fixture_claims:
+        manifest = prov.get("fixture_manifest") or {}
+        # series_count 不在 manifest 里，由 symbol_count × 交易日数推导
+        symbol_count = manifest.get("symbol_count")
+        dates = manifest.get("dates") or []
+        derived_series = (symbol_count * len(dates)) if symbol_count and dates else None
+        fixture_mapping = {
+            "bar_count": manifest.get("bar_count"),
+            "symbol_count": symbol_count,
+            "dates": len(dates) if dates else None,
+            "series_count": derived_series,
+            "universe_policy": manifest.get("universe_policy"),
+        }
+        for key, expected in fixture_claims.items():
+            if key not in fixture_mapping or expected is None:
+                continue
+            _check(results, f"fixture.{key}", fixture_mapping.get(key), expected)
+
     if "log_source" in claims.get("provenance", {}):
         _check(results, "provenance.log_source", prov.get("log_source"),
                claims["provenance"]["log_source"])

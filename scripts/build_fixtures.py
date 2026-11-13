@@ -223,6 +223,13 @@ def main(argv: List[str] | None = None) -> int:
             "fixture_fingerprint": manifests[0]["fixture_fingerprint"],
             "per_date": log_info["per_date"],
             "logged_semantics_hash": log_info["logged_semantics_hash"],
+            # 标的池策略必须落盘：claims 里一直声明着它，但 manifest
+            # 从不记录，读者无从核实"全期固定"到底是不是真的。
+            "universe_policy": (
+                f"全期固定（{len(dates)} 日 trade_list 交集，按代码排序等距抽样）"
+                if args.symbols is None and len(dates) > 1
+                else "单日抽样 / 显式指定"
+            ),
             "data_quality": dq,
             "provenance": manifests[0]["provenance"],
         }

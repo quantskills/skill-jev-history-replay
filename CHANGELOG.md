@@ -1,5 +1,37 @@
 # CHANGELOG
 
+## 0.15.9 — 2026-11-13
+
+这一轮核对「`validation_claims.json` 里声明的每一条是否真的被检查」。
+
+### 缺陷 64：`claims.fixture` 整段从未被 `verify_claims` 检查
+
+`validation_claims.json` 的 `fixture` 段有 5 个字段
+（`dates` / `symbol_count` / `series_count` / `bar_count` / `universe_policy`），
+但 `verify_claims.py` 里**没有任何代码读它**——一整块失效的对账数据。
+
+现在补上检查（79 → **84** 项）。实测：把 `symbol_count` 改成 999、
+`bar_count` 改成 1，立刻报出两处 MISMATCH。
+
+> `series_count` 不在 manifest 里，由 `symbol_count × 交易日数` 推导后核对。
+
+### 缺陷 65：`universe_policy` 声称存在，产物里根本没有
+
+claims 声明「全期固定（14 日 trade_list 交集，按代码排序等距抽样）」，
+但 `build_fixtures.py` **从不写这个字段**，manifest 里也没有。
+读者无法核实"全期固定"是否属实——而这是跨日持仓成立的前提。
+
+修复：`build_fixtures` 把该策略落盘到 manifest（含实际天数），
+claims 的声明终于有据可查。
+
+### 交付物
+- `verify_claims` 检查数 **79 → 84**
+- 新增 `test_manifest_records_universe_policy`
+
+### 缺陷台账 63 → 65 项
+
+---
+
 ## 0.15.8 — 2026-11-13
 
 这一轮用**真实 panda 接口**核对 `data_access.md`——这是读者重新生成夹具的

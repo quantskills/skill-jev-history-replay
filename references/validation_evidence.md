@@ -87,7 +87,7 @@ python3 -m pytest tests/ -q -m slow         # 区分度对照，约 2 分钟
 | `test_adapt_logs.py` | 22 | **外部日志字段映射**、布尔规范化、缺字段必失败、**纯契约日志可端到端接入**、**多日缺 date 必报错（加载器与 validate 两处）**、**无法判定的 hit 必报错**、**时间戳写法不影响结论** |
 | `test_knob_efficacy.py` | 3 | **旋钮全部接线**、指纹稳定性、含当前根必归零 |
 | `test_metrics_correctness.py` | 15 | **统计函数正确性**：精确值对比、蒙特卡洛 Type-I/覆盖率 |
-| `test_fixture_universe.py` | 5 | **14 日标的池恒定**、每条序列 K 线完整、**manifest 与实际夹具对账**、**gzip mtime=0 可重现**、**夹具日志与当前重放一致** |
+| `test_fixture_universe.py` | 6 | **14 日标的池恒定**、每条序列 K 线完整、**manifest 与实际夹具对账**、**gzip mtime=0 可重现**、**夹具日志与当前重放一致**、**manifest 记录标的池策略** |
 | `test_oos_check.py` | 4 | **IN_SAMPLE 基准与当前报告一致**、judge 能识别显著性减弱 |
 | `test_multi_knob_docs.py` | 5 | **多旋钮表内部一致**、仅 exit_eval 行与报告一致、**naive 消融表单项不解释**、**wait_bars/合并数可在真实夹具复现**（slow）、**naive 消融表可复现**（slow） |
 | `test_report_consistency.py` | 5 | **divergence_items 四处同口径**、各轴 divergent 加总、**non_match_rows 单列**、per_day 加总=total、inline 截断标记 |
@@ -123,7 +123,7 @@ git clone ... /tmp/jev-ci && cd /tmp/jev-ci
 python3 scripts/env_check.py      # exit 0
 python3 scripts/validate.py       # exit 0, issues []
 python3 scripts/build.py          # exit 0
-python3 scripts/verify_claims.py  # 79/79 OK
+python3 scripts/verify_claims.py  # 84/84 OK
 ```
 
 ### 由此发现的账本体积问题
@@ -276,8 +276,8 @@ cd /tmp/jev-cleanroom
 python3 scripts/env_check.py      # ok=true
 python3 scripts/validate.py       # ok=true, 0 issues
 python3 scripts/build.py          # 约 31 秒
-python3 scripts/verify_claims.py  # 79/79
-python3 -m pytest tests/ -q       # 288 passed, 1 skipped
+python3 scripts/verify_claims.py  # 84/84
+python3 -m pytest tests/ -q       # 289 passed, 1 skipped
 ```
 
 实测（v0.12.8，从 `origin/main` 全新 clone 到 /tmp）：各项全过，
@@ -1006,7 +1006,7 @@ python3 scripts/value_decomposition.py \
 
 ---
 
-## 6. 验证中发现并修复的缺陷（63 项）
+## 6. 验证中发现并修复的缺陷（65 项）
 
 以下都不是构造的测试用例，而是在真实数据上跑出来的：
 
@@ -1075,6 +1075,8 @@ python3 scripts/value_decomposition.py \
 | 61 | **`by_axis_prior` / `first_divergence` 完全没有文档** | 报告里有这两个字段，`api_guide.md` 里一个字都没提，读者拿到报告不知道含义 | 补两节说明（含各轴先验全表、first_divergence 的用途）+ `test_ledger_aux_fields_are_documented` |
 | 62 | **`api_guide` 的账本三行数全部过期** | `non_match_rows` 写 979,634（实际 979,639）、`divergence_rows` 写 314（实际 319） | 按实测更新 + `test_api_guide_ledger_counts_match_report`（篡改后立刻失败） |
 | 63 | **`data_access.md` 的接口耗时与返回列未经实测** | 写「300 标的 / 72,000 根约 3 秒」，实测 **0.6 秒**（快 5 倍）。返回列、`get_prev_trade_date` 返回 `str` 而非 DataFrame 等信息都缺失，读者据此写代码容易出错 | 按实测更新 + 补返回列清单；`test_documented_pandata_apis_match_code_calls` 与 `test_data_access_signature_notes_match_code` 双向对账（纯静态，CI 不装 panda_data 也能跑） |
+| 64 | **`claims.fixture` 整段从未被 `verify_claims` 检查** | 5 个字段（dates/symbol_count/series_count/bar_count/universe_policy）写进了 claims，却没有任何代码读它——一整块失效的对账数据 | `verify_claims` 补 fixture 段检查（79 → **84** 项），实测篡改后立刻报错 |
+| 65 | **`universe_policy` 声称存在但产物里根本没有** | claims 声明"全期固定（14 日 trade_list 交集…）"，而 `build_fixtures` 从不写该字段、manifest 里也没有。读者无法核实标的池策略 | `build_fixtures` 落盘该字段 + `test_manifest_records_universe_policy` |
 
 ---
 
@@ -1104,7 +1106,7 @@ python3 scripts/value_decomposition.py \
 | panda-data | 1.0.6（仅夹具再生） |
 | 三方依赖 | 无（对齐与回放为纯标准库；`python3 -S` 实测通过） |
 | 全量对齐 | 约 31 秒（4,200 序列 × 240 根，1,008,000 根） |
-| 单元测试 | 约 160 秒（288 passed, 1 skipped） |
+| 单元测试 | 约 160 秒（289 passed, 1 skipped） |
 
 ```bash
 git clone https://github.com/quantskills/skill-jev-history-replay

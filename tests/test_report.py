@@ -316,3 +316,27 @@ def test_low_coverage_and_full_sample_flat_stays_inconclusive():
     cur = _replay([0.0] * 30)
     out = report.build_value_assessment(base, cur, min_cycles=20)
     assert out["verdict"]["verdict"] == "inconclusive"
+
+
+def test_applicability_scope_matches_actual_capability():
+    """`applicability` 的声明必须与实际能力一致。
+
+    真实缺陷：`in_scope` 曾写"单一交易日"，`out_of_scope` 曾写"跨日持仓"，
+    而实现是完整支持跨日 + T+1 的（`tests/test_cross_day.py` 6 例、
+    本样本 1,422 笔全部跨日结算）。这类错误方向相反，会让读者以为
+    该功能不可用，属于比"漏写"更严重的误导。
+    """
+    out = report.build_applicability("actual", {"_hash": "x"}, None)
+
+    joined_in = " ".join(out["in_scope"])
+    joined_out = " ".join(out["out_of_scope"])
+
+    # 跨日/T+1 是已实现能力，必须出现在 in_scope，且不能出现在 out_of_scope
+    assert "跨日" in joined_in, "跨日持仓是已实现能力，应列入 in_scope"
+    assert "T+1" in joined_in
+    assert "跨日持仓" not in joined_out, (
+        "跨日持仓已实现，不应列为 out_of_scope")
+
+    # 确实没做的能力仍应列出
+    for item in ("除权除息", "盘口级撮合", "夏普", "实盘对接"):
+        assert item in joined_out, f"未实现的能力「{item}」应列入 out_of_scope"

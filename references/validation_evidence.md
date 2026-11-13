@@ -72,7 +72,7 @@ python3 -m pytest tests/ -q -m slow         # 区分度对照，约 2 分钟
 | `test_cross_day.py` | 6 | 跨日持仓传递、未平仓如实上报、单日行为不变 |
 | `test_aligner.py` | 18 | 五轴对齐、配对唯一性、单边缺失、差异分类、容差分离、**每轴 match/divergent 必须存在**、**容差必须真正改变判定** |
 | `test_attribution.py` | 11 | 单旋钮解释率、视图一致性、**多旋钮漏报成因** |
-| `test_report.py` | 31 | verdict 判定、覆盖率门槛、零冲突门槛、Welch 检验、**p 值不得被舍入为 0**、**任一轴零可比不得判 consistent**、**reason 里的 p 值不得显示为 0** |
+| `test_report.py` | 32 | verdict 判定、覆盖率门槛、零冲突门槛、Welch 检验、**p 值不得被舍入为 0**、**任一轴零可比不得判 consistent**、**reason 里的 p 值不得显示为 0**、**applicability 声明与能力一致** |
 | `test_end_to_end.py` | 13 | 输入校验、来源判定、产物落盘、确定性、**每根都写 vs 仅翻转两种记录习惯** |
 | `test_validation_claims.py` | 13 | **文档数字对账**、防漂移、区分度对照、**陈旧数字扫描** |
 | `test_data_quality_audit.py` | 7 | 板块分类、涨跌停口径、**离线时上界必须为 unknown 而非部分值**、报告回显 |
@@ -91,7 +91,7 @@ python3 -m pytest tests/ -q -m slow         # 区分度对照，约 2 分钟
 | `test_multi_knob_docs.py` | 5 | **多旋钮表内部一致**、仅 exit_eval 行与报告一致、**naive 消融表单项不解释**、**wait_bars/合并数可在真实夹具复现**（slow）、**naive 消融表可复现**（slow） |
 | `test_report_consistency.py` | 5 | **divergence_items 四处同口径**、各轴 divergent 加总、**non_match_rows 单列**、per_day 加总=total、inline 截断标记 |
 | `test_fixture_integrity.py` | 4 | **pre_close 口径**、日线 high/low/close 与分钟线一致、**day_open 取首根**、文档写明口径 |
-| `test_conclusion_consistency.py` | 7 | **§9 的数字与报告对账**：总体/退出轴一致率、未建模上界、**不得再称容差结果不变**、ST 占比两处一致、**样本长度敏感性已声明**、**方向翻转可复现**（slow） |
+| `test_conclusion_consistency.py` | 8 | **§9 的数字与报告对账**：总体/退出轴一致率、未建模上界、**不得再称容差结果不变**、ST 占比两处一致、**样本长度敏感性已声明**、**方向翻转可复现**（slow） |
 | `test_release_compliance.py` | 7 | **免责声明四点**、INSTALL 五平台、SPDX 许可证、三处 name 一致、无占位符、**无凭证/内网/邮箱泄露**、entry 存在 |
 | `test_runtime_adapters.py` | 9 | **适配器文件齐备**、声明的脚本/entry 存在、**旋钮清单与代码一致**、版本与 skill.json 一致、**README 实例数字与报告一致** |
 
@@ -276,7 +276,7 @@ python3 scripts/env_check.py      # ok=true
 python3 scripts/validate.py       # ok=true, 0 issues
 python3 scripts/build.py          # 约 31 秒
 python3 scripts/verify_claims.py  # 79/79
-python3 -m pytest tests/ -q       # 277 passed, 1 skipped
+python3 -m pytest tests/ -q       # 279 passed, 1 skipped
 ```
 
 实测（v0.12.8，从 `origin/main` 全新 clone 到 /tmp）：各项全过，
@@ -1005,7 +1005,7 @@ python3 scripts/value_decomposition.py \
 
 ---
 
-## 6. 验证中发现并修复的缺陷（56 项）
+## 6. 验证中发现并修复的缺陷（58 项）
 
 以下都不是构造的测试用例，而是在真实数据上跑出来的：
 
@@ -1067,6 +1067,8 @@ python3 scripts/value_decomposition.py \
 | 54 | **上一缺陷导致归因误判为 `single_knob`** | 修复缺陷 53 后，退出差异由 314 增至 **344**，`exit_eval` 解释率由 100% 降至 **91.3%**，归因判定由 `single_knob` 改为 **`multi_knob`**——此前那 30 条差异被错误地"解释掉了"。主数字随之变化：总一致率 0.9913→**0.9905**、退出轴 0.8896→**0.8790** | 全部文档数字与 `validation_claims.json` 按实测更新（claims 一次拦下 16 处偏差） |
 | 55 | **修复重放后忘了重新生成夹具日志** | 改好 `bars_held` 缺陷后，`fixtures/logs/` 仍是旧代码产物。对齐时出现 **30 条"无法归因"** 的退出差异（日志判 max_hold、重放判 stop_loss），归因被迫降级 `multi_knob`——**不是语义分歧，是夹具过期**。重新生成后归因恢复 `single_knob` 100% | 重新生成日志 + `test_fixture_logs_match_current_replayer`（逐条比对，实测能抓出篡改） |
 | 56 | **价值结论的样本长度敏感性从未记录** | `negative` 只在 14 天样本上成立。实测缩短到 7 天方向就**翻转**、3 天 ref 均值变成 **+0.9948%**（正面）。文档此前把 `negative` 当作该样本的可靠结论交付，没有说明它不可外推到更短窗口 | §5.3 新增敏感性子节（14/7/5/3/2 天实测）、§9 列为未验证；`test_value_conclusion_sensitivity_is_documented` + slow 用例复现翻转 |
+| 57 | **`applicability` 把已实现能力列进了 out_of_scope** | `in_scope` 写「单一交易日」、`out_of_scope` 写「跨日持仓」，而实现完整支持跨日 + T+1（`tests/test_cross_day.py` 6 例、本样本 1,422 笔全部跨日结算）。**方向相反的误导**：读者会以为该功能不可用。`SKILL.md` 的表述反而是对的，只有报告里的 `applicability` 错 | 按实际能力重写 in/out_of_scope + `test_applicability_scope_matches_actual_capability`（实测回滚后立刻失败） |
+| 58 | **`SKILL.md` 的缺陷数停留在 9，台账已 56** | 读者会低估这个 skill 已历的验证强度 | 改为 56 + `test_skill_md_defect_count_matches_ledger` 双向对账 |
 
 ---
 
@@ -1096,7 +1098,7 @@ python3 scripts/value_decomposition.py \
 | panda-data | 1.0.6（仅夹具再生） |
 | 三方依赖 | 无（对齐与回放为纯标准库；`python3 -S` 实测通过） |
 | 全量对齐 | 约 31 秒（4,200 序列 × 240 根，1,008,000 根） |
-| 单元测试 | 约 160 秒（277 passed, 1 skipped） |
+| 单元测试 | 约 160 秒（279 passed, 1 skipped） |
 
 ```bash
 git clone https://github.com/quantskills/skill-jev-history-replay

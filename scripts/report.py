@@ -296,13 +296,18 @@ def build_applicability(log_source: str, semantics: Dict[str, Any],
                         manifest: Optional[Dict[str, Any]]) -> Dict[str, Any]:
     return {
         "in_scope": [
-            "单一交易日、A 股分钟级盯盘条件的语义还原与回放",
+            "A 股分钟级盯盘条件的语义还原与回放（单日与跨日均支持）",
             "condition / signal / wait / entry / exit 五个对齐轴",
             "由语义旋钮差异引起的判断、时点与成交差异归因",
+            "跨日持仓与 T+1 结算：仓位可从入场日带到后续交易日",
             "只读对齐：不假设可访问 JEV 内部推理或自定义 API",
         ],
+        # 这里只列**确实没做**的事情。跨日持仓与 T+1 是已实现能力
+        # （见 tests/test_cross_day.py，本样本 1,422 笔全部跨日结算），
+        # 此前误列在 out_of_scope 里，与实际能力相反。
         "out_of_scope": [
-            "跨日持仓、隔夜跳空、除权除息调整",
+            "隔夜跳空的建模：回放按次日开盘价成交，不单列跳空损益",
+            "除权除息调整：K 线未复权对齐，pre_close 直接取数据源值",
             "盘口级撮合、排队与部分成交建模",
             "JEV 内部模型推理路径的复现",
             "收益率、夏普等绩效评价结论",

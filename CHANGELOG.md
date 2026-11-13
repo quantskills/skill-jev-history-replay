@@ -1,5 +1,41 @@
 # CHANGELOG
 
+## 0.15.5 — 2026-11-13
+
+这一轮核对 `applicability`（报告里的适用范围声明）与实际能力是否一致。
+
+### 缺陷 57：`applicability` 把已实现的能力列为「不在范围内」
+
+| 位置 | 原文 | 实际 |
+|---|---|---|
+| `in_scope` | 「**单一交易日**、A 股分钟级…」 | 完整支持多日 |
+| `out_of_scope` | 「**跨日持仓**、隔夜跳空、除权除息调整」 | 跨日持仓 + T+1 **已实现** |
+
+证据：`tests/test_cross_day.py` 有 6 条专门测试、本样本 **1,422 笔全部
+跨日结算**、`open_position` 74 笔如实上报。
+
+**这是方向相反的误导**——比"漏写功能"更严重：读者会以为跨日持仓不可用，
+从而放弃一个本来能用的能力。而且 `SKILL.md` 的表述（「支持多日（跨日持仓与
+T+1 已实现）」）一直是对的，**只有报告里的 `applicability` 错**。
+
+修复后 `in_scope` 明确列出跨日与 T+1；`out_of_scope` 改为真正没做的项
+（隔夜跳空不单列损益、不复权、不建模撮合等）。
+
+### 缺陷 58：`SKILL.md` 的缺陷数停在 9，台账已 58
+
+读者会严重低估这个 skill 已历的验证强度。
+
+### 修复
+- 重写 `applicability` 的 in/out_of_scope
+- `SKILL.md` 缺陷数 9 → 58
+- 新增测试：
+  - `test_applicability_scope_matches_actual_capability`（实测回滚后立刻失败）
+  - `test_skill_md_defect_count_matches_ledger`（双向对账）
+
+### 缺陷台账 56 → 58 项
+
+---
+
 ## 0.15.4 — 2026-11-13
 
 这一轮验证 `log_contract.md` 里一条从未实测过的声明：

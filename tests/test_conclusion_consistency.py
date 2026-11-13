@@ -115,3 +115,23 @@ def test_value_direction_reverses_on_short_window():
     a3, b3 = diff_for(3)
     assert b14 < a14, f"14 天应为 ref 更差：naive={a14:.6f} ref={b14:.6f}"
     assert b3 > a3, f"3 天应为 ref 更好（方向翻转）：naive={a3:.6f} ref={b3:.6f}"
+
+
+def test_skill_md_defect_count_matches_ledger():
+    """`SKILL.md` 里引用的缺陷数必须与证据文档台账一致。
+
+    此前 SKILL.md 写「9 处缺陷」，而台账已到 56 项——读者会严重低估
+    这个 skill 已经历的验证强度。
+    """
+    skill = (REPO_ROOT / "SKILL.md").read_text(encoding="utf-8")
+    evidence = EVIDENCE.read_text(encoding="utf-8")
+
+    ledger = re.search(r"## 6\. 验证中发现并修复的缺陷（(\d+) 项）", evidence)
+    assert ledger, "证据文档缺缺陷台账标题"
+    expected = int(ledger.group(1))
+
+    found = re.findall(r"含 (\d+) 处已发现并修复的缺陷", skill)
+    assert found, "SKILL.md 未引用缺陷数"
+    for n in found:
+        assert int(n) == expected, (
+            f"SKILL.md 写 {n} 处，台账实际 {expected} 项")

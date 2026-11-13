@@ -88,6 +88,7 @@ python3 -m pytest tests/ -q -m slow         # 区分度对照，约 2 分钟
 | `test_metrics_correctness.py` | 15 | **统计函数正确性**：精确值对比、蒙特卡洛 Type-I/覆盖率 |
 | `test_fixture_universe.py` | 4 | **14 日标的池恒定**、每条序列 K 线完整、**manifest 与实际夹具对账**、**gzip mtime=0 可重现** |
 | `test_oos_check.py` | 4 | **IN_SAMPLE 基准与当前报告一致**、judge 能识别显著性减弱 |
+| `test_multi_knob_docs.py` | 3 | **多旋钮表内部一致**、仅 exit_eval 行与报告一致、**wait_bars/合并数可在真实夹具复现**（slow） |
 | `test_report_consistency.py` | 5 | **divergence_items 四处同口径**、各轴 divergent 加总、**non_match_rows 单列**、per_day 加总=total、inline 截断标记 |
 | `test_fixture_integrity.py` | 4 | **pre_close 口径**、日线 high/low/close 与分钟线一致、**day_open 取首根**、文档写明口径 |
 | `test_conclusion_consistency.py` | 5 | **§9 的数字与报告对账**：总体/退出轴一致率、未建模上界、**不得再称容差结果不变**、ST 占比两处一致 |
@@ -275,7 +276,7 @@ python3 scripts/env_check.py      # ok=true
 python3 scripts/validate.py       # ok=true, 0 issues
 python3 scripts/build.py          # 约 31 秒
 python3 scripts/verify_claims.py  # 71/71
-python3 -m pytest tests/ -q       # 261 passed, 1 skipped
+python3 -m pytest tests/ -q       # 264 passed, 1 skipped
 ```
 
 实测（v0.12.8，从 `origin/main` 全新 clone 到 /tmp）：各项全过，
@@ -734,13 +735,13 @@ python3 -c "import json;print(json.load(open('output/report.json'))['attribution
 | 日志侧真实差异 | 差异数 | 归因判定 | 首位旋钮 | 解释率 |
 |---|---|---|---|---|
 | 仅 `exit_eval` | 314 | `single_knob` | `exit_eval` | **100%** ✓ |
-| 仅 `wait_bars` | 4,522 | `single_knob` | `wait_bars` | **100%** ✓ |
-| `exit_eval` + `wait_bars` | 4,649 | `multi_knob` | `wait_bars` | 92.0% |
+| 仅 `wait_bars` | 2,963 | `single_knob` | `wait_bars` | **100%** ✓ |
+| `exit_eval` + `wait_bars` | 3,096 | `multi_knob` | `wait_bars` | 90.3% |
 
 **两个旋钮同时不同时，归因把 `exit_eval` 完全漏掉**——只报 `wait_bars`
 解释 92%，而 `exit_eval` 也是真实成因。
 
-原因：`wait_bars` 的影响量大（4,522 条差异），`exit_eval` 的影响被淹没在
+原因：`wait_bars` 的影响量大（2,963 条差异），`exit_eval` 的影响被淹没在
 它的残差里。单旋钮消融无法分离"两个都改了"的情况——它只能回答
 "如果把某一个改对，差异会少多少"，而两个都错时，改对一个仍剩大量差异。
 
@@ -978,7 +979,7 @@ python3 scripts/value_decomposition.py \
 
 ---
 
-## 6. 验证中发现并修复的缺陷（45 项）
+## 6. 验证中发现并修复的缺陷（46 项）
 
 以下都不是构造的测试用例，而是在真实数据上跑出来的：
 
@@ -1029,6 +1030,7 @@ python3 scripts/value_decomposition.py \
 | 43 | **§9「结论与边界」的数字无人校验** | 上界写 4.20%（实际 4.67%）、ST 交易占比写 2.04%（实际 3.31%）、「容差 0–5 分钟结果不变」在 v0.12.8 修好容差后已不成立。这一节是读者判断能不能信的依据，却一直没进 `verify_claims` | 按实测更正 + `tests/test_conclusion_consistency.py`（5 例）对账 |
 | 44 | **`day_open` / `pre_close` 的口径从未写明** | `day_open` 取的是**分钟线首根 open**，不是日线 `open`；`pre_close` 也不总等于前一日 `close`（实测 5/4,200，除权所致）。两者此前都没写进文档，读者自己核对时会把正常的数据源口径当成夹具错误 | `semantics_matrix.md` 与 `data_access.md` 写明两条口径及实测影响面；`tests/test_fixture_integrity.py` 锁住"差异比例 <1% 且 close 严格相等" |
 | 45 | **`alignment_conclusion.divergence_items` 报的是"非 match 行"而非"冲突数"** | 同一份报告里 `divergence_items=979,634`，而 `summary.divergence_items` 与 `total.divergent` 都是 314——差三个数量级，读者会以为有近百万条真实冲突。`verify_claims` 没覆盖这个字段，所以长期未被发现 | `divergence_items` 改用真实冲突数；`ledger.divergence_rows` 同步，另设 `non_match_rows` 保留原含义；`tests/test_report_consistency.py`（5 例）锁四处同口径 |
+| 46 | **§4.2 多旋钮表在容差修复后整体过期** | `wait_bars` 单独 4,522（实际 2,963）、合并 4,649 / 92.0%（实际 3,096 / 90.3%）。结论本身仍成立（`multi_knob`、漏报 `exit_eval`），但数字全错 | 按实测重算 + `tests/test_multi_knob_docs.py`（含一条 slow 用例在真实夹具复现） |
 
 ---
 
@@ -1058,7 +1060,7 @@ python3 scripts/value_decomposition.py \
 | panda-data | 1.0.6（仅夹具再生） |
 | 三方依赖 | 无（对齐与回放为纯标准库；`python3 -S` 实测通过） |
 | 全量对齐 | 约 31 秒（4,200 序列 × 240 根，1,008,000 根） |
-| 单元测试 | 约 160 秒（261 passed, 1 skipped） |
+| 单元测试 | 约 160 秒（264 passed, 1 skipped） |
 
 ```bash
 git clone https://github.com/quantskills/skill-jev-history-replay

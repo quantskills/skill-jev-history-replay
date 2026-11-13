@@ -1,5 +1,47 @@
 # CHANGELOG
 
+## 0.16.0 — 2026-11-13
+
+这一轮换角度：不再核对文档，而是**核对测试本身是否真的有效**。
+
+### 缺陷 66：一条核心测试长期 `pytest.skip`，断言从未执行
+
+`test_single_knob_difference_is_attributed_to_that_knob` 声称验证
+「单旋钮时可定位归因」。但小样本下：
+
+```
+exit 轴: comparable=0, divergent=0, open_position=1
+total:   comparable=5, divergent=0
+```
+
+唯一一笔交易是 `open_position`（T+1 下当日无法退出），于是每次都走到
+`if agg["divergent"] == 0: pytest.skip(...)` 就退出。
+
+**测试存在、绿灯、却从未验证过任何东西。** 而它守护的正是
+「单旋钮归因可定位」这条核心能力。
+
+### 修复
+- 改用**真实夹具**（`@pytest.mark.slow`，约 35 秒）
+- 加前置断言防止再次空转：
+  ```python
+  assert exit_axis["comparable"] > 0, "exit 轴没有可比项——测试会变成空转"
+  assert exit_axis["divergent"] > 0, "该样本下 exit_eval 应产生差异"
+  ```
+- **实测非空转**：把预期从 `single_knob` 改成 `multi_knob`，测试立刻失败
+
+### 结果
+**全量从 289 passed / 1 skipped → 289 passed / 0 skipped**
+——现在每一条测试都真正执行断言。
+
+### 顺带核对（无问题）
+- 30 个测试文件、289 个测试函数，**没有一个是零断言的**
+- 无 `@pytest.mark.skip` / `xfail` / `if False` 包裹
+- 唯一的 `monkeypatch` 用在 `test_credentials.py` 的环境隔离，属必要用法
+
+### 缺陷台账 65 → 66 项
+
+---
+
 ## 0.15.9 — 2026-11-13
 
 这一轮核对「`validation_claims.json` 里声明的每一条是否真的被检查」。

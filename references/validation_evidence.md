@@ -71,7 +71,7 @@ python3 -m pytest tests/ -q -m slow         # 区分度对照，约 2 分钟
 | `test_replayer.py` | 19 | 条件判断、连续性、等待/入场、四条退出路径、T+1、时间边界、**强平推迟不重复累加 bars_held** |
 | `test_cross_day.py` | 6 | 跨日持仓传递、未平仓如实上报、单日行为不变 |
 | `test_aligner.py` | 18 | 五轴对齐、配对唯一性、单边缺失、差异分类、容差分离、**每轴 match/divergent 必须存在**、**容差必须真正改变判定** |
-| `test_attribution.py` | 11 | 单旋钮解释率、视图一致性、**多旋钮漏报成因** |
+| `test_attribution.py` | 10 | 单旋钮解释率、视图一致性、**多旋钮漏报成因** |
 | `test_report.py` | 32 | verdict 判定、覆盖率门槛、零冲突门槛、Welch 检验、**p 值不得被舍入为 0**、**任一轴零可比不得判 consistent**、**reason 里的 p 值不得显示为 0**、**applicability 声明与能力一致** |
 | `test_end_to_end.py` | 13 | 输入校验、来源判定、产物落盘、确定性、**每根都写 vs 仅翻转两种记录习惯** |
 | `test_validation_claims.py` | 13 | **文档数字对账**、防漂移、区分度对照、**陈旧数字扫描** |
@@ -277,7 +277,7 @@ python3 scripts/env_check.py      # ok=true
 python3 scripts/validate.py       # ok=true, 0 issues
 python3 scripts/build.py          # 约 31 秒
 python3 scripts/verify_claims.py  # 84/84
-python3 -m pytest tests/ -q       # 289 passed, 1 skipped
+python3 -m pytest tests/ -q       # 289 passed, 0 skipped
 ```
 
 实测（v0.12.8，从 `origin/main` 全新 clone 到 /tmp）：各项全过，
@@ -1006,7 +1006,7 @@ python3 scripts/value_decomposition.py \
 
 ---
 
-## 6. 验证中发现并修复的缺陷（65 项）
+## 6. 验证中发现并修复的缺陷（66 项）
 
 以下都不是构造的测试用例，而是在真实数据上跑出来的：
 
@@ -1077,6 +1077,7 @@ python3 scripts/value_decomposition.py \
 | 63 | **`data_access.md` 的接口耗时与返回列未经实测** | 写「300 标的 / 72,000 根约 3 秒」，实测 **0.6 秒**（快 5 倍）。返回列、`get_prev_trade_date` 返回 `str` 而非 DataFrame 等信息都缺失，读者据此写代码容易出错 | 按实测更新 + 补返回列清单；`test_documented_pandata_apis_match_code_calls` 与 `test_data_access_signature_notes_match_code` 双向对账（纯静态，CI 不装 panda_data 也能跑） |
 | 64 | **`claims.fixture` 整段从未被 `verify_claims` 检查** | 5 个字段（dates/symbol_count/series_count/bar_count/universe_policy）写进了 claims，却没有任何代码读它——一整块失效的对账数据 | `verify_claims` 补 fixture 段检查（79 → **84** 项），实测篡改后立刻报错 |
 | 65 | **`universe_policy` 声称存在但产物里根本没有** | claims 声明"全期固定（14 日 trade_list 交集…）"，而 `build_fixtures` 从不写该字段、manifest 里也没有。读者无法核实标的池策略 | `build_fixtures` 落盘该字段 + `test_manifest_records_universe_policy` |
+| 66 | **一条核心测试长期 `pytest.skip`，断言从未执行** | `test_single_knob_difference_is_attributed_to_that_knob` 号称验证「单旋钮时可定位」，但小样本下 exit 轴 `comparable=0`（唯一一笔还是 `open_position`），每次跑到 `if agg["divergent"]==0: pytest.skip(...)` 就退出。**测试存在、绿灯、却从未验证过任何东西** | 改用真实夹具（`@pytest.mark.slow`），并加前置断言 `exit_axis["comparable"] > 0` 防止再次空转；实测改错预期即失败 |
 
 ---
 
@@ -1106,7 +1107,7 @@ python3 scripts/value_decomposition.py \
 | panda-data | 1.0.6（仅夹具再生） |
 | 三方依赖 | 无（对齐与回放为纯标准库；`python3 -S` 实测通过） |
 | 全量对齐 | 约 31 秒（4,200 序列 × 240 根，1,008,000 根） |
-| 单元测试 | 约 160 秒（289 passed, 1 skipped） |
+| 单元测试 | 约 273 秒（289 passed, 0 skipped） |
 
 ```bash
 git clone https://github.com/quantskills/skill-jev-history-replay

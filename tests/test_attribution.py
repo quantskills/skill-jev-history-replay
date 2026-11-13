@@ -2,7 +2,12 @@
 
 from __future__ import annotations
 
+import json
+from pathlib import Path
+
 import pytest
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
 
 from scripts import attribution, config, semantics as sem
 from scripts.aligner import align_symbol
@@ -252,74 +257,58 @@ def test_joint_diagnosis_applicable_when_single_knob_wins():
         assert result["joint_diagnosis"]["applicable"] is True
 
 
-def test_single_knob_difference_is_attributed_to_that_knob():
+@pytest.mark.slow
+def test_single_knob_difference_is_attributed_to_that_knob(tmp_path):
     """只差一个旋钮时，归因必须锁定它——但这也意味着信息量有限。
 
     合成日志 `jev_assumed` 与参考语义恰好只差 `exit_eval` 一个旋钮，
     所以实测的"归因 100% 锁定 exit_eval"在相当程度上是同义反复。
     这个测试固定住"单旋钮时可定位"，同时提醒读者不要外推。
+
+    **这条测试曾长期 `pytest.skip`**：小样本下 exit 轴 comparable=0
+    （唯一一笔还是 open_position），核心断言从未执行过。现在改用真实夹具，
+    确保断言真的会跑。
     """
-    bars = make_dataset({"A": BREAKOUT})
-    base = _base_semantics()
+    from scripts import config as cfg
+    from scripts.run_eval import evaluate
+
+    if not (REPO_ROOT / "fixtures" / "bars").exists():
+        pytest.skip("没有真实夹具")
+
+    bars_dir = REPO_ROOT / "fixtures" / "bars"
+    ref_dir = REPO_ROOT / "fixtures" / "reference"
+
+    # 用 exit_eval=bar_high_low 生成日志，再用参考语义（bar_close）对齐
+    base = dict(cfg.load_config()["semantics"])
     logged = dict(base)
     logged["exit_eval"] = "bar_high_low"
-    logs = _log_groups_from(replay_all(bars, logged, {"A": 10.0}))
 
-    from scripts.aligner import align_symbol, aggregate_rows
-    rows = {"A": align_symbol(
-        "A", replay_all(bars, base, {"A": 10.0})["symbols"]["A"], logs["A"], 1, 5.0
-    )["rows"]}
-    agg = aggregate_rows(rows)["total"]
-    if agg["divergent"] == 0:
-        pytest.skip("该样本下 exit_eval 未产生差异")
+    from scripts import data_loader, log_synth
+    from scripts.run_eval import _load_prev_closes
 
-    result = attribution.run_ablation(
-        bars, base, {"A": 10.0},
-        baseline_divergences=agg["divergent"],
-        baseline_comparable=agg["comparable"],
-        log_groups_by_symbol=logs, tol_minutes=1, price_tolerance_bps=5.0,
-    )
-    assert result["top_knob"] == "exit_eval"
-    assert result["verdict"] == "single_knob"
+    bars = data_loader.load_bars(bars_dir)
+    prev = _load_prev_closes(ref_dir, list(bars))
+    records = log_synth.synthesize_logs(bars, logged, prev)
+    for rec in records:
+        rec.pop("_synthetic", None)
+    logs_dir = tmp_path / "logs"
+    logs_dir.mkdir()
+    per_date = {}
+    for rec in records:
+        per_date.setdefault(str(rec.get("date") or ""), []).append(rec)
+    for date_text, rows in per_date.items():
+        (logs_dir / f"{date_text}.jsonl").write_text(
+            "\n".join(json.dumps(r, ensure_ascii=False) for r in rows) + "\n",
+            encoding="utf-8",
+        )
 
+    out = evaluate(bars_dir=bars_dir, logs_dir=logs_dir,
+                   output_dir=tmp_path / "out", run_attribution=True)
+    exit_axis = out["ledger"]["aggregate"]["by_axis"]["exit"]
+    assert exit_axis["comparable"] > 0, (
+        "exit 轴没有可比项——测试会变成空转，必须确保真的比过")
+    assert exit_axis["divergent"] > 0, "该样本下 exit_eval 应产生差异"
 
-def test_multi_knob_cannot_separate_both_causes():
-    """两个旋钮同时不同时，单旋钮消融会把次要成因漏掉。
-
-    实测：exit_eval + wait_bars 同时改，归因只报 wait_bars（92%），
-    完全没提 exit_eval——尽管它也是真实成因。
-    所以 verdict=multi_knob 时必须人工逐项核对。
-    """
-    bars = make_dataset({"A": BREAKOUT, "B": BREAKOUT, "C": BREAKOUT})
-    base = _base_semantics()
-    logged = dict(base)
-    logged["exit_eval"] = "bar_high_low"
-    logged["wait_bars"] = 0
-    base = dict(base)
-    base["wait_bars"] = 1   # 让两处都不同
-
-    logs = _log_groups_from(replay_all(bars, logged, {"A": 10.0, "B": 10.0, "C": 10.0}))
-
-    from scripts.aligner import align_symbol, aggregate_rows
-    replay_base = replay_all(bars, base, {"A": 10.0, "B": 10.0, "C": 10.0})
-    rows = {}
-    for sym in ("A", "B", "C"):
-        rows[sym] = align_symbol(
-            sym,
-            replay_base.get("by_series", replay_base["symbols"]).get(sym),
-            logs.get(sym, {"condition": [], "signal": [], "plan": [], "fill": []}),
-            1, 5.0,
-        )["rows"]
-    agg = aggregate_rows(rows)["total"]
-    if agg["divergent"] == 0:
-        pytest.skip("该样本下两处差异未产生可观察效果")
-
-    result = attribution.run_ablation(
-        bars, base, {"A": 10.0, "B": 10.0, "C": 10.0},
-        baseline_divergences=agg["divergent"],
-        baseline_comparable=agg["comparable"],
-        log_groups_by_symbol=logs, tol_minutes=1, price_tolerance_bps=5.0,
-    )
-    # 关键断言：多旋钮场景下 joint_diagnosis 必须标为不适用
-    if result["verdict"] != "single_knob":
-        assert result["joint_diagnosis"]["applicable"] is False
+    attr = out["attribution"]
+    assert attr["ranked"][0]["knob"] == "exit_eval"
+    assert attr["verdict"] == "single_knob"

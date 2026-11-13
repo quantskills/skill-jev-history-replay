@@ -239,7 +239,12 @@ def build_alignment_conclusion(aggregate: Dict[str, Any],
         "reason": reason,
         "comparable_items": comparable,
         "match_rate": rate,
-        "divergence_items": divergence_rows,
+        # 必须是**真实冲突数**，与 summary.divergence_items 和
+        # ledger.aggregate.total.divergent 同口径。
+        # 此前这里传的是 divergence_rows（= 全部非 match 行，含近 98 万条
+        # jev_missing），于是同一份报告里同一概念出现 979,634 / 314 两个数，
+        # 读者会误以为有上百万条冲突。
+        "divergence_items": divergent,
         "match_rate_ci95": (
             metrics.wilson_interval(total["match"], comparable) if comparable else None
         ),
@@ -304,7 +309,9 @@ def build_ledger_block(rows_by_symbol: Dict[str, List[Dict[str, Any]]],
                        max_inline: int) -> Dict[str, Any]:
     all_rows = [row for rows in rows_by_symbol.values() for row in rows]
     all_rows.sort(key=lambda r: (r["symbol"], r["time"] or "", r["axis"]))
-    divergent = [r for r in all_rows if r["status"] != "match"]
+    # 注意区分：这条列表装的是**所有非 match 行**（含海量 one_sided），
+    # 不是"真实冲突"。真实冲突数是 aggregate.total.divergent。
+    non_match = [r for r in all_rows if r["status"] != "match"]
     aggregate = aggregate_rows(rows_by_symbol)
     return {
         "aggregate": aggregate,
@@ -313,8 +320,10 @@ def build_ledger_block(rows_by_symbol: Dict[str, List[Dict[str, Any]]],
         "inline_rows": all_rows[:max_inline],
         "inline_truncated": len(all_rows) > max_inline,
         "total_rows": len(all_rows),
-        "divergence_rows": len(divergent),
-        "divergence_breakdown": _breakdown(divergent),
+        # 与 aggregate.total.divergent 同口径（真实冲突数）
+        "divergence_rows": aggregate["total"].get("divergent", 0),
+        "non_match_rows": len(non_match),
+        "divergence_breakdown": _breakdown(non_match),
     }
 
 

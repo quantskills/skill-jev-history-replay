@@ -90,6 +90,19 @@ report = run(input_data, config=None)
 `comparable = match + divergent`；`match_rate = match / comparable`。
 单边缺失不进分母。
 
+### `ledger` 里的三个行数，别混用
+
+| 字段 | 含义 | 本样本实测 |
+|---|---|---|
+| `total_rows` | 账本全部行 | 1,015,406 |
+| `non_match_rows` | 全部**非 match** 行（含 `jev_missing`/`open_position`） | 979,634 |
+| `divergence_rows` | **真实冲突**行，与 `aggregate.total.divergent` 同口径 | 314 |
+
+`alignment_conclusion.divergence_items`、`summary.divergence_items`、
+`ledger.divergence_rows`、`ledger.aggregate.total.divergent` **四处必须相等**。
+早期 `divergence_items` 取的是 `non_match_rows`，导致同一份报告里
+同一概念同时出现 979,634 和 314 两个数。
+
 ### `attribution.ranked[]`
 
 | 字段 | 说明 |

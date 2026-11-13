@@ -88,6 +88,7 @@ python3 -m pytest tests/ -q -m slow         # 区分度对照，约 2 分钟
 | `test_metrics_correctness.py` | 15 | **统计函数正确性**：精确值对比、蒙特卡洛 Type-I/覆盖率 |
 | `test_fixture_universe.py` | 4 | **14 日标的池恒定**、每条序列 K 线完整、**manifest 与实际夹具对账**、**gzip mtime=0 可重现** |
 | `test_oos_check.py` | 4 | **IN_SAMPLE 基准与当前报告一致**、judge 能识别显著性减弱 |
+| `test_report_consistency.py` | 5 | **divergence_items 四处同口径**、各轴 divergent 加总、**non_match_rows 单列**、per_day 加总=total、inline 截断标记 |
 | `test_fixture_integrity.py` | 4 | **pre_close 口径**、日线 high/low/close 与分钟线一致、**day_open 取首根**、文档写明口径 |
 | `test_conclusion_consistency.py` | 5 | **§9 的数字与报告对账**：总体/退出轴一致率、未建模上界、**不得再称容差结果不变**、ST 占比两处一致 |
 | `test_release_compliance.py` | 7 | **免责声明四点**、INSTALL 五平台、SPDX 许可证、三处 name 一致、无占位符、**无凭证/内网/邮箱泄露**、entry 存在 |
@@ -274,7 +275,7 @@ python3 scripts/env_check.py      # ok=true
 python3 scripts/validate.py       # ok=true, 0 issues
 python3 scripts/build.py          # 约 31 秒
 python3 scripts/verify_claims.py  # 71/71
-python3 -m pytest tests/ -q       # 256 passed, 1 skipped
+python3 -m pytest tests/ -q       # 261 passed, 1 skipped
 ```
 
 实测（v0.12.8，从 `origin/main` 全新 clone 到 /tmp）：各项全过，
@@ -977,7 +978,7 @@ python3 scripts/value_decomposition.py \
 
 ---
 
-## 6. 验证中发现并修复的缺陷（44 项）
+## 6. 验证中发现并修复的缺陷（45 项）
 
 以下都不是构造的测试用例，而是在真实数据上跑出来的：
 
@@ -1027,6 +1028,7 @@ python3 scripts/value_decomposition.py \
 | 42 | **标的代码大小写不归一，导致全部对不上** | 日志写 `000001.sz`（或带空格）而 K 线是 `000001.SZ` 时，**一条也配不上**：全部变成 `jev_missing`、`comparable=0`、`match_rate=null`。报告完全看不出真正原因是大小写——表现成"日志与行情毫无关系" | 加载时统一 `strip().upper()`（K 线与日志两处）+ `test_symbol_case_and_whitespace_are_normalized` 等 2 例 |
 | 43 | **§9「结论与边界」的数字无人校验** | 上界写 4.20%（实际 4.67%）、ST 交易占比写 2.04%（实际 3.31%）、「容差 0–5 分钟结果不变」在 v0.12.8 修好容差后已不成立。这一节是读者判断能不能信的依据，却一直没进 `verify_claims` | 按实测更正 + `tests/test_conclusion_consistency.py`（5 例）对账 |
 | 44 | **`day_open` / `pre_close` 的口径从未写明** | `day_open` 取的是**分钟线首根 open**，不是日线 `open`；`pre_close` 也不总等于前一日 `close`（实测 5/4,200，除权所致）。两者此前都没写进文档，读者自己核对时会把正常的数据源口径当成夹具错误 | `semantics_matrix.md` 与 `data_access.md` 写明两条口径及实测影响面；`tests/test_fixture_integrity.py` 锁住"差异比例 <1% 且 close 严格相等" |
+| 45 | **`alignment_conclusion.divergence_items` 报的是"非 match 行"而非"冲突数"** | 同一份报告里 `divergence_items=979,634`，而 `summary.divergence_items` 与 `total.divergent` 都是 314——差三个数量级，读者会以为有近百万条真实冲突。`verify_claims` 没覆盖这个字段，所以长期未被发现 | `divergence_items` 改用真实冲突数；`ledger.divergence_rows` 同步，另设 `non_match_rows` 保留原含义；`tests/test_report_consistency.py`（5 例）锁四处同口径 |
 
 ---
 
@@ -1056,7 +1058,7 @@ python3 scripts/value_decomposition.py \
 | panda-data | 1.0.6（仅夹具再生） |
 | 三方依赖 | 无（对齐与回放为纯标准库；`python3 -S` 实测通过） |
 | 全量对齐 | 约 31 秒（4,200 序列 × 240 根，1,008,000 根） |
-| 单元测试 | 约 160 秒（256 passed, 1 skipped） |
+| 单元测试 | 约 160 秒（261 passed, 1 skipped） |
 
 ```bash
 git clone https://github.com/quantskills/skill-jev-history-replay

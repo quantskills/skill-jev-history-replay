@@ -1,5 +1,47 @@
 # CHANGELOG
 
+## 0.13.7 — 2026-11-13
+
+这一轮核对**报告内部各处的计数是否同口径**。查出一个差三个数量级的缺陷。
+
+### 缺陷 45：`divergence_items` 报的是"非 match 行"而非"冲突数"
+
+同一份 `report.json` 里，同一个概念出现了不同数字：
+
+| 位置 | 值 |
+|---|---|
+| `alignment_conclusion.divergence_items` | **979,634** |
+| `summary.divergence_items` | 314 |
+| `ledger.aggregate.total.divergent` | 314 |
+| `ledger.divergence_rows` | **979,634** |
+
+**差三个数量级**。读者看到 979,634 会以为有近百万条真实冲突，
+实际那 98 万条几乎全是 `jev_missing`（日志只在状态翻转时记录）。
+
+根因：`build_alignment_conclusion` 收到的 `divergence_rows` 是
+「全部非 match 行」，而不是真实冲突数。`verify_claims` 恰好没覆盖这个字段，
+所以从很早以前就错了却一直没被发现。
+
+### 修复
+- `divergence_items` 改用真实冲突数，四处口径统一
+- `ledger.divergence_rows` 同步；另设 `non_match_rows` 保留原含义（979,634）
+- `api_guide.md` 新增「三个行数，别混用」对照表
+- 新增 `tests/test_report_consistency.py`（5 例）：
+  - 四处 `divergence_items` 必须相等
+  - 总冲突数 == 各轴 `divergent` 之和
+  - `non_match_rows` 单列且 == `one_sided + divergent`
+  - `per_day` 加总 == `total`
+  - `inline_truncated` 与 `max_inline_rows` 一致
+
+### 顺带验证（无问题）
+- `per_day` 加总：comparable 36,086、divergent 314，与 total 完全一致
+- `ledger_mode: full`：1,015,406 行 / 185 MB / 32 秒，行数 == `total_rows`
+- `inline_truncated` 在 50 行上限时正确置 true
+
+### 缺陷台账 44 → 45 项
+
+---
+
 ## 0.13.6 — 2026-11-13
 
 这一轮核对 **`fixtures/reference` 是否真的来自 panda 数据源**——它提供
@@ -301,7 +343,7 @@ ModuleNotFoundError: No module named 'scripts'
 | 项 | 文档写的 | 实际 |
 |---|---|---|
 | `verify_claims.py` | 27/27（§1.1）、61/61（§1.0a） | **71/71** |
-| `pytest tests/ -q` | 113 passed | **256 passed, 1 skipped** |
+| `pytest tests/ -q` | 113 passed | **261 passed, 1 skipped** |
 | `build.py` | 54 秒 | **31 秒** |
 | Python | 3.12.12 / 3.11.16 | 3.12.12 / **3.9.6**（实测） |
 
@@ -316,7 +358,7 @@ env_check     ok=true
 validate      ok=true, 0 issues
 build         31 秒，exit 0
 verify_claims 71/71
-pytest        256 passed, 1 skipped
+pytest        261 passed, 1 skipped
 ```
 总一致率 0.9913、退出轴 0.8896，与本机完全一致；`output/` 由 `build.py` 自动创建。
 

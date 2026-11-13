@@ -198,3 +198,43 @@ def test_manifest_records_universe_policy():
     policy = manifest.get("universe_policy")
     assert policy, "manifest 未记录 universe_policy"
     assert "全期固定" in policy, f"多日夹具的标的池策略应为全期固定，实际：{policy}"
+
+
+def test_fixture_dates_are_contiguous_trading_days():
+    """夹具的交易日必须构成一段连续区间，不能混入零散日期。
+
+    真实事故：为验证"陌生数据可用性"，临时用 `build_fixtures.py` 生成了
+    2026-09-16/17/18 三天。`build_fixtures` 是**增量写入**——它不会清掉
+    旧文件，于是 `fixtures/` 同时含有 2026-09 与 2026-10/11 两段。
+    若未及时发现，后续所有 run 都会基于混入的样本。
+
+    这里守住"日期必须是单一连续区间"，混入外部日期会立刻失败。
+    """
+    import json as _json
+    import datetime as _dt
+
+    dates = sorted(p.name.split(".")[0] for p in BARS_DIR.glob("*.json.gz"))
+    if len(dates) < 2:
+        pytest.skip("单日夹具")
+
+    parsed = [_dt.date(int(d[:4]), int(d[4:6]), int(d[6:])) for d in dates]
+
+    # 相邻交易日间隔不应超过 4 天（跨周末 3 天 + 1 天余量；
+    # 长假会让这条偏紧，但本仓库的夹具区间内没有长假）
+    gaps = [
+        (a, b, (b - a).days)
+        for a, b in zip(parsed, parsed[1:])
+        if (b - a).days > 4
+    ]
+    assert not gaps, (
+        "夹具日期出现大跨度断档，可能混入了其它期间的夹具："
+        + ", ".join(f"{a}→{b}（{g} 天）" for a, b, g in gaps)
+    )
+
+    # manifest 记录的日期集合必须与磁盘完全一致
+    manifest_path = REPO_ROOT / "fixtures" / "manifest.json"
+    if manifest_path.exists():
+        manifest = _json.loads(manifest_path.read_text(encoding="utf-8"))
+        assert manifest.get("dates") == dates, (
+            f"manifest.dates 与磁盘不一致："
+            f"manifest={manifest.get('dates')} 磁盘={dates}")

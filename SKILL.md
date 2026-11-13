@@ -155,7 +155,7 @@ python3 scripts/validate.py       # 先检查日志契约，区分"字段缺失"
 - 若真实日志缺 `wait_bars` / `entry_price` 等字段，对应轴退化为不可比，不会编造一致
 - 跨日持仓的退出在日志侧通常没有独立记录（`plan` 写在入场日），
   因此这类周期的退出轴不可比，报告中标为 `replay_only` 单列，不进一致率分母
-- 实测验证记录见 `references/validation_evidence.md`，含 66 处已发现并修复的缺陷
+- 实测验证记录见 `references/validation_evidence.md`，含 67 处已发现并修复的缺陷
 
 ## 可被 Alpha 调用
 - 否

@@ -87,7 +87,7 @@ python3 -m pytest tests/ -q -m slow         # 区分度对照，约 2 分钟
 | `test_adapt_logs.py` | 22 | **外部日志字段映射**、布尔规范化、缺字段必失败、**纯契约日志可端到端接入**、**多日缺 date 必报错（加载器与 validate 两处）**、**无法判定的 hit 必报错**、**时间戳写法不影响结论** |
 | `test_knob_efficacy.py` | 3 | **旋钮全部接线**、指纹稳定性、含当前根必归零 |
 | `test_metrics_correctness.py` | 15 | **统计函数正确性**：精确值对比、蒙特卡洛 Type-I/覆盖率 |
-| `test_fixture_universe.py` | 6 | **14 日标的池恒定**、每条序列 K 线完整、**manifest 与实际夹具对账**、**gzip mtime=0 可重现**、**夹具日志与当前重放一致**、**manifest 记录标的池策略** |
+| `test_fixture_universe.py` | 7 | **14 日标的池恒定**、每条序列 K 线完整、**manifest 与实际夹具对账**、**gzip mtime=0 可重现**、**夹具日志与当前重放一致**、**manifest 记录标的池策略**、**日期必须是单一连续区间**（防混入外部夹具） |
 | `test_oos_check.py` | 4 | **IN_SAMPLE 基准与当前报告一致**、judge 能识别显著性减弱 |
 | `test_multi_knob_docs.py` | 5 | **多旋钮表内部一致**、仅 exit_eval 行与报告一致、**naive 消融表单项不解释**、**wait_bars/合并数可在真实夹具复现**（slow）、**naive 消融表可复现**（slow） |
 | `test_report_consistency.py` | 5 | **divergence_items 四处同口径**、各轴 divergent 加总、**non_match_rows 单列**、per_day 加总=total、inline 截断标记 |
@@ -277,7 +277,7 @@ python3 scripts/env_check.py      # ok=true
 python3 scripts/validate.py       # ok=true, 0 issues
 python3 scripts/build.py          # 约 31 秒
 python3 scripts/verify_claims.py  # 84/84
-python3 -m pytest tests/ -q       # 289 passed, 0 skipped
+python3 -m pytest tests/ -q       # 290 passed, 0 skipped
 ```
 
 实测（v0.12.8，从 `origin/main` 全新 clone 到 /tmp）：各项全过，
@@ -815,6 +815,24 @@ python3 scripts/oos_check.py            # 需凭证；11 天 × 300 只固定标
 **结构结论全部复现**：四轴一致率 1.00、退出轴 0.888 左右、归因锁定
 `exit_eval`、价值方向为负。
 
+### 在完全未参与开发的数据上从头跑通（2026-09-16 至 09-18）
+
+前面所有验收都基于同一份 14 天夹具。为验证工具不是"只对这份数据有效"，
+另取**三个与开发期完全不重叠的交易日**（2026-09-16/17/18，50 只标的），
+用 `build_fixtures.py` 从零生成夹具，再跑完整流程：
+
+| 指标 | 开发期 14 天 | 全新 3 天 |
+|---|---|---|
+| 总一致率 | 0.9912 | **0.9913** |
+| 退出轴一致率 | 0.8878 | **0.8882** |
+| 归因判定 | `single_knob` | **`single_knob`** |
+| `log_source` | synthetic | synthetic |
+
+**结构完全复现**，且整个过程无一条命令失败、无需修改任何代码。
+
+> 注意：这三天的夹具**未提交进仓库**（会被后续运行覆盖）。此处记录的是
+> "工具能在陌生数据上直接跑通"这一事实，不是新的样本结论。
+
 ### 但显著性强度没有复现（必须如实说明）
 
 | 项 | 样本内 | 样本外 |
@@ -1006,7 +1024,7 @@ python3 scripts/value_decomposition.py \
 
 ---
 
-## 6. 验证中发现并修复的缺陷（66 项）
+## 6. 验证中发现并修复的缺陷（67 项）
 
 以下都不是构造的测试用例，而是在真实数据上跑出来的：
 
@@ -1078,6 +1096,7 @@ python3 scripts/value_decomposition.py \
 | 64 | **`claims.fixture` 整段从未被 `verify_claims` 检查** | 5 个字段（dates/symbol_count/series_count/bar_count/universe_policy）写进了 claims，却没有任何代码读它——一整块失效的对账数据 | `verify_claims` 补 fixture 段检查（79 → **84** 项），实测篡改后立刻报错 |
 | 65 | **`universe_policy` 声称存在但产物里根本没有** | claims 声明"全期固定（14 日 trade_list 交集…）"，而 `build_fixtures` 从不写该字段、manifest 里也没有。读者无法核实标的池策略 | `build_fixtures` 落盘该字段 + `test_manifest_records_universe_policy` |
 | 66 | **一条核心测试长期 `pytest.skip`，断言从未执行** | `test_single_knob_difference_is_attributed_to_that_knob` 号称验证「单旋钮时可定位」，但小样本下 exit 轴 `comparable=0`（唯一一笔还是 `open_position`），每次跑到 `if agg["divergent"]==0: pytest.skip(...)` 就退出。**测试存在、绿灯、却从未验证过任何东西** | 改用真实夹具（`@pytest.mark.slow`），并加前置断言 `exit_axis["comparable"] > 0` 防止再次空转；实测改错预期即失败 |
+| 67 | **`build_fixtures.py` 增量写入，混入新日期不会报错** | 为验证"陌生数据可用性"生成 2026-09-16/17/18 三天后，`fixtures/` 里同时存在 2026-09 与 2026-10/11 两段（该脚本只加不清）。若不核对，后续所有 run 都会基于混入样本 | `test_fixture_dates_are_contiguous_trading_days` 守"日期必须是单一连续区间"（实测注入 20260916 立刻报 40 天断档）；本次已还原夹具 |
 
 ---
 
@@ -1107,7 +1126,7 @@ python3 scripts/value_decomposition.py \
 | panda-data | 1.0.6（仅夹具再生） |
 | 三方依赖 | 无（对齐与回放为纯标准库；`python3 -S` 实测通过） |
 | 全量对齐 | 约 31 秒（4,200 序列 × 240 根，1,008,000 根） |
-| 单元测试 | 约 273 秒（289 passed, 0 skipped） |
+| 单元测试 | 约 273 秒（290 passed, 0 skipped） |
 
 ```bash
 git clone https://github.com/quantskills/skill-jev-history-replay

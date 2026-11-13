@@ -26,7 +26,7 @@
     },
     "exit": {
       "comparable": 2844,
-      "match_rate": 0.8896,
+      "match_rate": 0.879,
       "statuses": {
         "open_position": 74
       }
@@ -34,16 +34,16 @@
   },
   "total": {
     "comparable": 36086,
-    "divergent": 314,
+    "divergent": 344,
     "one_sided": 979320,
-    "match": 35772,
-    "match_rate": 0.9913
+    "match": 35742,
+    "match_rate": 0.9905
   },
   "attribution": {
-    "verdict": "single_knob",
+    "verdict": "multi_knob",
     "top_knob": "exit_eval",
-    "top_explained_rate": 1.0,
-    "joint_diagnosis_applicable": true
+    "top_explained_rate": 0.9128,
+    "joint_diagnosis_applicable": false
   },
   "alignment_conclusion": {
     "verdict": "inconclusive"
@@ -75,7 +75,7 @@
     },
     "20261027": {
       "comparable": 1094,
-      "divergent": 27
+      "divergent": 29
     },
     "20261028": {
       "comparable": 4032,
@@ -83,7 +83,7 @@
     },
     "20261029": {
       "comparable": 1279,
-      "divergent": 35
+      "divergent": 45
     },
     "20261030": {
       "comparable": 1597,
@@ -95,19 +95,19 @@
     },
     "20261103": {
       "comparable": 2494,
-      "divergent": 68
+      "divergent": 69
     },
     "20261104": {
       "comparable": 4170,
-      "divergent": 17
+      "divergent": 21
     },
     "20261105": {
       "comparable": 4651,
-      "divergent": 41
+      "divergent": 43
     },
     "20261106": {
       "comparable": 1008,
-      "divergent": 11
+      "divergent": 16
     },
     "20261109": {
       "comparable": 1551,
@@ -115,15 +115,15 @@
     },
     "20261110": {
       "comparable": 3201,
-      "divergent": 22
+      "divergent": 24
     },
     "20261111": {
       "comparable": 2857,
-      "divergent": 49
+      "divergent": 52
     },
     "20261112": {
       "comparable": 1478,
-      "divergent": 22
+      "divergent": 23
     }
   }
 }

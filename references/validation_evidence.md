@@ -68,7 +68,7 @@ python3 -m pytest tests/ -q -m slow         # 区分度对照，约 2 分钟
 |---|---|---|
 | `test_semantics.py` | 15 | 旋钮取值校验、哈希敏感性、**默认值与 YAML 一致**、降级可见、**config 未知键必报错**、**文档所列 config 键全部生效** |
 | `test_data_loader.py` | 21 | 格式容错、gzip、字段校验、重复检测、**分钟缺口与午休排除**、**多日 series 键带日期**、**代码大小写/空格归一** |
-| `test_replayer.py` | 18 | 条件判断、连续性、等待/入场、四条退出路径、T+1、时间边界 |
+| `test_replayer.py` | 19 | 条件判断、连续性、等待/入场、四条退出路径、T+1、时间边界、**强平推迟不重复累加 bars_held** |
 | `test_cross_day.py` | 6 | 跨日持仓传递、未平仓如实上报、单日行为不变 |
 | `test_aligner.py` | 18 | 五轴对齐、配对唯一性、单边缺失、差异分类、容差分离、**每轴 match/divergent 必须存在**、**容差必须真正改变判定** |
 | `test_attribution.py` | 11 | 单旋钮解释率、视图一致性、**多旋钮漏报成因** |
@@ -133,11 +133,11 @@ python3 scripts/verify_claims.py  # 79/79 OK
 |---|---|---|
 | `one_sided`（多为 `jev_missing`） | 979,320 | **96.45%** |
 | `match` | 35,772 | 3.52% |
-| `divergent` | 314 | 0.03% |
+| `divergent` | 344 | 0.03% |
 | `open_position` | 74 | 0.01% |
 
 前两类合计 99.96%，但**它们不是差异**：`jev_missing` 是"日志没记这一根"，
-`match` 是一致。真正需要逐行追溯的只有 388 行（314 divergent + 74 open_position）。
+`match` 是一致。真正需要逐行追溯的只有 418 行（344 divergent + 74 open_position）。
 
 新增 `ledger_mode`（默认 `diff`）：只写需要看的记录。
 **185 MB → 68 KB（69,454 字节），缩减 99.96%**。需要全量时设 `ledger_mode: full`。
@@ -276,17 +276,17 @@ python3 scripts/env_check.py      # ok=true
 python3 scripts/validate.py       # ok=true, 0 issues
 python3 scripts/build.py          # 约 31 秒
 python3 scripts/verify_claims.py  # 79/79
-python3 -m pytest tests/ -q       # 271 passed, 1 skipped
+python3 -m pytest tests/ -q       # 272 passed, 1 skipped
 ```
 
 实测（v0.12.8，从 `origin/main` 全新 clone 到 /tmp）：各项全过，
-总一致率 0.9913、退出轴 0.8896，与本机**完全一致**。`output/` 在 clone 后
+总一致率 0.9905、退出轴 0.8790，与本机**完全一致**。`output/` 在 clone 后
 不存在，由 `build.py` 自动创建——不依赖任何预生成产物。
 
 ### 纯标准库可跑
 
 系统自带 Python 3.9.6 下 `python3 scripts/build.py` 跑通，数字完全相同
-（0.9913 / 0.8896）。再用 `python3 -S`（屏蔽 site-packages，等价于无任何
+（0.9905 / 0.8790）。再用 `python3 -S`（屏蔽 site-packages，等价于无任何
 三方包）复跑，仍得同一组数字，且报告正确回显降级原因：
 
 ```
@@ -420,8 +420,8 @@ python3 scripts/build.py        # 约 31 秒
 | signal | 1,496 | 1,496 | 0 | **1.00** |
 | wait | 1,496 | 1,496 | 0 | **1.00** |
 | entry | 1,496 | 1,496 | 0 | **1.00** |
-| exit | 2,844 | 2,530 | 314 | **0.8896** |
-| **合计** | **36,086** | **35,772** | **314** | **0.9913** |
+| exit | 2,844 | 2,500 | 344 | **0.8790** |
+| **合计** | **36,086** | **35,742** | **344** | **0.9905** |
 
 > **样本变更说明**：v0.6.1 修掉了标的池不一致的缺陷，序列从 7,000 降到 4,200
 > （300 × 14，全期固定）。数字随之变化，但**结构结论不变**：
@@ -627,10 +627,10 @@ python3 scripts/data_quality_audit.py --offline  # 无凭证，只算涨跌停�
 
 | 时间容差 | 总一致率 | 退出轴一致率 | 冲突数 | 归因首位 |
 |---|---|---|---|---|
-| 0 分钟 | 0.9895 | 0.8667 | 379 | `exit_eval` 100% |
-| 1 分钟（默认） | 0.9913 | 0.8896 | 314 | `exit_eval` 100% |
-| 2 分钟 | 0.9920 | 0.8991 | 287 | `exit_eval` 100% |
-| 5 分钟 | 0.9931 | 0.9121 | 250 | `exit_eval` 100% |
+| 0 分钟 | 0.9886 | 0.8548 | 413 | `exit_eval` 92.5% |
+| 1 分钟（默认） | 0.9905 | 0.8790 | 344 | `exit_eval` 91.3% |
+| 2 分钟 | 0.9912 | 0.8885 | 317 | `exit_eval` 90.5% |
+| 5 分钟 | 0.9924 | 0.9030 | 276 | `exit_eval` 89.5% |
 
 > **v0.12.8 更正**：这张表原先是四档完全相同（0.9895 / 0.8667 / 379），
 > 我当时解释成"退出时刻差是整分钟离散值、比较天然精确"。**那是错的**——
@@ -638,7 +638,7 @@ python3 scripts/data_quality_audit.py --offline  # 无凭证，只算涨跌停�
 > `"match" if gap == 0`，容差只影响配对搜索半径。参数调 0→5 结果不变，
 > 不是结论稳，是参数没生效。修复后四档才真正分化（见上表）。
 >
-> 这也说明主结论数字会随容差变化：默认 1 分钟下是 **0.9913 / 0.8896 / 314**。
+> 这也说明主结论数字会随容差变化：默认 1 分钟下是 **0.9905 / 0.8790 / 344**。
 > 值本身的变化方向合理——放宽容差让 1–5 分钟的时点抖动不再算冲突。
 
 
@@ -705,9 +705,9 @@ python3 -c "import json;print(json.load(open('output/report.json'))['attribution
 
 | 排名 | 旋钮 | 从 → 到 | 解释差异 | 解释率 |
 |---|---|---|---|---|
-| 1 | `exit_eval` | `bar_close` → `bar_high_low` | 314 | **100%** |
+| 1 | `exit_eval` | `bar_close` → `bar_high_low` | 314 | **91.3%** |
 
-`verdict = single_knob`，`joint_diagnosis.applicable = true`。
+`verdict = multi_knob`，`joint_diagnosis.applicable = false`（见下方说明）。
 
 ### 4.0 这个 100% 有多大的信息量（重要）
 
@@ -734,21 +734,21 @@ python3 -c "import json;print(json.load(open('output/report.json'))['attribution
 
 | 日志侧真实差异 | 差异数 | 归因判定 | 首位旋钮 | 解释率 |
 |---|---|---|---|---|
-| 仅 `exit_eval` | 314 | `single_knob` | `exit_eval` | **100%** ✓ |
-| 仅 `wait_bars` | 2,963 | `single_knob` | `wait_bars` | **100%** ✓ |
-| `exit_eval` + `wait_bars` | 3,096 | `multi_knob` | `wait_bars` | 90.3% |
+| 仅 `exit_eval` | 344 | `multi_knob` | `exit_eval` | 91.3% |
+| 仅 `wait_bars` | 2,954 | `single_knob` | `wait_bars` | **100%** ✓ |
+| `exit_eval` + `wait_bars` | 3,092 | `multi_knob` | `wait_bars` | 90.1% |
 
 **两个旋钮同时不同时，归因把 `exit_eval` 完全漏掉**——只报 `wait_bars`
 解释 92%，而 `exit_eval` 也是真实成因。
 
-原因：`wait_bars` 的影响量大（2,963 条差异），`exit_eval` 的影响被淹没在
+原因：`wait_bars` 的影响量大（2,954 条差异），`exit_eval` 的影响被淹没在
 它的残差里。单旋钮消融无法分离"两个都改了"的情况——它只能回答
 "如果把某一个改对，差异会少多少"，而两个都错时，改对一个仍剩大量差异。
 
 **结论**：`verdict=multi_knob` 时必须人工逐项核对，不能只看 `top_knob`。
 报告已在 `joint_diagnosis` 里标注 `applicable=false`。
 
-**解读**：314 条退出差异**全部**由「退出按收盘价还是按触价判定」造成。
+**解读**：344 条退出差异中，314 条由「退出按收盘价还是按触价判定」造成（91.3%），**剩余 30 条无法由单一旋钮解释**。
 
 ### 4.1 大偏差的成因已核实
 
@@ -772,9 +772,9 @@ python3 -c "import json;print(json.load(open('output/report.json'))['attribution
 
 | 操作 | 差异数 |
 |---|---|
-| 基线（参考语义 vs naive 日志） | 20,774 |
-| 只把 `bar_timestamp` 改成 naive 值 | 15,581 |
-| 只把 `baseline_price` 改成 naive 值 | 20,848（**增加**） |
+| 基线（参考语义 vs naive 日志） | 20,767 |
+| 只把 `bar_timestamp` 改成 naive 值 | 15,573 |
+| 只把 `baseline_price` 改成 naive 值 | 20,841（**增加**） |
 | 只把 `t_plus_1` 改成 naive 值 | 23,063（**增加**） |
 | 全部改成 naive（等价于日志侧配置） | **0** |
 
@@ -806,8 +806,8 @@ python3 scripts/oos_check.py            # 需凭证；11 天 × 300 只固定标
 |---|---|---|---|
 | condition | 28,754 / 1.0000 | 14,008 / **1.0000** | ✓ |
 | signal / wait / entry | 各 1,496 / 1.0000 | 各 678 / **1.0000** | ✓ |
-| exit | 2,844 / 0.8896 | 1,222 / **0.8879** | ✓ |
-| 合计 | 36,086 / 0.9913 | 17,264 / **0.9921** | ✓ |
+| exit | 2,844 / 0.8790 | 1,222 / **0.8879** | ✓ |
+| 合计 | 36,086 / 0.9905 | 17,264 / **0.9921** | ✓ |
 | 归因首位 | `exit_eval` 100% | **`exit_eval` 100%** | ✓ |
 | 价值 verdict | `negative` | **`negative`** | ✓ |
 
@@ -985,7 +985,7 @@ python3 scripts/value_decomposition.py \
 
 ---
 
-## 6. 验证中发现并修复的缺陷（52 项）
+## 6. 验证中发现并修复的缺陷（54 项）
 
 以下都不是构造的测试用例，而是在真实数据上跑出来的：
 
@@ -1043,6 +1043,8 @@ python3 scripts/value_decomposition.py \
 | 50 | **价值结论 `reason` 里 p 值仍用 `round(p,6)`** | 字段层面的 `sign_test_p` 在 v0.12.6 已修，但 `reason` 文字里还留着 `round(p_value, 6)`：p=3.0e-12 会显示成 `p=0.0`。同一份报告里字段正确、文字却是错的 | 新增 `_fmt_p()` 统一格式化 + `test_value_reason_never_shows_p_as_zero` |
 | 51 | **`jev_missing` 写成 1,633,358，超过总根数 1,008,000** | 一个**逻辑上不可能**的数字：单边缺失行数不可能多于该轴总根数。实际 979,246。这类错误只要做一次量级检查就能发现，但此前无人校验 | 按实测更正 + `verify_claims` 新增「`non_match_rows <= total_rows`」与「条件轴覆盖率与各轴一致」两条检查（77 → 79） |
 | 52 | **离线审计把"上界"报成"已知项的最大值"** | 离线时 ST/停牌为 `null`（未核验），上界却取涨跌停的 **2.40%**，verdict 输出「未建模状态占比 2.40%，属可接受」。而在线实测上界是 **4.67%**——等于把"一半没查"说成"风险可接受"。这正是文档反复强调的"不能把未核验当 0"，却在聚合层漏了 | 有任一未核验项时上界置 `null`、级别 `unknown`，并给出 `unverified_components` 与 `known_components_max`；原测试断言"不为 None"正是固化了错误行为，已改 |
+| 53 | **T+1 下强平推迟分支重复累加 `bars_held`，掩盖 30 条真实差异** | `force_exit_time` 分支在 `_exit_or_defer` 返回 False 后**没有 return**，循环继续；下一根仍过 `force_time`，再次进入该分支并累加 `bars_held`。14:45→15:00 的 15 根让它从 30 涨到 **360**（另有 34 笔 328–344）。次日 `held = bars_held + j + 1` 立刻超 max_hold，于是这些仓位**在次日第一根被当作"持有超时"平仓** | 推迟后立即 `return cycle`（与止损/止盈分支一致）+ `test_force_exit_defer_does_not_accumulate_bars_held` |
+| 54 | **上一缺陷导致归因误判为 `single_knob`** | 修复缺陷 53 后，退出差异由 314 增至 **344**，`exit_eval` 解释率由 100% 降至 **91.3%**，归因判定由 `single_knob` 改为 **`multi_knob`**——此前那 30 条差异被错误地"解释掉了"。主数字随之变化：总一致率 0.9913→**0.9905**、退出轴 0.8896→**0.8790** | 全部文档数字与 `validation_claims.json` 按实测更新（claims 一次拦下 16 处偏差） |
 
 ---
 
@@ -1072,7 +1074,7 @@ python3 scripts/value_decomposition.py \
 | panda-data | 1.0.6（仅夹具再生） |
 | 三方依赖 | 无（对齐与回放为纯标准库；`python3 -S` 实测通过） |
 | 全量对齐 | 约 31 秒（4,200 序列 × 240 根，1,008,000 根） |
-| 单元测试 | 约 160 秒（271 passed, 1 skipped） |
+| 单元测试 | 约 160 秒（272 passed, 1 skipped） |
 
 ```bash
 git clone https://github.com/quantskills/skill-jev-history-replay
@@ -1090,13 +1092,14 @@ python3 scripts/verify_claims.py
 ## 9. 结论与边界
 
 **已验证**：
-- 五轴全部可比：条件/信号/等待/入场一致率 1.00，退出轴 0.8896，总体 0.9913（容差 1 分钟）；
-- 314 条退出差异被 `exit_eval` 单一旋钮完整解释（100%），
+- 五轴全部可比：条件/信号/等待/入场一致率 1.00，退出轴 0.8790，总体 0.9905（容差 1 分钟）；
+- 344 条退出差异中，**314 条（91.3%）**由 `exit_eval` 解释，
+  剩余 30 条无法由单一旋钮解释，报告判定为 `multi_knob`；
   大偏差的 JEV 侧时刻全部指向次日首根触价，与逐条证据一致；
 - 14 天分日一致率见 §3.5，不由单日主导；
 - 未建模状态占比已量化：ST 4.67%、触涨停 1.76%、触跌停 0.64%，
   上界 4.67%（`moderate`），ST 标的实际产生 3.31% 的交易（§3.4）；
-- 容差 0/1/2/5 分钟下总一致率为 0.9895 / 0.9913 / 0.9920 / 0.9931，
+- 容差 0/1/2/5 分钟下总一致率为 0.9886 / 0.9905 / 0.9912 / 0.9924，
   **随容差单调上升**（并非「结果不变」；见 §3.6 的 v0.12.8 更正说明）；
 - 显式语义与字面直译的整体差异 **82.6% 由 `t_plus_1` 一个旋钮驱动**；
   关掉 T+1 后显式语义反而显著更优（p=0.036）。正确结论是

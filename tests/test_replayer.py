@@ -152,6 +152,38 @@ def test_t_plus_one_defers_same_day_exit(semantics):
     assert result["carry_out"] is not None
 
 
+def test_force_exit_defer_does_not_accumulate_bars_held(semantics):
+    """T+1 下强平被推迟后必须立刻结束本周期，不能继续扫后续根。
+
+    真实缺陷：`force_exit_time` 分支在 `_exit_or_defer` 返回 False 后
+    没有 `return`，循环继续；下一根的 `bar_minute` 仍 >= force_time，
+    于是再次进入该分支、`bars_held` 被反复累加。
+    14:45→15:00 的 15 根让它从 30 涨到 **360**。
+
+    这不是纯显示问题——`held = bars_held + j + 1` 用它判 max_hold，
+    次日处理时直接超时平仓，掩盖了 30 条真实的退出差异
+    （修复前归因 `single_knob` 100%，修复后 `multi_knob` 91.3%）。
+    """
+    # 14:30 前先拉一波触发信号，之后横盘避免止损/止盈，一路走到收盘
+    start = 14 * 60 + 30 - 6
+    prices = [10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.3] + [10.3] * 29
+    bars = make_bars(prices, start_minute=start)
+    semantics = _sem(semantics)
+    semantics["t_plus_1"] = True
+    semantics["stop_loss_pct"] = 0.9
+    semantics["take_profit_pct"] = 0.9
+    semantics["max_hold_bars"] = 1000
+
+    result = replayer.simulate_symbol("S", bars, semantics, 10.0, 1e6)
+    assert result["cycles"], "应有计划"
+    cycle = result["cycles"][0]
+    assert cycle["status"] == "open", "T+1 下当日不可卖，应带出当日"
+    # 持有根数必须等于实际经过的根数，不能因为反复进入强平分支而膨胀
+    assert cycle["bars_held"] <= len(bars), (
+        f"bars_held={cycle['bars_held']} 超过当日总根数 {len(bars)}，"
+        "说明强平推迟分支在重复累加")
+
+
 def test_t_plus_one_off_allows_same_day_exit(semantics):
     prices = [10.0] * 6 + [10.5, 10.0]
     bars = make_bars(prices)

@@ -241,8 +241,16 @@ def _carry_forward(carry: Dict[str, Any], symbol: str, bars: List[Dict[str, Any]
                 _set_exit(cycle, bar["time"], bar["close"], "take_profit", semantics)
                 return cycle
 
-    # 次日仍未触发任何退出：继续带到下一个交易日
-    cycle["bars_held"] = cycle["bars_held"] + len(bars)
+    # 次日仍未触发任何退出：继续带到下一个交易日。
+    #
+    # 不做累加：`bars_held` 在 T+1 顺延时已由 `_execute` 设成
+    # 「入场根到当日收盘」的根数（见下方 `status="open"` 分支），
+    # 并随 `carry_out` 传入 `_carry_forward`。
+    #
+    # 此前这里写 `+= len(bars)`（整日 240），于是跨日瞬间 bars_held
+    # 变成 240+，而 `held = bars_held + j + 1` 用它判断 max_hold=30
+    # ——所有 T+1 顺延的仓位都在**次日第一根**被判"持有超时"，
+    # max_hold 实际退化成"次日开盘无条件平仓"。
     return cycle
 
 
@@ -324,6 +332,12 @@ def _execute(symbol: str, bars: List[Dict[str, Any]], signal: Dict[str, Any],
         if bar_minute >= force_time:
             if _exit_or_defer(cycle, bar, bar["close"], "force_exit_time", semantics):
                 return cycle
+            # T+1 下强平被推迟：`_exit_or_defer` 已把 bars_held 累加过一次并
+            # 标记 status="open"。这里必须**结束本周期**，否则循环继续，
+            # 下一根又会重新进入本分支（bar_minute 已过 force_time），
+            # bars_held 被反复累加——实测 14:45→15:00 的 15 根让它从 30
+            # 涨到 360。止损/止盈分支本来就有 `return cycle`，只有这里漏了。
+            return cycle
 
         if semantics["exit_eval"] == "bar_high_low":
             low_ret = (bar["low"] - price) / price

@@ -1,5 +1,47 @@
 # CHANGELOG
 
+## 0.13.6 — 2026-11-13
+
+这一轮核对 **`fixtures/reference` 是否真的来自 panda 数据源**——它提供
+`pre_close`，是涨幅判断的基准，此前没有任何测试校验。
+
+### 与 panda 数据源逐字段核对（真实数据）
+
+| 核对 | 结果 |
+|---|---|
+| 300 只 × 2 天日线 OHLC + `pre_close` vs `get_stock_daily` | **600 条全对** |
+| 2 只标的全天分钟线 vs `get_stock_min` | **480 行 × 5 字段全对** |
+
+夹具忠实复制了数据源，没有二次加工。
+
+### 缺陷 44：两条数据源口径从未写明
+
+核对时发现两类"看起来像错误、实际是口径"的差异：
+
+**① `pre_close` 不总等于前一交易日 `close`**（实测 5/4,200）
+源于除权除息或数据源自身的 pre_close 口径。已用 panda 官方接口确认
+（`601298.SH` 20261028：panda 的 `pre_close=9.43`，前一日 `close=9.57`）。
+
+**② `day_open` 取的是分钟线首根 open，不是日线 open**（实测 2/4,200，最大差 1.385%）
+集合竞价使 09:31 首根与日线 `open` 不同。
+
+两者此前都没写进文档。读者自己核对时会以为是夹具错误，
+**实际是必须写下来的口径假设**。
+
+### 影响面
+`day_open` 只用于 `baseline_price=day_open` 的场景；参考语义与 `jev_assumed`
+都用 `prev_close`，**主对齐结论不受影响**，只在 `naive_literal` 基线里体现。
+
+### 修复
+- `semantics_matrix.md` 标明 `day_open` = 分钟线首根 open，并列出那 2 个案例
+- `data_access.md` 补两条数据源口径与实测比例
+- 新增 `tests/test_fixture_integrity.py`（4 例）：pre_close 差异比例 <1%、
+  日线 close 必须严格相等、day_open 取首根、文档必须写明口径
+
+### 缺陷台账 43 → 44 项
+
+---
+
 ## 0.13.5 — 2026-11-13
 
 这一轮核对 **§9「结论与边界」**——读者据此判断能不能信这个工具。
@@ -259,7 +301,7 @@ ModuleNotFoundError: No module named 'scripts'
 | 项 | 文档写的 | 实际 |
 |---|---|---|
 | `verify_claims.py` | 27/27（§1.1）、61/61（§1.0a） | **71/71** |
-| `pytest tests/ -q` | 113 passed | **252 passed, 1 skipped** |
+| `pytest tests/ -q` | 113 passed | **256 passed, 1 skipped** |
 | `build.py` | 54 秒 | **31 秒** |
 | Python | 3.12.12 / 3.11.16 | 3.12.12 / **3.9.6**（实测） |
 
@@ -274,7 +316,7 @@ env_check     ok=true
 validate      ok=true, 0 issues
 build         31 秒，exit 0
 verify_claims 71/71
-pytest        252 passed, 1 skipped
+pytest        256 passed, 1 skipped
 ```
 总一致率 0.9913、退出轴 0.8896，与本机完全一致；`output/` 由 `build.py` 自动创建。
 

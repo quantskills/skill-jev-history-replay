@@ -73,6 +73,12 @@ export PANDA_DATA_BASE_URL=<base_url>
 >   这是 `semantics.bar_timestamp` 默认 `bar_end` 的依据。
 > - `get_trade_list` 的 `exchange` 只接受 `SH` / `HK` / `US`，传 `SZ` 报 `100006`；
 >   A 股全市场用 `exchange='SH'` 一次取回（含深市代码）。
+> - **`pre_close` 不总等于前一交易日的 `close`**：实测 5/4,200 条序列不同，
+>   源于除权除息或数据源自身的 pre_close 口径。夹具忠实复制 panda 返回值，
+>   不做二次调整。若你的基准定义是"前一交易日收盘价"，需要自行处理除权。
+> - **集合竞价会让日线 `open` 与分钟线首根 `open` 不同**：实测 2/4,200 条，
+>   最大差 1.385%。本 skill 的 `baseline_price=day_open` 取**分钟线首根**，
+>   详见 `semantics_matrix.md`。参考语义用 `prev_close`，不受影响。
 > - `get_stock_min` 支持一次传多标的（实测 300 标的、72,000 根，约 3 秒）。
 > - `get_prev_trade_date` 在 1.0.6 中是 `date=` 而非 `nature_date=`。
 

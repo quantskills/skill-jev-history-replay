@@ -1,6 +1,6 @@
 {
   "name": "skill-jev-history-replay",
-  "version": "0.13.5",
+  "version": "0.13.6",
   "entrypoint": "SKILL.md",
   "runtime": "python>=3.10",
   "license": "GPL-3.0-only",

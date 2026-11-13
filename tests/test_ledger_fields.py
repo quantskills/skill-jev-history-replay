@@ -79,3 +79,38 @@ def test_api_guide_ledger_counts_match_report(report):
         documented = int(match.group(1).replace(",", ""))
         assert documented == actual, (
             f"`{field}` 文档写 {documented}，实际 {actual}")
+
+def test_diff_mode_ledger_cannot_compute_match_rate(report):
+    """默认 diff 模式下落盘的账本**不含 match 行**，不能用它算一致率。
+
+    读者很容易拿 `output/ledger.jsonl` 去统计"匹配多少条"，
+    结果分母严重偏小（本样本 match=35,767 一条都没写）。
+    api_guide 此前只列了 status 枚举（含 match），没说默认不会出现，
+    属于会直接导致错误分析的文档缺口。
+    """
+    if not LEDGER.exists():
+        pytest.skip("需要 output/ledger.jsonl")
+
+    rows = [json.loads(line) for line in LEDGER.open(encoding="utf-8") if line.strip()]
+    statuses = {r["status"] for r in rows}
+
+    assert "match" not in statuses, (
+        "diff 模式下账本不应包含 match 行；若出现说明模式或实现变了，"
+        "需要同步更新文档说明")
+    # 只有需要追溯的行才落盘
+    assert statuses <= {"divergent", "open_position", "time_shifted",
+                        "replay_only", "jev_only"}
+
+    # 报告里的 match 数远大于账本行数——正是"不能用来算一致率"的证据
+    total_match = report["ledger"]["aggregate"]["total"]["match"]
+    assert total_match > len(rows), (
+        "match 数应远超落盘行数；若不然，本条说明的前提需重新审视")
+
+
+def test_api_guide_warns_about_diff_mode():
+    """api_guide 必须明确警告「不能用 ledger 算一致率」。"""
+    text = API_GUIDE.read_text(encoding="utf-8")
+    assert "不会出现它" in text or "不写 `match` 行" in text, (
+        "api_guide 未说明 diff 模式下没有 match 行")
+    assert "不能用 `ledger.jsonl` 统计一致率" in text, (
+        "api_guide 未明确警告不能用账本算一致率")

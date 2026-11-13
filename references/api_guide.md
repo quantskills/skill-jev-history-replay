@@ -203,6 +203,18 @@ report = run(input_data, config=None)
 
 `delta` 的符号约定：**replay − jev**。正数表示重放更晚/更高/更多。
 
+### ⚠️ 默认 `ledger_mode: diff` 下不写 `match` 行
+
+`status` 的枚举里虽然有 `match`，但**默认配置下账本里不会出现它**——
+`diff` 模式只写需要追溯的行（`divergent` 与 `open_position`），
+否则光是 condition 轴的 98 万条 `jev_missing` 就有 185 MB。
+
+**因此不能用 `ledger.jsonl` 统计一致率**：`match` 行不在里面，
+算出来的分母会严重偏小。一致率请直接读 `report.json` 的
+`ledger.aggregate`（聚合统计用的是内存数据，不受落盘模式影响）。
+
+需要逐行完整账本时设 `ledger_mode: full`（本样本 1,015,406 行 / 185 MB）。
+
 ---
 
 ## 4. 命令行脚本

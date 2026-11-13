@@ -1,5 +1,48 @@
 # CHANGELOG
 
+## 0.16.3 — 2026-11-13
+
+这一轮验证**输出产物能否被下游直接消费**。
+
+### 核对通过的项
+
+| 项 | 结果 |
+|---|---|
+| `ledger.jsonl` 每行结构 | 393 行，**9 个字段完全一致**，无 schema 漂移 |
+| 值的类型一致性 | `delta` 为 int/null、`jev`/`replay` 为 str/null，无混杂 |
+| 能否复现报告数字 | `divergent` 319、`open_position` 74，与报告完全一致 |
+
+### 缺陷 69：文档说账本含 `match`，但默认 diff 模式根本不写
+
+`api_guide` 把 `status` 枚举写成：
+
+```
+"status": "match|divergent|jev_missing|replay_only|..."
+```
+
+但**默认 `ledger_mode: diff` 下账本里一条 `match` 都没有**——
+只有 `divergent` 与 `open_position`。本样本 match 有 **35,767 条**，
+落盘 393 行里零条。
+
+读者拿 `ledger.jsonl` 统计"匹配多少条"，分母会严重偏小，
+**算出的结果完全错误**。
+
+修复：`api_guide` 补 ⚠️ 明说「不能用 `ledger.jsonl` 统计一致率」，
+并指向 `report.json` 的 `ledger.aggregate`。
+
+### 也验证了 `full` 模式确实完整
+
+`ledger_mode: full` → 1,015,406 行，`match=35,767` 与报告完全一致。
+两种模式行为都正确，只是文档没说清默认是哪种。
+
+### 新增测试
+- `test_diff_mode_ledger_cannot_compute_match_rate`
+- `test_api_guide_warns_about_diff_mode`
+
+### 缺陷台账 68 → 69 项
+
+---
+
 ## 0.16.2 — 2026-11-13
 
 这一轮验证**错误恢复能力**——真实使用中最常见的不是理想路径，而是中途失败。

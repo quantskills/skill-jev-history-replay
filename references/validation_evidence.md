@@ -122,7 +122,7 @@ git clone ... /tmp/jev-ci && cd /tmp/jev-ci
 python3 scripts/env_check.py      # exit 0
 python3 scripts/validate.py       # exit 0, issues []
 python3 scripts/build.py          # exit 0
-python3 scripts/verify_claims.py  # 77/77 OK
+python3 scripts/verify_claims.py  # 79/79 OK
 ```
 
 ### 由此发现的账本体积问题
@@ -275,8 +275,8 @@ cd /tmp/jev-cleanroom
 python3 scripts/env_check.py      # ok=true
 python3 scripts/validate.py       # ok=true, 0 issues
 python3 scripts/build.py          # 约 31 秒
-python3 scripts/verify_claims.py  # 77/77
-python3 -m pytest tests/ -q       # 270 passed, 1 skipped
+python3 scripts/verify_claims.py  # 79/79
+python3 -m pytest tests/ -q       # 269 passed, 1 skipped
 ```
 
 实测（v0.12.8，从 `origin/main` 全新 clone 到 /tmp）：各项全过，
@@ -450,7 +450,7 @@ v0.2.0 时退出轴 `comparable=0`。根因有两层：
 
 | 类型 | 数量 | 含义 |
 |---|---|---|
-| `jev_missing`（condition） | 1,633,358 | 日志只在状态翻转时写，重放逐根判断 |
+| `jev_missing`（condition） | 979,246 | 日志只在状态翻转时写，重放逐根判断 |
 
 条件轴覆盖率 2.85%（28,754 / 1,008,000 根）。这**不进入一致率分母**。
 混算会得到"一致率 2.8%"这种误导性数字。
@@ -822,6 +822,12 @@ python3 scripts/oos_check.py            # 需凭证；11 天 × 300 只固定标
 | 均值差 | −0.3749% | −0.1960% |
 | 样本量 | 27,987 vs 1,422 | 12,050 vs 611 |
 
+> **两个"样本量"别混用**：下表 27,987 vs 1,422 与 12,050 vs 611 是
+> **Welch 全样本检验**用的收官收益条数（每边全部已收盘周期）；
+> 而 §4.5 上表的 36,086 / 17,264 是**账本可比项**（五轴逐项），
+> exit 轴的 2,844 / 1,222 又是配对后的周期数。三者口径不同，
+> 数量级差异是正常的，不是数据不一致。
+
 样本外 p=0.0488 只差 **0.0012** 就越过 0.05。方向一致、但仍显著，
 **属边缘证据**，不能与样本内的强结论等同看待。
 
@@ -979,7 +985,7 @@ python3 scripts/value_decomposition.py \
 
 ---
 
-## 6. 验证中发现并修复的缺陷（50 项）
+## 6. 验证中发现并修复的缺陷（51 项）
 
 以下都不是构造的测试用例，而是在真实数据上跑出来的：
 
@@ -1035,6 +1041,7 @@ python3 scripts/value_decomposition.py \
 | 48 | **`verify_claims` 的覆盖不全，同类缺陷反复出现** | 连续多轮都是"改逻辑→别处数字过期"：`divergence_items` 口径、`inline_truncated`、归因细项都没被检查。根因是核对项靠人工逐条加 | 内部一致性检查从 7 条扩到 13 条：`divergence_items` 四处同口径、`non_match_rows` 分解、归因 `explained <= baseline`、inline 上限与截断标记。总数 71 → 77 |
 | 49 | **有轴零可比时仍判 `consistent`——"没验证"冒充"一致"** | 日志只写 `condition`、无任何 `signal`/`plan` 时，`signal`/`wait`/`entry`/`exit` 四轴 `comparable=0`，但总体因 2 条 condition 相符即判 `consistent`。exit 是**最关键的一轴**，完全没比过却说一致 | 加"每轴必须有可比项"门槛，未满足则 `inconclusive` 并在 `reason` 列出未验证的轴；补 2 例测试 |
 | 50 | **价值结论 `reason` 里 p 值仍用 `round(p,6)`** | 字段层面的 `sign_test_p` 在 v0.12.6 已修，但 `reason` 文字里还留着 `round(p_value, 6)`：p=3.0e-12 会显示成 `p=0.0`。同一份报告里字段正确、文字却是错的 | 新增 `_fmt_p()` 统一格式化 + `test_value_reason_never_shows_p_as_zero` |
+| 51 | **`jev_missing` 写成 1,633,358，超过总根数 1,008,000** | 一个**逻辑上不可能**的数字：单边缺失行数不可能多于该轴总根数。实际 979,246。这类错误只要做一次量级检查就能发现，但此前无人校验 | 按实测更正 + `verify_claims` 新增「`non_match_rows <= total_rows`」与「条件轴覆盖率与各轴一致」两条检查（77 → 79） |
 
 ---
 
@@ -1064,7 +1071,7 @@ python3 scripts/value_decomposition.py \
 | panda-data | 1.0.6（仅夹具再生） |
 | 三方依赖 | 无（对齐与回放为纯标准库；`python3 -S` 实测通过） |
 | 全量对齐 | 约 31 秒（4,200 序列 × 240 根，1,008,000 根） |
-| 单元测试 | 约 160 秒（270 passed, 1 skipped） |
+| 单元测试 | 约 160 秒（269 passed, 1 skipped） |
 
 ```bash
 git clone https://github.com/quantskills/skill-jev-history-replay

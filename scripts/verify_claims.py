@@ -112,6 +112,26 @@ def _internal_consistency(report: Dict[str, Any],
         _check(results, "consistency.attribution.explained_le_baseline",
                over, [])
 
+    # 9) 单边缺失不可能超过该轴总根数——这是"逻辑上不可能"的边界。
+    #    曾出现 `jev_missing = 1,633,358` 而总根数只有 1,008,000 的记录，
+    #    这种数字只要做一次量级检查就能发现。
+    rows_total = total.get("rows", 0)
+    non_match = ledger.get("non_match_rows")
+    if non_match is not None:
+        _check(results, "consistency.ledger.non_match_le_total_rows",
+               non_match <= rows_total, True)
+
+    # 10) 条件轴覆盖率 = comparable / (comparable + jev_missing)
+    cond = by_axis.get("condition", {})
+    cond_comparable = cond.get("comparable", 0)
+    cond_missing = cond.get("jev_missing", 0)
+    denom = cond_comparable + cond_missing
+    if denom:
+        summary_cov = summary.get("condition_coverage")
+        if summary_cov is not None:
+            _check(results, "consistency.condition_coverage_matches_axes",
+                   summary_cov, round(cond_comparable / denom, 4), tol=5e-4)
+
     # 8) inline_rows 不得超过 max_inline_rows，且截断标记要正确
     max_inline = report.get("comparability", {}).get("max_inline_rows")
     inline = ledger.get("inline_rows") or []

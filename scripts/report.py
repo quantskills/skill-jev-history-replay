@@ -188,6 +188,14 @@ CONSISTENT_MIN_RATE = 0.98
 # 若某类冲突确属噪声，应由上游过滤，而不是在这里放宽。
 CONSISTENT_MAX_DIVERGENT_ABS = 0
 CONSISTENT_MAX_DIVERGENT_RATIO = 0.0
+# 判 `consistent` 时，**每一个轴都必须有可比项**。
+#
+# 只看总体会让"没验证"冒充"一致"：日志若只写了 condition 而没有任何
+# plan/signal，exit/entry/wait 三轴 comparable 全是 0，总体却可能因为
+# 少量 condition 相符而给出 consistent。那个"一致"覆盖不到最关键的执行轴。
+#
+# 这条门槛不要求每轴有很多项——只要求"确实比过"，把未验证明确暴露出来。
+CONSISTENT_REQUIRE_ALL_AXES_COMPARABLE = True
 
 
 def build_alignment_conclusion(aggregate: Dict[str, Any],
@@ -213,6 +221,19 @@ def build_alignment_conclusion(aggregate: Dict[str, Any],
         reason = (
             "日志为合成数据，只能证明对齐链路可运行；"
             "对 JEV 实际语义的判定必须等真实日志到位后重跑"
+        )
+    elif CONSISTENT_REQUIRE_ALL_AXES_COMPARABLE and (
+            unverified_axes := [a for a, row in aggregate.get("by_axis", {}).items()
+                                if not row.get("comparable")]
+    ):
+        # 有轴完全没比过，不能判 consistent——那是"没验证"，不是"一致"。
+        # 归为 inconclusive，并指出是哪几个轴。
+        verdict = "inconclusive"
+        reason = (
+            f"以下轴线完全没有可比项：{unverified_axes}。"
+            f"虽然其余轴一致率 {rate:.4f}，但未覆盖的轴可能藏着差异，"
+            "不能据此判定语义一致。请在日志中补齐对应记录"
+            "（signal / plan 的 entry_time、exit_time 等）后重跑。"
         )
     elif rate is not None and rate >= CONSISTENT_MIN_RATE and negligible_conflicts:
         verdict = "consistent"

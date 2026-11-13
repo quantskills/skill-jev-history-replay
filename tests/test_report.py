@@ -83,6 +83,48 @@ def test_alignment_without_comparable_is_inconclusive():
     assert out["verdict"] == "inconclusive"
 
 
+def test_alignment_inconclusive_when_any_axis_unverified():
+    """有轴完全没有可比项时，不得判 `consistent`。
+
+    实测：日志只写 condition、没有任何 signal/plan 时，exit/entry/wait
+    三轴 comparable 全是 0，总体却因为 2 条 condition 相符而给出
+    `consistent`。那等于把"没验证"说成"一致"——而 exit 恰恰是最关键的一轴。
+    """
+    agg = {
+        "total": {"match": 2, "divergent": 0, "comparable": 2,
+                  "match_rate": 1.0, "one_sided": 60, "rows": 62},
+        "by_axis": {
+            "condition": {"match": 2, "divergent": 0, "comparable": 2,
+                          "match_rate": 1.0},
+            "signal": {"match": 0, "divergent": 0, "comparable": 0,
+                       "match_rate": None},
+            "wait": {"match": 0, "divergent": 0, "comparable": 0,
+                     "match_rate": None},
+            "entry": {"match": 0, "divergent": 0, "comparable": 0,
+                      "match_rate": None},
+            "exit": {"match": 0, "divergent": 0, "comparable": 0,
+                     "match_rate": None},
+        },
+    }
+    out = report.build_alignment_conclusion(agg, 0, "actual")
+    assert out["verdict"] == "inconclusive", (
+        f"三个轴零可比却判 {out['verdict']}，等于把未验证当成一致")
+    for axis in ("signal", "wait", "entry", "exit"):
+        assert axis in out["reason"], f"reason 未指出未验证的轴 {axis}"
+
+
+def test_alignment_consistent_when_all_axes_have_comparable():
+    """所有轴都有可比项时，全对仍应判 consistent（不能把门槛设得过死）。"""
+    axis = {"match": 5, "divergent": 0, "comparable": 5, "match_rate": 1.0}
+    agg = {
+        "total": {"match": 25, "divergent": 0, "comparable": 25,
+                  "match_rate": 1.0, "one_sided": 0, "rows": 25},
+        "by_axis": {a: dict(axis) for a in
+                    ("condition", "signal", "wait", "entry", "exit")},
+    }
+    assert report.build_alignment_conclusion(agg, 0, "actual")["verdict"] == "consistent"
+
+
 def test_applicability_lists_scope_and_limits():
     out = report.build_applicability("synthetic", {"_hash": "abc"}, None)
     assert out["in_scope"] and out["out_of_scope"]

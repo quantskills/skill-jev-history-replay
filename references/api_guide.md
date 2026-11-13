@@ -132,6 +132,16 @@ report = run(input_data, config=None)
 
 `synthetic` 日志恒为 `inconclusive`。
 
+**判 `consistent` 需要同时满足**：
+
+1. 总体一致率 ≥ 0.98；
+2. 真实冲突数 **= 0**（不给"可忽略额度"）；
+3. **每一个轴都有可比项**——否则是"没验证"，不是"一致"。
+
+第 3 条来自一个真实反例：日志只写 `condition`、完全不写 `signal`/`plan` 时，
+`signal`/`wait`/`entry`/`exit` 四轴 `comparable` 全为 0，而总体因 2 条
+`condition` 相符就给出 `consistent`。此时 `reason` 会明确指出哪些轴未验证。
+
 ### `value_assessment`
 
 `baseline`（字面直译）与 `current`（当前配置）的对比：

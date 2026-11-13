@@ -72,7 +72,7 @@ python3 -m pytest tests/ -q -m slow         # 区分度对照，约 2 分钟
 | `test_cross_day.py` | 6 | 跨日持仓传递、未平仓如实上报、单日行为不变 |
 | `test_aligner.py` | 18 | 五轴对齐、配对唯一性、单边缺失、差异分类、容差分离、**每轴 match/divergent 必须存在**、**容差必须真正改变判定** |
 | `test_attribution.py` | 11 | 单旋钮解释率、视图一致性、**多旋钮漏报成因** |
-| `test_report.py` | 27 | verdict 判定、覆盖率门槛、零冲突门槛、Welch 检验、**p 值不得被舍入为 0** |
+| `test_report.py` | 29 | verdict 判定、覆盖率门槛、零冲突门槛、Welch 检验、**p 值不得被舍入为 0**、**任一轴零可比不得判 consistent** |
 | `test_end_to_end.py` | 11 | 输入校验、来源判定、产物落盘、确定性 |
 | `test_validation_claims.py` | 13 | **文档数字对账**、防漂移、区分度对照、**陈旧数字扫描** |
 | `test_data_quality_audit.py` | 6 | 板块分类、涨跌停口径、离线不把"未核验"当 0、报告回显 |
@@ -276,7 +276,7 @@ python3 scripts/env_check.py      # ok=true
 python3 scripts/validate.py       # ok=true, 0 issues
 python3 scripts/build.py          # 约 31 秒
 python3 scripts/verify_claims.py  # 77/77
-python3 -m pytest tests/ -q       # 266 passed, 1 skipped
+python3 -m pytest tests/ -q       # 268 passed, 1 skipped
 ```
 
 实测（v0.12.8，从 `origin/main` 全新 clone 到 /tmp）：各项全过，
@@ -979,7 +979,7 @@ python3 scripts/value_decomposition.py \
 
 ---
 
-## 6. 验证中发现并修复的缺陷（48 项）
+## 6. 验证中发现并修复的缺陷（49 项）
 
 以下都不是构造的测试用例，而是在真实数据上跑出来的：
 
@@ -1033,6 +1033,7 @@ python3 scripts/value_decomposition.py \
 | 46 | **§4.2 多旋钮表在容差修复后整体过期** | `wait_bars` 单独 4,522（实际 2,963）、合并 4,649 / 92.0%（实际 3,096 / 90.3%）。结论本身仍成立（`multi_knob`、漏报 `exit_eval`），但数字全错 | 按实测重算 + `tests/test_multi_knob_docs.py`（含一条 slow 用例在真实夹具复现） |
 | 47 | **§4.2 naive 消融表也整体过期** | 文档 7,206 / 5,489 / 7,261 / 8,742，实际 20,774 / 15,581 / 20,848 / 23,063。趋势（单项不解释、改两个反增、全改归零）不变，数值全错 | 按实测重算 + 在 `test_multi_knob_docs.py` 增加 slow 用例复现 |
 | 48 | **`verify_claims` 的覆盖不全，同类缺陷反复出现** | 连续多轮都是"改逻辑→别处数字过期"：`divergence_items` 口径、`inline_truncated`、归因细项都没被检查。根因是核对项靠人工逐条加 | 内部一致性检查从 7 条扩到 13 条：`divergence_items` 四处同口径、`non_match_rows` 分解、归因 `explained <= baseline`、inline 上限与截断标记。总数 71 → 77 |
+| 49 | **有轴零可比时仍判 `consistent`——"没验证"冒充"一致"** | 日志只写 `condition`、无任何 `signal`/`plan` 时，`signal`/`wait`/`entry`/`exit` 四轴 `comparable=0`，但总体因 2 条 condition 相符即判 `consistent`。exit 是**最关键的一轴**，完全没比过却说一致 | 加"每轴必须有可比项"门槛，未满足则 `inconclusive` 并在 `reason` 列出未验证的轴；补 2 例测试 |
 
 ---
 
@@ -1062,7 +1063,7 @@ python3 scripts/value_decomposition.py \
 | panda-data | 1.0.6（仅夹具再生） |
 | 三方依赖 | 无（对齐与回放为纯标准库；`python3 -S` 实测通过） |
 | 全量对齐 | 约 31 秒（4,200 序列 × 240 根，1,008,000 根） |
-| 单元测试 | 约 160 秒（266 passed, 1 skipped） |
+| 单元测试 | 约 160 秒（268 passed, 1 skipped） |
 
 ```bash
 git clone https://github.com/quantskills/skill-jev-history-replay

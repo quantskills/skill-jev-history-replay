@@ -1,5 +1,50 @@
 # CHANGELOG
 
+## 0.14.0 — 2026-11-13
+
+这一轮逐条实测 `applicability.invalid_when` 声明的 5 个"结论失效"场景，
+看它们是否真的会暴露，而不是只写在文档里。查出一个"没验证冒充一致"的缺陷。
+
+### 缺陷 49：有轴零可比时仍判 `consistent`
+
+构造一份只写 `condition`、完全不含 `signal`/`plan` 的日志：
+
+```
+condition: comparable=2
+signal/wait/entry/exit: comparable=0     ← 四个轴一条都没比过
+verdict: consistent                       ← 仍然判"一致"
+```
+
+`exit` 恰恰是最关键的一轴（退出判定口径正是本项目的主要分歧来源），
+完全没比过却报告"一致"。这等于把**没验证**说成**一致**。
+
+修复：判 `consistent` 增加第三个条件——**每个轴都必须有可比项**。
+未满足时判 `inconclusive`，并在 `reason` 里点名：
+
+> 以下轴线完全没有可比项：['signal','wait','entry','exit']。虽然其余轴
+> 一致率 1.0000，但未覆盖的轴可能藏着差异，不能据此判定语义一致。
+
+### 其余 4 条的实测结果
+
+| invalid_when 条目 | 实测 |
+|---|---|
+| 停牌/ST/涨跌停未建模 | ✅ 已量化并在 `applicability` 声明（上界 4.67%） |
+| 除权除息 | ✅ 已在 `data_access.md` 说明（pre_close 口径） |
+| **日志缺 wait_bars/entry_price** | ❌ **判 consistent**（本缺陷） |
+| 时间戳口径与 bar_timestamp 不符 | ✅ 能被抓出（condition 一致率 → 0） |
+| 样本天数不足 | ✅ 已由 `min_cycles` 与覆盖率门槛约束 |
+
+### 新增测试
+`test_report.py` 27 → 29：
+- `test_alignment_inconclusive_when_any_axis_unverified`
+- `test_alignment_consistent_when_all_axes_have_comparable`（防止门槛过死）
+
+阳性对照组仍判 `consistent`，区分度完好。
+
+### 缺陷台账 48 → 49 项
+
+---
+
 ## 0.13.9 — 2026-11-13
 
 前几轮反复出现同一类问题：「改一处逻辑，别处数字悄悄过期」。这一轮不再
@@ -421,7 +466,7 @@ ModuleNotFoundError: No module named 'scripts'
 | 项 | 文档写的 | 实际 |
 |---|---|---|
 | `verify_claims.py` | 27/27（§1.1）、61/61（§1.0a） | **71/71** |
-| `pytest tests/ -q` | 113 passed | **266 passed, 1 skipped** |
+| `pytest tests/ -q` | 113 passed | **268 passed, 1 skipped** |
 | `build.py` | 54 秒 | **31 秒** |
 | Python | 3.12.12 / 3.11.16 | 3.12.12 / **3.9.6**（实测） |
 
@@ -436,7 +481,7 @@ env_check     ok=true
 validate      ok=true, 0 issues
 build         31 秒，exit 0
 verify_claims 71/71
-pytest        266 passed, 1 skipped
+pytest        268 passed, 1 skipped
 ```
 总一致率 0.9913、退出轴 0.8896，与本机完全一致；`output/` 由 `build.py` 自动创建。
 

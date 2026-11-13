@@ -73,7 +73,7 @@ python3 -m pytest tests/ -q -m slow         # 区分度对照，约 2 分钟
 | `test_aligner.py` | 18 | 五轴对齐、配对唯一性、单边缺失、差异分类、容差分离、**每轴 match/divergent 必须存在**、**容差必须真正改变判定** |
 | `test_attribution.py` | 11 | 单旋钮解释率、视图一致性、**多旋钮漏报成因** |
 | `test_report.py` | 31 | verdict 判定、覆盖率门槛、零冲突门槛、Welch 检验、**p 值不得被舍入为 0**、**任一轴零可比不得判 consistent**、**reason 里的 p 值不得显示为 0** |
-| `test_end_to_end.py` | 11 | 输入校验、来源判定、产物落盘、确定性 |
+| `test_end_to_end.py` | 13 | 输入校验、来源判定、产物落盘、确定性、**每根都写 vs 仅翻转两种记录习惯** |
 | `test_validation_claims.py` | 13 | **文档数字对账**、防漂移、区分度对照、**陈旧数字扫描** |
 | `test_data_quality_audit.py` | 7 | 板块分类、涨跌停口径、**离线时上界必须为 unknown 而非部分值**、报告回显 |
 | `test_trade_audit.py` | 4 | **逐笔价格/算术反查**、跨日覆盖、故意改价必被抓 |
@@ -276,7 +276,7 @@ python3 scripts/env_check.py      # ok=true
 python3 scripts/validate.py       # ok=true, 0 issues
 python3 scripts/build.py          # 约 31 秒
 python3 scripts/verify_claims.py  # 79/79
-python3 -m pytest tests/ -q       # 275 passed, 1 skipped
+python3 -m pytest tests/ -q       # 277 passed, 1 skipped
 ```
 
 实测（v0.12.8，从 `origin/main` 全新 clone 到 /tmp）：各项全过，
@@ -1096,7 +1096,7 @@ python3 scripts/value_decomposition.py \
 | panda-data | 1.0.6（仅夹具再生） |
 | 三方依赖 | 无（对齐与回放为纯标准库；`python3 -S` 实测通过） |
 | 全量对齐 | 约 31 秒（4,200 序列 × 240 根，1,008,000 根） |
-| 单元测试 | 约 160 秒（275 passed, 1 skipped） |
+| 单元测试 | 约 160 秒（277 passed, 1 skipped） |
 
 ```bash
 git clone https://github.com/quantskills/skill-jev-history-replay

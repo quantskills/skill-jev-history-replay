@@ -2,7 +2,7 @@ openapi: 3.1.0
 info:
   title: skill-jev-history-replay
   description: Align JEV's recorded watch conditions with a deterministic historical replayer and attribute every difference to one explicit interpretation knob (timestamp convention, baseline price, breakout field/window, persistence, wait bars, entry price, exit evaluation, T+1, cooldown). Emits a five-axis difference ledger plus single-knob ablation.
-  version: 0.15.1
+  version: 0.15.2
 
 x-skill-info:
   name: skill-jev-history-replay

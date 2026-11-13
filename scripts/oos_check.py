@@ -45,7 +45,7 @@ IN_SAMPLE = {
     "attribution_top_knob": "exit_eval",
     "attribution_top_rate": 1.0,
     "value_verdict": "negative",
-    "welch_p": 7e-06,
+    "welch_p": 1.1e-05,
 }
 
 

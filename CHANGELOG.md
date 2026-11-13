@@ -1,5 +1,49 @@
 # CHANGELOG
 
+## 0.16.2 — 2026-11-13
+
+这一轮验证**错误恢复能力**——真实使用中最常见的不是理想路径，而是中途失败。
+
+### 缺陷 68：网络失败抛原始 SDK 异常，CLI 吐几十行 traceback
+
+把 `PANDA_DATA_BASE_URL` 指向不可达主机，执行 `fetch_data.fetch()`：
+
+```
+panda_data.exceptions.ServiceError: Network error: [Errno 8] ...
+（完整 traceback，共 50+ 行）
+```
+
+`init_token` / `get_stock_min` / `get_stock_daily` 都**没有包 try/except**，
+SDK 异常直接穿透。文档 §7 承诺错误路径给出 `code` / `message` / `hint`，
+在这里完全失效。
+
+修复后：
+
+```
+FetchError
+  code:    auth_request_failed
+  message: PandaData 登录请求失败：Network error: [Errno 8] ...
+  hint:    检查 PANDA_DATA_BASE_URL 是否可达、网络是否正常；凭证过期也会表现为登录失败
+```
+
+### 顺带测过、确认正常的错误路径
+
+| 场景 | 结果 |
+|---|---|
+| 日志含坏 JSON | `ReplayError: invalid_json`，带文件名与行号 ✓ |
+| 凭证缺失 | `CredentialError: missing_credentials`，列出缺哪几项 ✓ |
+| K 线只有半天 | 跑通，信号 0（不足 `warmup_bars`），不报错 ✓ |
+| `logs_dir` 不存在 | `ReplayError: logs_dir_not_found` ✓ |
+
+### 交付物
+- `fetch_data.py` 四处 SDK 调用包成 `FetchError`
+- 新增 `test_fetch_network_error_becomes_structured`（用 monkeypatch 模拟，
+  不需要真实网络；实测回滚修复后立刻失败）
+
+### 缺陷台账 67 → 68 项
+
+---
+
 ## 0.16.1 — 2026-11-13
 
 这一轮验证一件此前从未做过的事：**工具能否在完全没见过的日期上从头跑通**。

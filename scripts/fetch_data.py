@@ -80,21 +80,46 @@ def _client() -> Any:
             "缺少 PandaData 凭证（PANDA_DATA_USERNAME / PANDA_DATA_PASSWORD / PANDA_DATA_BASE_URL）",
             hint="写入 ~/.pandadata/pandadata.env 或 export 环境变量",
         )
-    panda_data.init_token(username=username, password=zinfoid, base_url=base_url)
-    if not panda_data.is_authenticated():
-        raise FetchError("auth_failed", "PandaData 登录失败")
+    # SDK 的网络/认证异常必须转成结构化 FetchError，否则 CLI 会直接吐
+    # 几十行 traceback，读者拿不到可操作的提示。实测：base_url 指到不存在的
+    # 主机时，init_token 抛原始 ServiceError("Network error: ...")。
+    try:
+        panda_data.init_token(username=username, password=zinfoid,
+                              base_url=base_url)
+    except Exception as exc:  # noqa: BLE001 - SDK 异常类型不稳定，统一兜住
+        raise FetchError(
+            "auth_request_failed",
+            f"PandaData 登录请求失败：{exc}",
+            hint=("检查 PANDA_DATA_BASE_URL 是否可达、网络是否正常；"
+                  "凭证过期也会表现为登录失败"),
+        ) from exc
+    try:
+        authenticated = panda_data.is_authenticated()
+    except Exception as exc:  # noqa: BLE001
+        raise FetchError("auth_check_failed", f"PandaData 登录状态检查失败：{exc}") from exc
+    if not authenticated:
+        raise FetchError("auth_failed", "PandaData 登录失败",
+                         hint="凭证可能已过期，请重新获取")
     return panda_data
 
 
 def fetch(date: str, symbols: List[str], out_dir: Path, ref_dir: Path) -> Dict[str, Any]:
     client = _client()
 
-    bars = client.get_stock_min(
-        symbol=symbols,
-        start_date=date,
-        end_date=date,
-        fields=["symbol", "datetime", "open", "high", "low", "close", "volume", "amount"],
-    )
+    try:
+        bars = client.get_stock_min(
+            symbol=symbols,
+            start_date=date,
+            end_date=date,
+            fields=["symbol", "datetime", "open", "high", "low", "close",
+                    "volume", "amount"],
+        )
+    except Exception as exc:  # noqa: BLE001 - SDK 网络异常统一兜住
+        raise FetchError(
+            "fetch_failed",
+            f"拉取 {date} 分钟线失败：{exc}",
+            hint="检查网络与服务地址；已有夹具不受影响，重试即可",
+        ) from exc
     if bars is None or len(bars) == 0:
         raise FetchError(
             "no_data",
@@ -110,12 +135,19 @@ def fetch(date: str, symbols: List[str], out_dir: Path, ref_dir: Path) -> Dict[s
     except Exception:  # 交易日历不可用不阻断主流程
         prev_date = None
 
-    daily = client.get_stock_daily(
-        symbol=symbols,
-        start_date=prev_date or date,
-        end_date=date,
-        fields=["symbol", "date", "open", "high", "low", "close", "pre_close"],
-    )
+    try:
+        daily = client.get_stock_daily(
+            symbol=symbols,
+            start_date=prev_date or date,
+            end_date=date,
+            fields=["symbol", "date", "open", "high", "low", "close", "pre_close"],
+        )
+    except Exception as exc:  # noqa: BLE001
+        raise FetchError(
+            "fetch_failed",
+            f"拉取 {date} 日线/前收失败：{exc}",
+            hint="分钟线可能已写入；重试会覆盖，无需手动清理",
+        ) from exc
     reference: Dict[str, Any] = {}
     if daily is not None and len(daily) > 0:
         for _, row in daily.iterrows():

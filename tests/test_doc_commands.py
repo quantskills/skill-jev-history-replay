@@ -313,3 +313,37 @@ def test_data_access_signature_notes_match_code():
     fetch = (REPO_ROOT / "scripts" / "fetch_data.py").read_text(encoding="utf-8")
     assert "get_prev_trade_date(" in fetch
     assert "nature_date=" not in fetch, "代码用了 nature_date，与 1.0.6 签名不符"
+
+
+def test_fetch_network_error_becomes_structured(monkeypatch):
+    """SDK 的网络异常必须转成本 skill 的 `FetchError`。
+
+    真实缺陷：`base_url` 指到不可达主机时，`init_token` 抛出原始
+    `ServiceError("Network error: ...")`，`fetch_data.py` 没有兜住，
+    于是 CLI 直接吐几十行 traceback，读者拿不到可操作的提示。
+
+    文档 §7 承诺错误路径给出 `code` / `message` / `hint`，这条守住它。
+    """
+    import sys
+    import types
+
+    import pytest as _pytest
+
+    fetch_data = _pytest.importorskip("scripts.fetch_data")
+
+    class BoomSDK:
+        def init_token(self, **kwargs):
+            raise RuntimeError("Network error: simulated unreachable host")
+
+        def is_authenticated(self):
+            return False
+
+    monkeypatch.setitem(sys.modules, "panda_data", BoomSDK())
+    monkeypatch.setenv("PANDA_DATA_USERNAME", "u")
+    monkeypatch.setenv("PANDA_DATA_PASSWORD", "p")
+    monkeypatch.setenv("PANDA_DATA_BASE_URL", "https://unreachable.invalid")
+
+    with _pytest.raises(fetch_data.FetchError) as exc:
+        fetch_data._client()
+    assert exc.value.code == "auth_request_failed"
+    assert exc.value.hint, "结构化错误必须带可操作的 hint"

@@ -77,7 +77,7 @@ python3 -m pytest tests/ -q -m slow         # 区分度对照，约 2 分钟
 | `test_validation_claims.py` | 13 | **文档数字对账**、防漂移、区分度对照、**陈旧数字扫描** |
 | `test_data_quality_audit.py` | 7 | 板块分类、涨跌停口径、**离线时上界必须为 unknown 而非部分值**、报告回显 |
 | `test_trade_audit.py` | 4 | **逐笔价格/算术反查**、跨日覆盖、故意改价必被抓 |
-| `test_doc_commands.py` | 11 | **文档引用的脚本必须存在 / 可解析**、**证据表格与实际测试文件一致**、**表格用例数 = pytest 收集数**、**README 目录树列全脚本**、**缺陷标题数 = 表行数**、**文档里的命令输出计数与实际一致** | **文档引用的脚本必须存在 / 可解析**、**证据表格与实际测试文件一致**、**表格用例数 = pytest 收集数**、**README 目录树列全脚本**、**缺陷标题数 = 表行数** |
+| `test_doc_commands.py` | 12 | **文档引用的脚本必须存在 / 可解析**、**证据表格与实际测试文件一致**、**表格用例数 = pytest 收集数**、**README 目录树列全脚本**、**缺陷标题数 = 表行数**、**文档里的命令输出计数与实际一致** | **文档引用的脚本必须存在 / 可解析**、**证据表格与实际测试文件一致**、**表格用例数 = pytest 收集数**、**README 目录树列全脚本**、**缺陷标题数 = 表行数** |
 | `test_ledger_fields.py` | 4 | **by_axis_prior 与代码一致**、**first_divergence 真实存在于账本**、**api_guide 三个行数与报告对账**、辅助字段已文档化 |
 | `test_compare_baseline.py` | 9 | **冻结基线**、同配置给 delta、异配置拒绝、结构化错误、**仅 config_hash 变也要列出**、**改资金参数端到端拒绝给 delta** |
 | `test_value_decomposition.py` | 4 | **T+1 强制隔夜**、拆解前提、summary 形状 |
@@ -277,7 +277,7 @@ python3 scripts/env_check.py      # ok=true
 python3 scripts/validate.py       # ok=true, 0 issues
 python3 scripts/build.py          # 约 31 秒
 python3 scripts/verify_claims.py  # 84/84
-python3 -m pytest tests/ -q       # 290 passed, 0 skipped
+python3 -m pytest tests/ -q       # 291 passed, 0 skipped
 ```
 
 实测（v0.12.8，从 `origin/main` 全新 clone 到 /tmp）：各项全过，
@@ -1024,7 +1024,7 @@ python3 scripts/value_decomposition.py \
 
 ---
 
-## 6. 验证中发现并修复的缺陷（67 项）
+## 6. 验证中发现并修复的缺陷（68 项）
 
 以下都不是构造的测试用例，而是在真实数据上跑出来的：
 
@@ -1097,6 +1097,7 @@ python3 scripts/value_decomposition.py \
 | 65 | **`universe_policy` 声称存在但产物里根本没有** | claims 声明"全期固定（14 日 trade_list 交集…）"，而 `build_fixtures` 从不写该字段、manifest 里也没有。读者无法核实标的池策略 | `build_fixtures` 落盘该字段 + `test_manifest_records_universe_policy` |
 | 66 | **一条核心测试长期 `pytest.skip`，断言从未执行** | `test_single_knob_difference_is_attributed_to_that_knob` 号称验证「单旋钮时可定位」，但小样本下 exit 轴 `comparable=0`（唯一一笔还是 `open_position`），每次跑到 `if agg["divergent"]==0: pytest.skip(...)` 就退出。**测试存在、绿灯、却从未验证过任何东西** | 改用真实夹具（`@pytest.mark.slow`），并加前置断言 `exit_axis["comparable"] > 0` 防止再次空转；实测改错预期即失败 |
 | 67 | **`build_fixtures.py` 增量写入，混入新日期不会报错** | 为验证"陌生数据可用性"生成 2026-09-16/17/18 三天后，`fixtures/` 里同时存在 2026-09 与 2026-10/11 两段（该脚本只加不清）。若不核对，后续所有 run 都会基于混入样本 | `test_fixture_dates_are_contiguous_trading_days` 守"日期必须是单一连续区间"（实测注入 20260916 立刻报 40 天断档）；本次已还原夹具 |
+| 68 | **网络失败抛原始 SDK 异常，CLI 吐几十行 traceback** | `base_url` 指到不可达主机时，`init_token` 抛 `ServiceError("Network error: ...")`，`fetch_data.py` 没兜住 → 读者看到的是 traceback 而非 `code`/`message`/`hint`。文档 §7 承诺的结构化错误在这里失效 | `init_token` / `is_authenticated` / `get_stock_min` / `get_stock_daily` 四处包成 `FetchError`（含可操作 hint）+ `test_fetch_network_error_becomes_structured`（实测回滚后立刻失败） |
 
 ---
 
@@ -1126,7 +1127,7 @@ python3 scripts/value_decomposition.py \
 | panda-data | 1.0.6（仅夹具再生） |
 | 三方依赖 | 无（对齐与回放为纯标准库；`python3 -S` 实测通过） |
 | 全量对齐 | 约 31 秒（4,200 序列 × 240 根，1,008,000 根） |
-| 单元测试 | 约 273 秒（290 passed, 0 skipped） |
+| 单元测试 | 约 273 秒（291 passed, 0 skipped） |
 
 ```bash
 git clone https://github.com/quantskills/skill-jev-history-replay

@@ -125,6 +125,29 @@ def test_alignment_consistent_when_all_axes_have_comparable():
     assert report.build_alignment_conclusion(agg, 0, "actual")["verdict"] == "consistent"
 
 
+def test_value_reason_never_shows_p_as_zero():
+    """`reason` 文字里的 p 值不能因舍入变成 `p=0.0`。
+
+    与 `sign_test_p` 字段同类问题：精确二项检验在 n≈1200 时 p 可到 1e-12，
+    `round(p, 6)` 会把它写成 `p=0.0`，读者会以为"p 恰为 0"。
+    字段层面此前已修，但 `reason` 字符串里还留着旧写法。
+    """
+    # 构造一个胜负数足够悬殊的配对场景
+    base = _replay([0.0] * 60)
+    cur = _replay([0.01] * 60)
+    out = report.build_value_assessment(base, cur, min_cycles=20)
+    reason = out["verdict"]["reason"]
+    assert "p=0.0" not in reason, f"reason 里出现 p=0.0：{reason}"
+    if out["verdict"]["verdict"] in ("positive", "negative"):
+        assert "p=" in reason
+
+
+def test_fmt_p_preserves_small_values():
+    assert report._fmt_p(3.0126e-12) == "3.013e-12"
+    assert report._fmt_p(0.004077) == "0.004077"
+    assert report._fmt_p(None) == "None"
+
+
 def test_applicability_lists_scope_and_limits():
     out = report.build_applicability("synthetic", {"_hash": "abc"}, None)
     assert out["in_scope"] and out["out_of_scope"]

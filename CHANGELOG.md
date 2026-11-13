@@ -1,5 +1,37 @@
 # CHANGELOG
 
+## 0.14.1 — 2026-11-13
+
+上一轮发现判定逻辑漏洞后，这一轮系统性审计**其余判定路径**是否有同类问题。
+
+### 审计结果
+
+| 判定路径 | 结论 |
+|---|---|
+| `alignment_conclusion` | ✅ 上轮已加"每轴须有可比项" |
+| `value_assessment` | ✅ 有覆盖率门槛 + 最小周期数 + 全样本检验兜底 |
+| `attribution` | ✅ `no_divergence` 有明确条件，`single_knob` 需达阈值 |
+| `data_quality` | ✅ 离线时把"未核验"标为 null 而非 0 |
+
+判定分支本身**没有**新的"未验证冒充结论"问题。
+
+### 缺陷 50：`reason` 文字里的 p 值仍在舍入
+
+但查出一个外围问题：`value_assessment.verdict.reason` 里写着
+`round(p_value, 6)`。字段层面的 `sign_test_p` 在 v0.12.6 已修成
+`3.013e-12`，**文字描述里却还是 `p=0.0`**——同一份报告，字段对、文字错。
+
+实测：胜 60 负 0 时精确二项 p = 1.7e-18，旧写法显示 `p=0.0`。
+
+### 修复
+- 新增 `report._fmt_p()`，统一 `{p:.4g}` 格式化
+- 两处 `reason` 改用该函数
+- 新增 `test_value_reason_never_shows_p_as_zero` 与 `test_fmt_p_preserves_small_values`
+
+### 缺陷台账 49 → 50 项
+
+---
+
 ## 0.14.0 — 2026-11-13
 
 这一轮逐条实测 `applicability.invalid_when` 声明的 5 个"结论失效"场景，
@@ -466,7 +498,7 @@ ModuleNotFoundError: No module named 'scripts'
 | 项 | 文档写的 | 实际 |
 |---|---|---|
 | `verify_claims.py` | 27/27（§1.1）、61/61（§1.0a） | **71/71** |
-| `pytest tests/ -q` | 113 passed | **268 passed, 1 skipped** |
+| `pytest tests/ -q` | 113 passed | **270 passed, 1 skipped** |
 | `build.py` | 54 秒 | **31 秒** |
 | Python | 3.12.12 / 3.11.16 | 3.12.12 / **3.9.6**（实测） |
 
@@ -481,7 +513,7 @@ env_check     ok=true
 validate      ok=true, 0 issues
 build         31 秒，exit 0
 verify_claims 71/71
-pytest        268 passed, 1 skipped
+pytest        270 passed, 1 skipped
 ```
 总一致率 0.9913、退出轴 0.8896，与本机完全一致；`output/` 由 `build.py` 自动创建。
 

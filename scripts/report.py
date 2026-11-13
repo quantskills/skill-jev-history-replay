@@ -102,13 +102,13 @@ def build_value_assessment(baseline_replay: Dict[str, Any],
     elif p_value is not None and p_value < 0.05 and wins > losses:
         verdict = "positive"
         reason = (
-            f"配对周期中显式语义胜 {wins} 负 {losses}，符号检验 p={round(p_value, 6)}"
+            f"配对周期中显式语义胜 {wins} 负 {losses}，符号检验 p={_fmt_p(p_value)}"
             "，方向上显著更优"
         )
     elif p_value is not None and p_value < 0.05 and losses > wins:
         verdict = "negative"
         reason = (
-            f"配对周期中显式语义胜 {wins} 负 {losses}，符号检验 p={round(p_value, 6)}"
+            f"配对周期中显式语义胜 {wins} 负 {losses}，符号检验 p={_fmt_p(p_value)}"
             "，方向上显著更差，属可靠负结果"
         )
     else:
@@ -196,6 +196,17 @@ CONSISTENT_MAX_DIVERGENT_RATIO = 0.0
 #
 # 这条门槛不要求每轴有很多项——只要求"确实比过"，把未验证明确暴露出来。
 CONSISTENT_REQUIRE_ALL_AXES_COMPARABLE = True
+
+
+def _fmt_p(p) -> str:
+    """把 p 值格式化成不会丢精度的字符串。
+
+    不能 `round(p, 6)`：精确二项检验在 n≈1200 时 p 可到 1e-12，
+    四舍五入会变成 `0.0`，读者会当成"p 恰为 0"（统计上不可能）。
+    """
+    if p is None:
+        return "None"
+    return f"{p:.4g}"
 
 
 def build_alignment_conclusion(aggregate: Dict[str, Any],

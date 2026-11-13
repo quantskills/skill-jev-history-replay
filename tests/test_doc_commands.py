@@ -268,3 +268,48 @@ def test_evidence_table_counts_match_collection():
         "证据文档的用例数与实际收集不一致（文档, 实际）：\n"
         + "\n".join(f"  {n}: {c} vs {a}" for n, (c, a) in mismatches.items())
     )
+
+
+def test_documented_pandata_apis_match_code_calls():
+    """`data_access.md` 列的 panda 接口必须与代码实际调用的一致。
+
+    这张表是读者重新生成夹具的唯一依据。文档写了一个代码没用的接口，
+    或代码用了一个文档没列的接口，都会让读者困惑。
+
+    只做静态比对（不导入 panda_data），因此 CI 不装它也能跑。
+    """
+    doc = (REPO_ROOT / "references" / "data_access.md").read_text(encoding="utf-8")
+
+    api_names = ("get_stock_min", "get_stock_daily", "get_prev_trade_date",
+                 "get_trade_list", "get_st_list", "get_suspended_list")
+
+    # 文档里以表格行形式列出的接口
+    documented = {name for name in api_names if re.search(rf"\| `{name}` \|", doc)}
+    assert documented, "data_access.md 的接口表没解析到任何接口"
+
+    # 代码里实际调用的接口
+    called = set()
+    for path in sorted((REPO_ROOT / "scripts").glob("*.py")):
+        src = path.read_text(encoding="utf-8")
+        for name in api_names:
+            if re.search(rf"\b{name}\s*\(", src):
+                called.add(name)
+
+    assert documented == called, (
+        f"文档列了但代码没调用：{sorted(documented - called)}；"
+        f"代码调用了但文档没列：{sorted(called - documented)}")
+
+
+def test_data_access_signature_notes_match_code():
+    """文档里强调的两个签名坑必须与代码一致。
+
+    - `get_prev_trade_date` 用 `date=` 而非 `nature_date=`
+    - `get_trade_list` 的 exchange 用 `'SH'`（含深市）
+    """
+    doc = (REPO_ROOT / "references" / "data_access.md").read_text(encoding="utf-8")
+    assert "date=" in doc and "nature_date=" in doc, "文档未说明 get_prev_trade_date 的参数名坑"
+    assert "exchange='SH'" in doc or 'exchange="SH"' in doc
+
+    fetch = (REPO_ROOT / "scripts" / "fetch_data.py").read_text(encoding="utf-8")
+    assert "get_prev_trade_date(" in fetch
+    assert "nature_date=" not in fetch, "代码用了 nature_date，与 1.0.6 签名不符"

@@ -1,5 +1,40 @@
 # CHANGELOG
 
+## 0.15.8 — 2026-11-13
+
+这一轮用**真实 panda 接口**核对 `data_access.md`——这是读者重新生成夹具的
+唯一依据，此前只有签名是抄来的，行为描述没实测过。
+
+### 缺陷 63：接口耗时与返回列未经实测
+
+| 项 | 文档 | 实测 |
+|---|---|---|
+| `get_stock_min` 300 标的 / 72,000 根 | 约 3 秒 | **0.6 秒**（快 5 倍） |
+
+同时缺失的关键信息：
+- 各接口的**返回列**（`get_st_list` 是 `symbol,date,is_st` 等）
+- `get_prev_trade_date` 返回 **`str`** 而非 DataFrame
+- `get_trade_list('20261112','SH')` 实测 **5,218 行**（含深市）
+
+### 6 个接口逐个实测，全部正常
+
+| 接口 | 实测结果 |
+|---|---|
+| `get_stock_min` | 时间戳 `15:00` = 分钟**结束**时刻 ✓ |
+| `get_stock_daily` | 按 `fields` 裁剪，返回 `pre_close` ✓ |
+| `get_prev_trade_date` | 返回 `'20261111'`（str）✓ |
+| `get_trade_list` | 5,218 行，含深市 ✓ |
+| `get_st_list` | 2,732 行 ✓ |
+| `get_suspended_list` | 92 行 ✓ |
+
+### 新增测试（2 例，纯静态，CI 不装 panda_data 也能跑）
+- `test_documented_pandata_apis_match_code_calls`：文档列的接口 == 代码调用的接口
+- `test_data_access_signature_notes_match_code`：签名坑说明与代码一致
+
+### 缺陷台账 62 → 63 项
+
+---
+
 ## 0.15.7 — 2026-11-13
 
 这一轮核对报告里几个尚未验证过的辅助字段：`by_axis_prior`、`first_divergence`、

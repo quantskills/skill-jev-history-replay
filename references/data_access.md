@@ -79,7 +79,14 @@ export PANDA_DATA_BASE_URL=<base_url>
 > - **集合竞价会让日线 `open` 与分钟线首根 `open` 不同**：实测 2/4,200 条，
 >   最大差 1.385%。本 skill 的 `baseline_price=day_open` 取**分钟线首根**，
 >   详见 `semantics_matrix.md`。参考语义用 `prev_close`，不受影响。
-> - `get_stock_min` 支持一次传多标的（实测 300 标的、72,000 根，约 3 秒）。
+> - `get_stock_min` 支持一次传多标的（实测 300 标的、72,000 根，**约 0.6 秒**）。
+> - 各接口返回列（实测）：
+>   - `get_stock_min` → `symbol, date, amount, close, datetime, high, low, minute, num_trades, open, volume`
+>   - `get_stock_daily` → `symbol, date, open, high, low, close, pre_close`（按 `fields` 裁剪）
+>   - `get_st_list` → `symbol, date, is_st`
+>   - `get_suspended_list` → `symbol, date, is_suspended`
+>   - `get_prev_trade_date` → 返回 `str`（如 `'20261111'`），不是 DataFrame
+> - `get_trade_list(date='20261112', exchange='SH')` 实测返回 5,218 行（含深市代码）。
 > - `get_prev_trade_date` 在 1.0.6 中是 `date=` 而非 `nature_date=`。
 
 > 契约以 [`quantskills/skill-pandadata-api`](https://github.com/quantskills/skill-pandadata-api)

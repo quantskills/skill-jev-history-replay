@@ -125,3 +125,58 @@ def test_corrupt_json_raises_structured_error(tmp_path):
     with pytest.raises(compare_baseline.BaselineError) as exc:
         compare_baseline.freeze(bad)
     assert exc.value.code == "invalid_json"
+
+
+def test_capital_change_end_to_end_blocks_comparison(tmp_path):
+    """端到端：改资金参数 → semantics_hash 变 → 拒绝给 delta。
+
+    上一轮修了「资金参数未计入 hash」，但只测了 `semantics_hash()` 函数本身。
+    没有端到端测试守着「配置变化真的会传导到 compare 的拒绝逻辑」这条链——
+    而正是这条链才是 `config_hash` 机制的意义所在。
+
+    注意：`initial_capital` 属于语义层，必须通过
+    `config={"semantics": {...}}` 传入，不是顶层 config 键。
+    """
+    from scripts import config as cfg
+    from scripts import semantics as sem
+
+    base = dict(cfg.REFERENCE_SEMANTICS)
+    altered = dict(base)
+    altered["initial_capital"] = 500_000.0
+
+    def fake_report(sem_dict):
+        # config_hash 在真实流程里由 semantics_hash 等一起算出
+        # （见 run_eval.py 的 comparability["config_hash"] = ...），
+        # 这里照做，否则测的就不是真实链路。
+        from scripts import report as report_mod
+
+        sem_hash = sem.semantics_hash(sem_dict)
+        return {
+            "comparability": {
+                "config_hash": report_mod.config_hash({
+                    "semantics_hash": sem_hash,
+                    "fixture_fingerprint": "fp1",
+                    "time_tolerance_minutes": 1,
+                    "price_tolerance_bps": 5.0,
+                    "min_cycles": 20,
+                    "log_source": "synthetic",
+                }),
+                "semantics_hash": sem_hash,
+                "fixture_fingerprint": "fp1",
+                "log_source": "synthetic",
+            },
+            "summary": {"ledger_match_rate": 0.99, "closed_cycles": 100},
+        }
+
+    a = tmp_path / "a.json"
+    a.write_text(json.dumps(fake_report(base)), encoding="utf-8")
+    frozen = compare_baseline.freeze(a, name="base", baseline_dir=tmp_path / "bl")
+
+    b = tmp_path / "b.json"
+    b.write_text(json.dumps(fake_report(altered)), encoding="utf-8")
+    out = compare_baseline.compare(b, frozen["baseline"])
+
+    assert out["comparable"] is False, (
+        "仅资金参数不同也必须判为不可比")
+    assert out["deltas"] is None
+    assert "semantics_hash" in out["changed_fields"]

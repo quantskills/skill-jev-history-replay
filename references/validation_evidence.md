@@ -78,7 +78,7 @@ python3 -m pytest tests/ -q -m slow         # 区分度对照，约 2 分钟
 | `test_data_quality_audit.py` | 7 | 板块分类、涨跌停口径、**离线时上界必须为 unknown 而非部分值**、报告回显 |
 | `test_trade_audit.py` | 4 | **逐笔价格/算术反查**、跨日覆盖、故意改价必被抓 |
 | `test_doc_commands.py` | 9 | **文档引用的脚本必须存在 / 可解析**、**证据表格与实际测试文件一致**、**表格用例数 = pytest 收集数**、**README 目录树列全脚本**、**缺陷标题数 = 表行数**、**文档里的命令输出计数与实际一致** | **文档引用的脚本必须存在 / 可解析**、**证据表格与实际测试文件一致**、**表格用例数 = pytest 收集数**、**README 目录树列全脚本**、**缺陷标题数 = 表行数** |
-| `test_compare_baseline.py` | 8 | **冻结基线**、同配置给 delta、异配置拒绝、结构化错误、**仅 config_hash 变也要列出** |
+| `test_compare_baseline.py` | 9 | **冻结基线**、同配置给 delta、异配置拒绝、结构化错误、**仅 config_hash 变也要列出**、**改资金参数端到端拒绝给 delta** |
 | `test_value_decomposition.py` | 4 | **T+1 强制隔夜**、拆解前提、summary 形状 |
 | `test_credentials.py` | 6 | **引号去除**、别名回退、缺凭证结构化报错、非法 URL 拒绝 |
 | `test_ci_config.py` | 4 | **CI 配置合法**、步骤齐全、build 先于 tests |
@@ -276,7 +276,7 @@ python3 scripts/env_check.py      # ok=true
 python3 scripts/validate.py       # ok=true, 0 issues
 python3 scripts/build.py          # 约 31 秒
 python3 scripts/verify_claims.py  # 79/79
-python3 -m pytest tests/ -q       # 281 passed, 1 skipped
+python3 -m pytest tests/ -q       # 282 passed, 1 skipped
 ```
 
 实测（v0.12.8，从 `origin/main` 全新 clone 到 /tmp）：各项全过，
@@ -1100,7 +1100,7 @@ python3 scripts/value_decomposition.py \
 | panda-data | 1.0.6（仅夹具再生） |
 | 三方依赖 | 无（对齐与回放为纯标准库；`python3 -S` 实测通过） |
 | 全量对齐 | 约 31 秒（4,200 序列 × 240 根，1,008,000 根） |
-| 单元测试 | 约 160 秒（281 passed, 1 skipped） |
+| 单元测试 | 约 160 秒（282 passed, 1 skipped） |
 
 ```bash
 git clone https://github.com/quantskills/skill-jev-history-replay

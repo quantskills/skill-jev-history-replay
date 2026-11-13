@@ -71,3 +71,47 @@ def test_st_trade_share_is_documented_consistently():
     shares = set(re.findall(r"占全部交易的 \*\*([\d.]+)%\*\*", text))
     shares |= set(re.findall(r"ST 标的实际产生 ([\d.]+)% 的交易", text))
     assert len(shares) == 1, f"ST 交易占比出现多个不同值：{shares}"
+
+def test_value_conclusion_sensitivity_is_documented():
+    """§5.3 必须写明价值结论对样本长度敏感，且方向会翻转。
+
+    实测：14 天 ref 更差（−0.3678%）、3 天 ref 更好（+0.9948%）。
+    方向在 7 天附近翻转。这个结论若不与 `negative` 一起交付，
+    读者会把它当成"显式语义普遍更差"的普适判断。
+    """
+    text = EVIDENCE.read_text(encoding="utf-8")
+    assert "对样本长度高度敏感" in text, "§5.3 未声明样本长度敏感性"
+    assert "方向在 7 天附近翻转" in text, "未写明翻转点"
+    # §9 的未验证列表也要提到，避免只看结论不看正文
+    sec9 = text[text.index("## 9. 结论与边界"):]
+    assert "跨样本稳定性" in sec9, "§9 未把跨样本稳定性列为未验证"
+
+
+@pytest.mark.slow
+def test_value_direction_reverses_on_short_window():
+    """在真实夹具上验证：3 天窗口的差值方向与 14 天相反。
+
+    这是文档声明的核心事实，必须可复现。
+    """
+    from scripts import config as cfg
+    from scripts import data_loader, metrics
+    from scripts.replayer import replay_all
+    from scripts.run_eval import _load_prev_closes, evaluate_naive
+
+    bars = data_loader.load_bars(REPO_ROOT / "fixtures" / "bars")
+    dates = sorted({e.get("date") for e in bars.values()})
+    prev = _load_prev_closes(REPO_ROOT / "fixtures" / "reference", list(bars))
+    base = cfg.load_config()["semantics"]
+
+    def diff_for(n):
+        keep = set(dates[-n:])
+        sub = {k: v for k, v in bars.items() if v.get("date") in keep}
+        sp = {k: v for k, v in prev.items() if k.split("@")[-1] in keep}
+        cur = metrics.all_closed_returns(replay_all(sub, base, sp))
+        nv = metrics.all_closed_returns(evaluate_naive(sub, base, sp))
+        return sum(nv) / len(nv), sum(cur) / len(cur)
+
+    a14, b14 = diff_for(14)
+    a3, b3 = diff_for(3)
+    assert b14 < a14, f"14 天应为 ref 更差：naive={a14:.6f} ref={b14:.6f}"
+    assert b3 > a3, f"3 天应为 ref 更好（方向翻转）：naive={a3:.6f} ref={b3:.6f}"

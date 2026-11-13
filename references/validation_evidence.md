@@ -91,7 +91,7 @@ python3 -m pytest tests/ -q -m slow         # 区分度对照，约 2 分钟
 | `test_multi_knob_docs.py` | 5 | **多旋钮表内部一致**、仅 exit_eval 行与报告一致、**naive 消融表单项不解释**、**wait_bars/合并数可在真实夹具复现**（slow）、**naive 消融表可复现**（slow） |
 | `test_report_consistency.py` | 5 | **divergence_items 四处同口径**、各轴 divergent 加总、**non_match_rows 单列**、per_day 加总=total、inline 截断标记 |
 | `test_fixture_integrity.py` | 4 | **pre_close 口径**、日线 high/low/close 与分钟线一致、**day_open 取首根**、文档写明口径 |
-| `test_conclusion_consistency.py` | 5 | **§9 的数字与报告对账**：总体/退出轴一致率、未建模上界、**不得再称容差结果不变**、ST 占比两处一致 |
+| `test_conclusion_consistency.py` | 7 | **§9 的数字与报告对账**：总体/退出轴一致率、未建模上界、**不得再称容差结果不变**、ST 占比两处一致、**样本长度敏感性已声明**、**方向翻转可复现**（slow） |
 | `test_release_compliance.py` | 7 | **免责声明四点**、INSTALL 五平台、SPDX 许可证、三处 name 一致、无占位符、**无凭证/内网/邮箱泄露**、entry 存在 |
 | `test_runtime_adapters.py` | 9 | **适配器文件齐备**、声明的脚本/entry 存在、**旋钮清单与代码一致**、版本与 skill.json 一致、**README 实例数字与报告一致** |
 
@@ -276,7 +276,7 @@ python3 scripts/env_check.py      # ok=true
 python3 scripts/validate.py       # ok=true, 0 issues
 python3 scripts/build.py          # 约 31 秒
 python3 scripts/verify_claims.py  # 79/79
-python3 -m pytest tests/ -q       # 273 passed, 1 skipped
+python3 -m pytest tests/ -q       # 275 passed, 1 skipped
 ```
 
 实测（v0.12.8，从 `origin/main` 全新 clone 到 /tmp）：各项全过，
@@ -983,9 +983,29 @@ python3 scripts/value_decomposition.py \
 > 当时没有独立的全样本证据。现在补上了 Welch 检验，且它与配对方向一致，
 > 结论才重新成立。**结论没变，但证据基础从"不可外推的子样本"换成了"全样本"。**
 
+#### ⚠️ 这个结论对样本长度高度敏感（实测，必须与结论一起交付）
+
+把同一套语义在**连续缩短的时间窗口**上重跑（取最近 N 个交易日）：
+
+| 交易日数 | naive 均值 | ref 均值 | 差值 | p | 方向 |
+|---|---|---|---|---|---|
+| 14（全部） | −0.1850% | −0.5527% | **−0.3678%** | 1.1e-05 | ref **更差** |
+| 7 | −0.1850% | −0.1187% | **+0.1866%** | 0.101 | 反转，不显著 |
+| 5 | — | — | **+0.9862%** | <0.001 | ref 更好 |
+| 3 | −0.1829% | **+0.8118%** | **+0.9948%** | <0.001 | ref 更好 |
+| 2 | — | — | **+1.2516%** | <0.001 | ref 更好 |
+
+**方向在 7 天附近翻转。** 14 天的 `negative` 结论**不能外推**到更短窗口；
+反过来，短窗口的 `positive` 也不能外推到这里。
+
+已用官方 `evaluate_naive()` 交叉验证（非手工构造），14 天与 3 天两档结果一致。
+
+**这意味着**：`negative` 是"这 14 个交易日"的结论，不是"显式语义普遍更差"。
+把它当成普适判断会出错——在只有 2–5 天的样本上会得到完全相反的答案。
+
 ---
 
-## 6. 验证中发现并修复的缺陷（55 项）
+## 6. 验证中发现并修复的缺陷（56 项）
 
 以下都不是构造的测试用例，而是在真实数据上跑出来的：
 
@@ -1046,6 +1066,7 @@ python3 scripts/value_decomposition.py \
 | 53 | **T+1 下强平推迟分支重复累加 `bars_held`，掩盖 30 条真实差异** | `force_exit_time` 分支在 `_exit_or_defer` 返回 False 后**没有 return**，循环继续；下一根仍过 `force_time`，再次进入该分支并累加 `bars_held`。14:45→15:00 的 15 根让它从 30 涨到 **360**（另有 34 笔 328–344）。次日 `held = bars_held + j + 1` 立刻超 max_hold，于是这些仓位**在次日第一根被当作"持有超时"平仓** | 推迟后立即 `return cycle`（与止损/止盈分支一致）+ `test_force_exit_defer_does_not_accumulate_bars_held` |
 | 54 | **上一缺陷导致归因误判为 `single_knob`** | 修复缺陷 53 后，退出差异由 314 增至 **344**，`exit_eval` 解释率由 100% 降至 **91.3%**，归因判定由 `single_knob` 改为 **`multi_knob`**——此前那 30 条差异被错误地"解释掉了"。主数字随之变化：总一致率 0.9913→**0.9905**、退出轴 0.8896→**0.8790** | 全部文档数字与 `validation_claims.json` 按实测更新（claims 一次拦下 16 处偏差） |
 | 55 | **修复重放后忘了重新生成夹具日志** | 改好 `bars_held` 缺陷后，`fixtures/logs/` 仍是旧代码产物。对齐时出现 **30 条"无法归因"** 的退出差异（日志判 max_hold、重放判 stop_loss），归因被迫降级 `multi_knob`——**不是语义分歧，是夹具过期**。重新生成后归因恢复 `single_knob` 100% | 重新生成日志 + `test_fixture_logs_match_current_replayer`（逐条比对，实测能抓出篡改） |
+| 56 | **价值结论的样本长度敏感性从未记录** | `negative` 只在 14 天样本上成立。实测缩短到 7 天方向就**翻转**、3 天 ref 均值变成 **+0.9948%**（正面）。文档此前把 `negative` 当作该样本的可靠结论交付，没有说明它不可外推到更短窗口 | §5.3 新增敏感性子节（14/7/5/3/2 天实测）、§9 列为未验证；`test_value_conclusion_sensitivity_is_documented` + slow 用例复现翻转 |
 
 ---
 
@@ -1075,7 +1096,7 @@ python3 scripts/value_decomposition.py \
 | panda-data | 1.0.6（仅夹具再生） |
 | 三方依赖 | 无（对齐与回放为纯标准库；`python3 -S` 实测通过） |
 | 全量对齐 | 约 31 秒（4,200 序列 × 240 根，1,008,000 根） |
-| 单元测试 | 约 160 秒（273 passed, 1 skipped） |
+| 单元测试 | 约 160 秒（275 passed, 1 skipped） |
 
 ```bash
 git clone https://github.com/quantskills/skill-jev-history-replay
@@ -1114,7 +1135,9 @@ python3 scripts/verify_claims.py
 
 **未验证**：
 - **JEV 实际语义**——日志为合成数据，对齐 verdict 恒为 `inconclusive`；
-- T+0 市场、多空双向、除权除息、停牌、涨跌停场景。
+- T+0 市场、多空双向、除权除息、停牌、涨跌停场景；
+- **价值结论的跨样本稳定性**——已实测：缩短到 7 天以下方向会**翻转**
+  （见 §5.3 的敏感性子节）。`negative` 只是这 14 天的结论，不可外推。
 
 **结论据此成立的范围**：仅在 `applicability` 声明的 A 股分钟级单/多日场景，
 且日志按 `log_contract.md` 提供记录时。

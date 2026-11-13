@@ -9,8 +9,8 @@
 {"symbol": "000001.SZ", "date": "20261106", "ts": "14:16", "kind": "condition", "hit": false, "reference": 11.84, "baseline": 11.64, "gain_pct": 0.01718213, "_synthetic": true}
 {"symbol": "000028.SZ", "date": "20261106", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
 {"symbol": "000058.SZ", "date": "20261106", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
-{"symbol": "000058.SZ", "date": "20261106", "ts": "09:31", "kind": "plan", "plan": "exit", "entry_time": "14:16", "entry_price": 6.63, "exit_time": "09:31", "exit_reason": "max_hold", "net_return_pct": -0.02402443, "cross_day": true, "_synthetic": true}
-{"symbol": "000058.SZ", "date": "20261106", "ts": "09:31", "kind": "fill", "side": "sell", "price": 6.48, "qty": 15000, "status": "filled", "cross_day": true, "_synthetic": true}
+{"symbol": "000058.SZ", "date": "20261106", "ts": "09:31", "kind": "plan", "plan": "exit", "entry_time": "14:16", "entry_price": 6.63, "exit_time": "09:31", "exit_reason": "stop_loss", "net_return_pct": -0.0064, "cross_day": true, "_synthetic": true}
+{"symbol": "000058.SZ", "date": "20261106", "ts": "09:31", "kind": "fill", "side": "sell", "price": 6.59685, "qty": 15000, "status": "filled", "cross_day": true, "_synthetic": true}
 {"symbol": "000058.SZ", "date": "20261106", "ts": "10:25", "kind": "condition", "hit": true, "reference": 6.72, "baseline": 6.65, "gain_pct": 0.01203008, "_synthetic": true}
 {"symbol": "000058.SZ", "date": "20261106", "ts": "10:26", "kind": "condition", "hit": false, "reference": 6.74, "baseline": 6.65, "gain_pct": 0.01353383, "_synthetic": true}
 {"symbol": "000151.SZ", "date": "20261106", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
@@ -237,8 +237,8 @@
 {"symbol": "002861.SZ", "date": "20261106", "ts": "09:31", "kind": "plan", "plan": "exit", "entry_time": "14:09", "entry_price": 12.33, "exit_time": "09:31", "exit_reason": "max_hold", "net_return_pct": -0.03303017, "cross_day": true, "_synthetic": true}
 {"symbol": "002861.SZ", "date": "20261106", "ts": "09:31", "kind": "fill", "side": "sell", "price": 11.94, "qty": 8100, "status": "filled", "cross_day": true, "_synthetic": true}
 {"symbol": "002879.SZ", "date": "20261106", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
-{"symbol": "002879.SZ", "date": "20261106", "ts": "09:31", "kind": "plan", "plan": "exit", "entry_time": "14:34", "entry_price": 14.1, "exit_time": "09:31", "exit_reason": "max_hold", "net_return_pct": -0.03473333, "cross_day": true, "_synthetic": true}
-{"symbol": "002879.SZ", "date": "20261106", "ts": "09:31", "kind": "fill", "side": "sell", "price": 13.63, "qty": 7000, "status": "filled", "cross_day": true, "_synthetic": true}
+{"symbol": "002879.SZ", "date": "20261106", "ts": "09:31", "kind": "plan", "plan": "exit", "entry_time": "14:34", "entry_price": 14.1, "exit_time": "09:31", "exit_reason": "stop_loss", "net_return_pct": -0.0064, "cross_day": true, "_synthetic": true}
+{"symbol": "002879.SZ", "date": "20261106", "ts": "09:31", "kind": "fill", "side": "sell", "price": 14.0295, "qty": 7000, "status": "filled", "cross_day": true, "_synthetic": true}
 {"symbol": "002897.SZ", "date": "20261106", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
 {"symbol": "002897.SZ", "date": "20261106", "ts": "09:31", "kind": "plan", "plan": "exit", "entry_time": "10:07", "entry_price": 44.51, "exit_time": "09:31", "exit_reason": "stop_loss", "net_return_pct": -0.0064, "cross_day": true, "_synthetic": true}
 {"symbol": "002897.SZ", "date": "20261106", "ts": "09:31", "kind": "fill", "side": "sell", "price": 44.28745, "qty": 2200, "status": "filled", "cross_day": true, "_synthetic": true}
@@ -414,8 +414,8 @@
 {"symbol": "300772.SZ", "date": "20261106", "ts": "14:38", "kind": "condition", "hit": false, "reference": 9.43, "baseline": 9.25, "gain_pct": 0.0172973, "_synthetic": true}
 {"symbol": "300772.SZ", "date": "20261106", "ts": "14:39", "kind": "plan", "plan": "enter", "entry_time": "14:39", "entry_price": 9.4, "wait_bars": 1, "qty": 10600, "exit_time": null, "exit_reason": null, "net_return_pct": null, "cross_day_pending": true, "_synthetic": true}
 {"symbol": "300789.SZ", "date": "20261106", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
-{"symbol": "300789.SZ", "date": "20261106", "ts": "09:31", "kind": "plan", "plan": "exit", "entry_time": "14:32", "entry_price": 14.8, "exit_time": "09:31", "exit_reason": "max_hold", "net_return_pct": -0.01423784, "cross_day": true, "_synthetic": true}
-{"symbol": "300789.SZ", "date": "20261106", "ts": "09:31", "kind": "fill", "side": "sell", "price": 14.61, "qty": 6700, "status": "filled", "cross_day": true, "_synthetic": true}
+{"symbol": "300789.SZ", "date": "20261106", "ts": "09:31", "kind": "plan", "plan": "exit", "entry_time": "14:32", "entry_price": 14.8, "exit_time": "09:31", "exit_reason": "stop_loss", "net_return_pct": -0.0064, "cross_day": true, "_synthetic": true}
+{"symbol": "300789.SZ", "date": "20261106", "ts": "09:31", "kind": "fill", "side": "sell", "price": 14.726, "qty": 6700, "status": "filled", "cross_day": true, "_synthetic": true}
 {"symbol": "300809.SZ", "date": "20261106", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
 {"symbol": "300809.SZ", "date": "20261106", "ts": "09:31", "kind": "plan", "plan": "exit", "entry_time": "10:06", "entry_price": 20.64, "exit_time": "09:31", "exit_reason": "stop_loss", "net_return_pct": -0.0064, "cross_day": true, "_synthetic": true}
 {"symbol": "300809.SZ", "date": "20261106", "ts": "09:31", "kind": "fill", "side": "sell", "price": 20.5368, "qty": 4800, "status": "filled", "cross_day": true, "_synthetic": true}
@@ -678,8 +678,8 @@
 {"symbol": "600612.SH", "date": "20261106", "ts": "09:31", "kind": "fill", "side": "sell", "price": 32.59, "qty": 3000, "status": "filled", "cross_day": true, "_synthetic": true}
 {"symbol": "600638.SH", "date": "20261106", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
 {"symbol": "600660.SH", "date": "20261106", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
-{"symbol": "600660.SH", "date": "20261106", "ts": "09:31", "kind": "plan", "plan": "exit", "entry_time": "14:34", "entry_price": 55.79, "exit_time": "09:31", "exit_reason": "max_hold", "net_return_pct": -0.00122076, "cross_day": true, "_synthetic": true}
-{"symbol": "600660.SH", "date": "20261106", "ts": "09:31", "kind": "fill", "side": "sell", "price": 55.8, "qty": 1700, "status": "filled", "cross_day": true, "_synthetic": true}
+{"symbol": "600660.SH", "date": "20261106", "ts": "09:31", "kind": "plan", "plan": "exit", "entry_time": "14:34", "entry_price": 55.79, "exit_time": "09:31", "exit_reason": "stop_loss", "net_return_pct": -0.0064, "cross_day": true, "_synthetic": true}
+{"symbol": "600660.SH", "date": "20261106", "ts": "09:31", "kind": "fill", "side": "sell", "price": 55.51105, "qty": 1700, "status": "filled", "cross_day": true, "_synthetic": true}
 {"symbol": "600660.SH", "date": "20261106", "ts": "11:11", "kind": "condition", "hit": true, "reference": 56.27, "baseline": 55.82, "gain_pct": 0.01003225, "_synthetic": true}
 {"symbol": "600660.SH", "date": "20261106", "ts": "11:12", "kind": "condition", "hit": false, "reference": 56.44, "baseline": 55.82, "gain_pct": 0.00913651, "_synthetic": true}
 {"symbol": "600660.SH", "date": "20261106", "ts": "13:02", "kind": "condition", "hit": true, "reference": 56.51, "baseline": 55.82, "gain_pct": 0.0128986, "_synthetic": true}
@@ -718,8 +718,8 @@
 {"symbol": "601100.SH", "date": "20261106", "ts": "09:31", "kind": "plan", "plan": "exit", "entry_time": "09:54", "entry_price": 90.81, "exit_time": "09:31", "exit_reason": "stop_loss", "net_return_pct": -0.0064, "cross_day": true, "_synthetic": true}
 {"symbol": "601100.SH", "date": "20261106", "ts": "09:31", "kind": "fill", "side": "sell", "price": 90.35595, "qty": 1100, "status": "filled", "cross_day": true, "_synthetic": true}
 {"symbol": "601136.SH", "date": "20261106", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
-{"symbol": "601136.SH", "date": "20261106", "ts": "09:31", "kind": "plan", "plan": "exit", "entry_time": "14:18", "entry_price": 13.4, "exit_time": "09:31", "exit_reason": "max_hold", "net_return_pct": -0.02005672, "cross_day": true, "_synthetic": true}
-{"symbol": "601136.SH", "date": "20261106", "ts": "09:31", "kind": "fill", "side": "sell", "price": 13.15, "qty": 7400, "status": "filled", "cross_day": true, "_synthetic": true}
+{"symbol": "601136.SH", "date": "20261106", "ts": "09:31", "kind": "plan", "plan": "exit", "entry_time": "14:18", "entry_price": 13.4, "exit_time": "09:31", "exit_reason": "stop_loss", "net_return_pct": -0.0064, "cross_day": true, "_synthetic": true}
+{"symbol": "601136.SH", "date": "20261106", "ts": "09:31", "kind": "fill", "side": "sell", "price": 13.333, "qty": 7400, "status": "filled", "cross_day": true, "_synthetic": true}
 {"symbol": "601200.SH", "date": "20261106", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
 {"symbol": "601200.SH", "date": "20261106", "ts": "11:11", "kind": "condition", "hit": true, "reference": 6.95, "baseline": 6.89, "gain_pct": 0.01015965, "_synthetic": true}
 {"symbol": "601200.SH", "date": "20261106", "ts": "11:12", "kind": "condition", "hit": false, "reference": 6.96, "baseline": 6.89, "gain_pct": 0.00870827, "_synthetic": true}

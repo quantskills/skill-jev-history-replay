@@ -131,3 +131,51 @@ def test_manifest_describes_the_actual_fixtures():
         "manifest.json 与实际夹具不符（多日构建时合并结果未落盘？）：\n"
         + "\n".join(f"  {p}" for p in problems)
     )
+
+
+def test_fixture_logs_match_current_replayer():
+    """落盘日志必须与**当前代码**重放的结果一致。
+
+    真实踩过的坑：修好 `bars_held` 重复累加缺陷后忘了重新生成夹具日志，
+    于是 `fixtures/logs/` 里仍是旧代码的产物。对齐时表现为 30 条
+    "无法归因"的退出差异（日志判 max_hold、重放判 stop_loss），
+    归因被迫降级为 `multi_knob`。**不是语义分歧，是夹具过期**。
+
+    日志只有 34,590 条，逐条比对成本可接受。
+    """
+    import json as _json
+
+    from scripts import config as cfg
+    from scripts import data_loader, log_synth, semantics as sem
+    from scripts.run_eval import _load_prev_closes
+
+    bars = data_loader.load_bars(REPO_ROOT / "fixtures" / "bars")
+    if not bars:
+        pytest.skip("没有 K 线夹具")
+    prev = _load_prev_closes(REPO_ROOT / "fixtures" / "reference", list(bars))
+
+    logged = dict(cfg.load_config()["semantics"])
+    logged.update(sem.get_profile("jev_assumed"))
+    fresh = log_synth.synthesize_logs(bars, logged, prev)
+
+    disk = []
+    for path in sorted((REPO_ROOT / "fixtures" / "logs").glob("*.jsonl")):
+        disk += [_json.loads(line) for line in path.open(encoding="utf-8")
+                 if line.strip()]
+
+    def key(rec):
+        return (rec.get("symbol"), str(rec.get("date")), rec.get("ts"),
+                rec.get("kind"), rec.get("plan"))
+
+    fresh_map = {key(r): r.get("exit_reason") for r in fresh if r.get("kind") == "plan"}
+    disk_map = {key(r): r.get("exit_reason") for r in disk if r.get("kind") == "plan"}
+    mismatched = [
+        (k, disk_map.get(k), fresh_map.get(k))
+        for k in set(fresh_map) | set(disk_map)
+        if fresh_map.get(k) != disk_map.get(k)
+    ]
+    assert mismatched == [], (
+        f"{len(mismatched)} 条 plan 记录的退出原因与当前重放不一致——"
+        "夹具日志已过期，请重新运行 scripts/build_fixtures.py 生成日志。"
+        f"样例：{mismatched[:3]}"
+    )

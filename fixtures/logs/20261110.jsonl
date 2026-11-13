@@ -549,8 +549,8 @@
 {"symbol": "002678.SZ", "date": "20261110", "ts": "13:24", "kind": "condition", "hit": true, "reference": 4.14, "baseline": 4.09, "gain_pct": 0.01466993, "_synthetic": true}
 {"symbol": "002678.SZ", "date": "20261110", "ts": "13:25", "kind": "condition", "hit": false, "reference": 4.15, "baseline": 4.09, "gain_pct": 0.01222494, "_synthetic": true}
 {"symbol": "002698.SZ", "date": "20261110", "ts": "09:31", "kind": "condition", "hit": false, "reference": null, "baseline": null, "gain_pct": null, "_synthetic": true}
-{"symbol": "002698.SZ", "date": "20261110", "ts": "09:31", "kind": "plan", "plan": "exit", "entry_time": "14:30", "entry_price": 10.98, "exit_time": "09:31", "exit_reason": "max_hold", "net_return_pct": 0.00042149, "cross_day": true, "_synthetic": true}
-{"symbol": "002698.SZ", "date": "20261110", "ts": "09:31", "kind": "fill", "side": "sell", "price": 11.0, "qty": 9100, "status": "filled", "cross_day": true, "_synthetic": true}
+{"symbol": "002698.SZ", "date": "20261110", "ts": "09:32", "kind": "plan", "plan": "exit", "entry_time": "14:30", "entry_price": 10.98, "exit_time": "09:32", "exit_reason": "take_profit", "net_return_pct": 0.0086, "cross_day": true, "_synthetic": true}
+{"symbol": "002698.SZ", "date": "20261110", "ts": "09:32", "kind": "fill", "side": "sell", "price": 11.0898, "qty": 9100, "status": "filled", "cross_day": true, "_synthetic": true}
 {"symbol": "002698.SZ", "date": "20261110", "ts": "10:00", "kind": "condition", "hit": true, "reference": 11.1, "baseline": 10.91, "gain_pct": 0.0192484, "_synthetic": true}
 {"symbol": "002698.SZ", "date": "20261110", "ts": "10:01", "kind": "signal", "signal": "buy", "wait_bars": 1, "_synthetic": true}
 {"symbol": "002698.SZ", "date": "20261110", "ts": "10:03", "kind": "plan", "plan": "enter", "entry_time": "10:03", "entry_price": 11.16, "wait_bars": 1, "qty": 8900, "exit_time": null, "exit_reason": null, "net_return_pct": null, "cross_day_pending": true, "_synthetic": true}

@@ -113,13 +113,13 @@ The bundled fixtures (300 fixed symbols × 14 trading days × 240 minute bars,
 | signal | 1.00 | 1,496 |
 | wait | 1.00 | 1,496 |
 | entry | 1.00 | 1,496 |
-| exit | 0.8790 | 2,844 |
-| Attribution | `multi_knob` — `exit_eval` explains 91.3% | |
+| exit | 0.8878 | 2,844 |
+| Attribution | `single_knob` — `exit_eval` explains 100% | |
 
 Condition, signal, wait and entry agree completely; the only disagreement is which price the exit is evaluated on.
 
 > The exit match rate moves with `time_tolerance_minutes`: 0.8667 at 0 minutes,
-> 0.8790 at 1 minute (default), 0.9030 at 5 minutes. That is genuine parameter
+> 0.8878 at 1 minute (default); it rises slightly with a wider tolerance. That is genuine parameter
 > sensitivity, not noise — see `references/validation_evidence.md` §3.6.
 >
 > These numbers change whenever the fixtures change. Treat your own

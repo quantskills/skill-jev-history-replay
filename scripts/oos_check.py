@@ -40,8 +40,8 @@ DEFAULT_DATES = [
 # 都必须同步更新这里，否则"复现判定"会拿旧基准比新结果。
 IN_SAMPLE = {
     "total_comparable": 36086,
-    "total_match_rate": 0.9905,
-    "exit_match_rate": 0.8790,
+    "total_match_rate": 0.9912,
+    "exit_match_rate": 0.8878,
     "attribution_top_knob": "exit_eval",
     "attribution_top_rate": 1.0,
     "value_verdict": "negative",

@@ -35,6 +35,81 @@ def _documented_row(label: str):
     }
 
 
+def _documented_naive_row(label: str) -> int:
+    text = EVIDENCE.read_text(encoding="utf-8")
+    pattern = rf"\| {re.escape(label)} \| \*?\*?([\d,]+)"
+    match = re.search(pattern, text)
+    assert match, f"证据文档里找不到「{label}」"
+    return int(match.group(1).replace(",", ""))
+
+
+def test_naive_ablation_table_shows_no_single_knob_explains_it():
+    """naive 日志（8 个旋钮不同）的消融表：单项都不该带来大幅下降。
+
+    这是 §4.2 用来证明「单旋钮消融在多旋钮场景失效」的核心证据——
+    只改一个旋钮，差异几乎不降；改两个还会**上升**；
+    只有全改才对得上 0。
+    """
+    base = _documented_naive_row("基线（参考语义 vs naive 日志）")
+    ts = _documented_naive_row("只把 `bar_timestamp` 改成 naive 值")
+    bp = _documented_naive_row("只把 `baseline_price` 改成 naive 值")
+    tp = _documented_naive_row("只把 `t_plus_1` 改成 naive 值")
+    allnaive = _documented_naive_row("全部改成 naive（等价于日志侧配置）")
+
+    assert allnaive == 0, "全改成 naive 应当完全对齐"
+    # 单项修改最多只能解释一小部分（远不足 100%）
+    assert ts > base * 0.5, "bar_timestamp 单独改动就解释了绝大部分差异，结论不成立"
+    # 改两个反而可能增加——这正是"方法失效"的表现
+    assert bp >= base or tp >= base
+
+
+@pytest.mark.slow
+def test_naive_ablation_counts_reproduce():
+    """在真实夹具上重跑 naive 消融表，核对文档数字。"""
+    import tempfile
+
+    from scripts import config as cfg
+    from scripts import semantics as sem
+    from scripts.aligner import align_symbol, aggregate_rows
+    from scripts.controls_check import _write_actual_logs
+    from scripts.data_loader import group_logs, load_bars, load_logs, normalize_log_records
+    from scripts.replayer import replay_all
+    from scripts.run_eval import _load_prev_closes
+
+    base = dict(cfg.load_config()["semantics"])
+    naive = dict(base)
+    naive.update(sem.NAIVE_PROFILE)
+    naive["breakout_window"] = base["breakout_window"]
+    naive["warmup_bars"] = base["warmup_bars"]
+
+    bars = load_bars(BARS)
+    prev = _load_prev_closes(REF, list(bars))
+
+    with tempfile.TemporaryDirectory() as tmp:
+        logs_dir = _write_actual_logs(BARS, REF, naive, Path(tmp) / "naive")
+        recs = normalize_log_records(load_logs(logs_dir), multi_day=True)
+        grouped = group_logs(recs)
+
+    def count(aligned):
+        res = replay_all(bars, aligned, prev)
+        views = res.get("by_series") or res["symbols"]
+        rows = {}
+        for series, view in views.items():
+            groups = grouped.get(series) or {
+                "condition": [], "signal": [], "plan": [], "fill": []}
+            rows[series] = align_symbol(series, view, groups, 1, 5.0)["rows"]
+        return aggregate_rows(rows)["total"]["divergent"]
+
+    assert count(base) == _documented_naive_row("基线（参考语义 vs naive 日志）")
+    assert count(naive) == 0
+    for knob, label in (("bar_timestamp", "只把 `bar_timestamp` 改成 naive 值"),
+                        ("baseline_price", "只把 `baseline_price` 改成 naive 值"),
+                        ("t_plus_1", "只把 `t_plus_1` 改成 naive 值")):
+        alt = dict(base)
+        alt[knob] = naive[knob]
+        assert count(alt) == _documented_naive_row(label), f"{knob} 计数不符"
+
+
 def test_multi_knob_table_is_internally_consistent():
     """合并场景的差异数必须 ≥ 单旋钮场景（子集关系）。"""
     single = _documented_row("仅 `wait_bars`")

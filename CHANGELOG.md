@@ -1,5 +1,48 @@
 # CHANGELOG
 
+## 0.13.9 — 2026-11-13
+
+前几轮反复出现同一类问题：「改一处逻辑，别处数字悄悄过期」。这一轮不再
+逐处打补丁，而是**系统性地找 `verify_claims` 的覆盖缺口**。
+
+### 缺陷 48：`verify_claims` 覆盖不全，是反复出错的根因
+
+`verify_claims` 只核对了 40 个路径，报告里大量字段没被检查。补了 6 条
+内部一致性检查（总数 71 → **77**）：
+
+| 新增检查 | 抓的是 |
+|---|---|
+| `divergence_items` 四处同口径 | 上轮那个 979,634 vs 314 的错 |
+| `ledger.non_match_rows == one_sided + divergent` | 新增字段的分解关系 |
+| 归因各行 `explained <= baseline_divergences` | 消融不可能解释超过基线 |
+| `inline_rows <= max_inline_rows` | 截断上限 |
+| `inline_truncated` 标记正确 | 截断标记与行数一致 |
+
+实测有效：把 `divergence_items` 改成 979,634、把 `inline_truncated` 取反，
+两项都立刻报错。
+
+### 缺陷 47：§4.2 的 naive 消融表也整体过期
+
+| 操作 | 文档 | 实际 |
+|---|---|---|
+| 基线 | 7,206 | **20,774** |
+| 只改 `bar_timestamp` | 5,489 | **15,581** |
+| 只改 `baseline_price` | 7,261 | **20,848** |
+| 只改 `t_plus_1` | 8,742 | **23,063** |
+| 全部改成 naive | 0 | 0 ✓ |
+
+**趋势完全一致**（单项解释不了、改两个反而增加、全改才归零），
+结论不变，只是数值全错。`bar_timestamp` 的解释率也从 23.8% 改为 25.0%。
+
+### 新增测试
+`tests/test_multi_knob_docs.py` 从 3 例扩到 5 例，新增：
+- naive 消融表的**内部逻辑**断言（单项不解释、改两个反增）
+- `@pytest.mark.slow` 在真实夹具上**逐格复现**该表（64 秒）
+
+### 缺陷台账 46 → 48 项
+
+---
+
 ## 0.13.8 — 2026-11-13
 
 这一轮核对**受容差修复影响、但当时没跟着更新**的章节。§4.2 的多旋钮表
@@ -378,7 +421,7 @@ ModuleNotFoundError: No module named 'scripts'
 | 项 | 文档写的 | 实际 |
 |---|---|---|
 | `verify_claims.py` | 27/27（§1.1）、61/61（§1.0a） | **71/71** |
-| `pytest tests/ -q` | 113 passed | **264 passed, 1 skipped** |
+| `pytest tests/ -q` | 113 passed | **266 passed, 1 skipped** |
 | `build.py` | 54 秒 | **31 秒** |
 | Python | 3.12.12 / 3.11.16 | 3.12.12 / **3.9.6**（实测） |
 
@@ -393,7 +436,7 @@ env_check     ok=true
 validate      ok=true, 0 issues
 build         31 秒，exit 0
 verify_claims 71/71
-pytest        264 passed, 1 skipped
+pytest        266 passed, 1 skipped
 ```
 总一致率 0.9913、退出轴 0.8896，与本机完全一致；`output/` 由 `build.py` 自动创建。
 

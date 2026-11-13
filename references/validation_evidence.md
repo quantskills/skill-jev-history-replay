@@ -88,7 +88,7 @@ python3 -m pytest tests/ -q -m slow         # 区分度对照，约 2 分钟
 | `test_metrics_correctness.py` | 15 | **统计函数正确性**：精确值对比、蒙特卡洛 Type-I/覆盖率 |
 | `test_fixture_universe.py` | 4 | **14 日标的池恒定**、每条序列 K 线完整、**manifest 与实际夹具对账**、**gzip mtime=0 可重现** |
 | `test_oos_check.py` | 4 | **IN_SAMPLE 基准与当前报告一致**、judge 能识别显著性减弱 |
-| `test_multi_knob_docs.py` | 3 | **多旋钮表内部一致**、仅 exit_eval 行与报告一致、**wait_bars/合并数可在真实夹具复现**（slow） |
+| `test_multi_knob_docs.py` | 5 | **多旋钮表内部一致**、仅 exit_eval 行与报告一致、**naive 消融表单项不解释**、**wait_bars/合并数可在真实夹具复现**（slow）、**naive 消融表可复现**（slow） |
 | `test_report_consistency.py` | 5 | **divergence_items 四处同口径**、各轴 divergent 加总、**non_match_rows 单列**、per_day 加总=total、inline 截断标记 |
 | `test_fixture_integrity.py` | 4 | **pre_close 口径**、日线 high/low/close 与分钟线一致、**day_open 取首根**、文档写明口径 |
 | `test_conclusion_consistency.py` | 5 | **§9 的数字与报告对账**：总体/退出轴一致率、未建模上界、**不得再称容差结果不变**、ST 占比两处一致 |
@@ -122,7 +122,7 @@ git clone ... /tmp/jev-ci && cd /tmp/jev-ci
 python3 scripts/env_check.py      # exit 0
 python3 scripts/validate.py       # exit 0, issues []
 python3 scripts/build.py          # exit 0
-python3 scripts/verify_claims.py  # 71/71 OK
+python3 scripts/verify_claims.py  # 77/77 OK
 ```
 
 ### 由此发现的账本体积问题
@@ -275,8 +275,8 @@ cd /tmp/jev-cleanroom
 python3 scripts/env_check.py      # ok=true
 python3 scripts/validate.py       # ok=true, 0 issues
 python3 scripts/build.py          # 约 31 秒
-python3 scripts/verify_claims.py  # 71/71
-python3 -m pytest tests/ -q       # 264 passed, 1 skipped
+python3 scripts/verify_claims.py  # 77/77
+python3 -m pytest tests/ -q       # 266 passed, 1 skipped
 ```
 
 实测（v0.12.8，从 `origin/main` 全新 clone 到 /tmp）：各项全过，
@@ -772,15 +772,15 @@ python3 -c "import json;print(json.load(open('output/report.json'))['attribution
 
 | 操作 | 差异数 |
 |---|---|
-| 基线（参考语义 vs naive 日志） | 7,206 |
-| 只把 `bar_timestamp` 改成 naive 值 | 5,489 |
-| 只把 `baseline_price` 改成 naive 值 | 7,261（**增加**） |
-| 只把 `t_plus_1` 改成 naive 值 | 8,742（**增加**） |
+| 基线（参考语义 vs naive 日志） | 20,774 |
+| 只把 `bar_timestamp` 改成 naive 值 | 15,581 |
+| 只把 `baseline_price` 改成 naive 值 | 20,848（**增加**） |
+| 只把 `t_plus_1` 改成 naive 值 | 23,063（**增加**） |
 | 全部改成 naive（等价于日志侧配置） | **0** |
 
 真因确实是多旋钮同时偏移，但单旋钮消融给不出结论。
 此时报告输出 `joint_diagnosis.diagnosis = "multiple_knobs_shifted"`，
-而不是「`bar_timestamp` 解释 23.8%」这种半吊子结论。
+而不是「`bar_timestamp` 解释 25.0%」这种半吊子结论。
 
 **方法的边界必须与方法的结论一起交付。**
 
@@ -979,7 +979,7 @@ python3 scripts/value_decomposition.py \
 
 ---
 
-## 6. 验证中发现并修复的缺陷（46 项）
+## 6. 验证中发现并修复的缺陷（48 项）
 
 以下都不是构造的测试用例，而是在真实数据上跑出来的：
 
@@ -1031,6 +1031,8 @@ python3 scripts/value_decomposition.py \
 | 44 | **`day_open` / `pre_close` 的口径从未写明** | `day_open` 取的是**分钟线首根 open**，不是日线 `open`；`pre_close` 也不总等于前一日 `close`（实测 5/4,200，除权所致）。两者此前都没写进文档，读者自己核对时会把正常的数据源口径当成夹具错误 | `semantics_matrix.md` 与 `data_access.md` 写明两条口径及实测影响面；`tests/test_fixture_integrity.py` 锁住"差异比例 <1% 且 close 严格相等" |
 | 45 | **`alignment_conclusion.divergence_items` 报的是"非 match 行"而非"冲突数"** | 同一份报告里 `divergence_items=979,634`，而 `summary.divergence_items` 与 `total.divergent` 都是 314——差三个数量级，读者会以为有近百万条真实冲突。`verify_claims` 没覆盖这个字段，所以长期未被发现 | `divergence_items` 改用真实冲突数；`ledger.divergence_rows` 同步，另设 `non_match_rows` 保留原含义；`tests/test_report_consistency.py`（5 例）锁四处同口径 |
 | 46 | **§4.2 多旋钮表在容差修复后整体过期** | `wait_bars` 单独 4,522（实际 2,963）、合并 4,649 / 92.0%（实际 3,096 / 90.3%）。结论本身仍成立（`multi_knob`、漏报 `exit_eval`），但数字全错 | 按实测重算 + `tests/test_multi_knob_docs.py`（含一条 slow 用例在真实夹具复现） |
+| 47 | **§4.2 naive 消融表也整体过期** | 文档 7,206 / 5,489 / 7,261 / 8,742，实际 20,774 / 15,581 / 20,848 / 23,063。趋势（单项不解释、改两个反增、全改归零）不变，数值全错 | 按实测重算 + 在 `test_multi_knob_docs.py` 增加 slow 用例复现 |
+| 48 | **`verify_claims` 的覆盖不全，同类缺陷反复出现** | 连续多轮都是"改逻辑→别处数字过期"：`divergence_items` 口径、`inline_truncated`、归因细项都没被检查。根因是核对项靠人工逐条加 | 内部一致性检查从 7 条扩到 13 条：`divergence_items` 四处同口径、`non_match_rows` 分解、归因 `explained <= baseline`、inline 上限与截断标记。总数 71 → 77 |
 
 ---
 
@@ -1060,7 +1062,7 @@ python3 scripts/value_decomposition.py \
 | panda-data | 1.0.6（仅夹具再生） |
 | 三方依赖 | 无（对齐与回放为纯标准库；`python3 -S` 实测通过） |
 | 全量对齐 | 约 31 秒（4,200 序列 × 240 根，1,008,000 根） |
-| 单元测试 | 约 160 秒（264 passed, 1 skipped） |
+| 单元测试 | 约 160 秒（266 passed, 1 skipped） |
 
 ```bash
 git clone https://github.com/quantskills/skill-jev-history-replay

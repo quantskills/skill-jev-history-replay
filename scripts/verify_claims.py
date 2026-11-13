@@ -87,6 +87,41 @@ def _internal_consistency(report: Dict[str, Any],
     same("total.rows_eq_parts", total.get("rows", 0),
          total.get("match", 0) + total.get("divergent", 0) + total.get("one_sided", 0))
 
+    # 5) "冲突数"这个概念在报告里有四处，必须同口径。
+    #    此前 alignment_conclusion.divergence_items 报的是"全部非 match 行"
+    #    （含近 98 万条 jev_missing），与 summary/total 差三个数量级。
+    ledger = report.get("ledger", {})
+    alignment = report.get("alignment_conclusion", {})
+    same("divergence_items.alignment_conclusion_eq_total",
+         alignment.get("divergence_items"), total.get("divergent"))
+    same("divergence_items.ledger_eq_total",
+         ledger.get("divergence_rows"), total.get("divergent"))
+
+    # 6) ledger 的 non_match_rows 必须等于 one_sided + divergent
+    if "non_match_rows" in ledger:
+        same("ledger.non_match_rows_eq_parts",
+             ledger.get("non_match_rows"),
+             total.get("one_sided", 0) + total.get("divergent", 0))
+
+    # 7) 归因各行的 explained 不得超过 baseline_divergences
+    attr = report.get("attribution", {})
+    baseline_div = attr.get("baseline_divergences")
+    if baseline_div is not None:
+        over = [r.get("knob") for r in attr.get("ranked", [])
+                if (r.get("explained") or 0) > baseline_div]
+        _check(results, "consistency.attribution.explained_le_baseline",
+               over, [])
+
+    # 8) inline_rows 不得超过 max_inline_rows，且截断标记要正确
+    max_inline = report.get("comparability", {}).get("max_inline_rows")
+    inline = ledger.get("inline_rows") or []
+    if max_inline is not None:
+        _check(results, "consistency.ledger.inline_within_cap",
+               len(inline) <= max_inline, True)
+        _check(results, "consistency.ledger.inline_truncated_flag",
+               ledger.get("inline_truncated"),
+               (ledger.get("total_rows", 0) > max_inline))
+
 
 def verify(report: Dict[str, Any], claims: Dict[str, Any]) -> Dict[str, Any]:
     results: List[Dict[str, Any]] = []

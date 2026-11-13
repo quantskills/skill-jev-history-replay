@@ -38,8 +38,24 @@ def test_audit_exposes_unmodeled_share():
     result = dqa.audit(offline=True)
     assert "unmodeled_share" in result
     assert "limit_touch" in result["unmodeled_share"]
-    assert result["overall_unmodeled_upper_bound"] is not None
     assert result["verdict"]["level"] in ("minor", "moderate", "material", "unknown")
+
+
+def test_offline_upper_bound_is_unknown_not_partial():
+    """离线时上界必须为 None（unknown），不能报「已知项的最大值」。
+
+    此前离线只算涨跌停得到 2.40%，verdict 输出「未建模状态占比 2.40%，
+    属可接受」——而 ST/停牌**完全没核验**，在线实测上界是 4.67%。
+    等于把"一半没查"说成"风险可接受"。
+    """
+    result = dqa.audit(offline=True)
+    assert result["overall_unmodeled_upper_bound"] is None, (
+        "离线时存在未核验组成项，上界不能报成一个具体数字")
+    assert result["verdict"]["level"] == "unknown"
+    assert "未核验" in result["verdict"]["reason"]
+    # 已核验部分仍应如实给出，便于读者知道"查了多少"
+    assert result["known_components_max"] is not None
+    assert "st_or_suspended" in result["unverified_components"]
 
 
 def test_verdict_thresholds():

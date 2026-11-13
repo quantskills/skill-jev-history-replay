@@ -132,6 +132,8 @@
     },
     "caveat": "本 skill 不对这些状态做特殊处理：ST/停牌/涨跌停标的照常产生信号与成交。下面的占比就是结论的适用范围折扣——占比越高，结论越不能直接外推到实盘。",
     "overall_unmodeled_upper_bound": 0.0467,
+    "unverified_components": [],
+    "known_components_max": 0.0467,
     "verdict": {
       "level": "moderate",
       "reason": "未建模状态占比 4.67%，属可接受但需声明的范围"

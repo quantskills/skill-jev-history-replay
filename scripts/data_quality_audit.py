@@ -205,8 +205,23 @@ def audit(offline: bool = False) -> Dict[str, Any]:
     result["unmodeled_share"]["limit_touch"] = (
         round((limit_up + limit_dn) / considered, 4) if considered else None
     )
-    worst = [v for v in result["unmodeled_share"].values() if v is not None]
-    result["overall_unmodeled_upper_bound"] = round(max(worst), 4) if worst else None
+    # 上界 = 所有**已核验**项的最大值；但只要有任一组成项未核验，
+    # 上界就是**未知**，不能报成"已知项的最大值"。
+    #
+    # 此前离线时 ST/停牌为 None（未核验），而上界只取涨跌停的 2.40%，
+    # 于是 verdict 输出「未建模状态占比 2.40%，属可接受」——
+    # 而实际在线实测上界是 4.67%（ST 占 4.67%）。等于把"一半没查"
+    # 说成了"风险可接受"。
+    known = [v for v in result["unmodeled_share"].values() if v is not None]
+    unverified = [k for k, v in result["unmodeled_share"].items() if v is None]
+    if unverified:
+        result["overall_unmodeled_upper_bound"] = None
+        result["unverified_components"] = unverified
+        result["known_components_max"] = round(max(known), 4) if known else None
+    else:
+        result["overall_unmodeled_upper_bound"] = round(max(known), 4) if known else None
+        result["unverified_components"] = []
+        result["known_components_max"] = result["overall_unmodeled_upper_bound"]
     result["verdict"] = _verdict(result)
     return result
 
@@ -214,6 +229,14 @@ def audit(offline: bool = False) -> Dict[str, Any]:
 def _verdict(result: Dict[str, Any]) -> Dict[str, Any]:
     share = result.get("overall_unmodeled_upper_bound")
     if share is None:
+        unverified = result.get("unverified_components") or []
+        known = result.get("known_components_max")
+        if unverified:
+            known_text = (f"已核验部分最高 {known:.2%}" if known is not None
+                          else "已核验部分无可用数据")
+            return {"level": "unknown",
+                    "reason": (f"有未核验的组成项：{unverified}（{known_text}）。"
+                               "上界无法确定，需跑一次在线审计或在报告中声明此项未评估")}
         return {"level": "unknown",
                 "reason": "既无交易所名单也无法计算涨跌停可达性"}
     if share >= 0.10:

@@ -75,7 +75,7 @@ python3 -m pytest tests/ -q -m slow         # 区分度对照，约 2 分钟
 | `test_report.py` | 31 | verdict 判定、覆盖率门槛、零冲突门槛、Welch 检验、**p 值不得被舍入为 0**、**任一轴零可比不得判 consistent**、**reason 里的 p 值不得显示为 0** |
 | `test_end_to_end.py` | 11 | 输入校验、来源判定、产物落盘、确定性 |
 | `test_validation_claims.py` | 13 | **文档数字对账**、防漂移、区分度对照、**陈旧数字扫描** |
-| `test_data_quality_audit.py` | 6 | 板块分类、涨跌停口径、离线不把"未核验"当 0、报告回显 |
+| `test_data_quality_audit.py` | 7 | 板块分类、涨跌停口径、**离线时上界必须为 unknown 而非部分值**、报告回显 |
 | `test_trade_audit.py` | 4 | **逐笔价格/算术反查**、跨日覆盖、故意改价必被抓 |
 | `test_doc_commands.py` | 9 | **文档引用的脚本必须存在 / 可解析**、**证据表格与实际测试文件一致**、**表格用例数 = pytest 收集数**、**README 目录树列全脚本**、**缺陷标题数 = 表行数**、**文档里的命令输出计数与实际一致** | **文档引用的脚本必须存在 / 可解析**、**证据表格与实际测试文件一致**、**表格用例数 = pytest 收集数**、**README 目录树列全脚本**、**缺陷标题数 = 表行数** |
 | `test_compare_baseline.py` | 8 | **冻结基线**、同配置给 delta、异配置拒绝、结构化错误、**仅 config_hash 变也要列出** |
@@ -276,7 +276,7 @@ python3 scripts/env_check.py      # ok=true
 python3 scripts/validate.py       # ok=true, 0 issues
 python3 scripts/build.py          # 约 31 秒
 python3 scripts/verify_claims.py  # 79/79
-python3 -m pytest tests/ -q       # 269 passed, 1 skipped
+python3 -m pytest tests/ -q       # 271 passed, 1 skipped
 ```
 
 实测（v0.12.8，从 `origin/main` 全新 clone 到 /tmp）：各项全过，
@@ -985,7 +985,7 @@ python3 scripts/value_decomposition.py \
 
 ---
 
-## 6. 验证中发现并修复的缺陷（51 项）
+## 6. 验证中发现并修复的缺陷（52 项）
 
 以下都不是构造的测试用例，而是在真实数据上跑出来的：
 
@@ -1042,6 +1042,7 @@ python3 scripts/value_decomposition.py \
 | 49 | **有轴零可比时仍判 `consistent`——"没验证"冒充"一致"** | 日志只写 `condition`、无任何 `signal`/`plan` 时，`signal`/`wait`/`entry`/`exit` 四轴 `comparable=0`，但总体因 2 条 condition 相符即判 `consistent`。exit 是**最关键的一轴**，完全没比过却说一致 | 加"每轴必须有可比项"门槛，未满足则 `inconclusive` 并在 `reason` 列出未验证的轴；补 2 例测试 |
 | 50 | **价值结论 `reason` 里 p 值仍用 `round(p,6)`** | 字段层面的 `sign_test_p` 在 v0.12.6 已修，但 `reason` 文字里还留着 `round(p_value, 6)`：p=3.0e-12 会显示成 `p=0.0`。同一份报告里字段正确、文字却是错的 | 新增 `_fmt_p()` 统一格式化 + `test_value_reason_never_shows_p_as_zero` |
 | 51 | **`jev_missing` 写成 1,633,358，超过总根数 1,008,000** | 一个**逻辑上不可能**的数字：单边缺失行数不可能多于该轴总根数。实际 979,246。这类错误只要做一次量级检查就能发现，但此前无人校验 | 按实测更正 + `verify_claims` 新增「`non_match_rows <= total_rows`」与「条件轴覆盖率与各轴一致」两条检查（77 → 79） |
+| 52 | **离线审计把"上界"报成"已知项的最大值"** | 离线时 ST/停牌为 `null`（未核验），上界却取涨跌停的 **2.40%**，verdict 输出「未建模状态占比 2.40%，属可接受」。而在线实测上界是 **4.67%**——等于把"一半没查"说成"风险可接受"。这正是文档反复强调的"不能把未核验当 0"，却在聚合层漏了 | 有任一未核验项时上界置 `null`、级别 `unknown`，并给出 `unverified_components` 与 `known_components_max`；原测试断言"不为 None"正是固化了错误行为，已改 |
 
 ---
 
@@ -1071,7 +1072,7 @@ python3 scripts/value_decomposition.py \
 | panda-data | 1.0.6（仅夹具再生） |
 | 三方依赖 | 无（对齐与回放为纯标准库；`python3 -S` 实测通过） |
 | 全量对齐 | 约 31 秒（4,200 序列 × 240 根，1,008,000 根） |
-| 单元测试 | 约 160 秒（269 passed, 1 skipped） |
+| 单元测试 | 约 160 秒（271 passed, 1 skipped） |
 
 ```bash
 git clone https://github.com/quantskills/skill-jev-history-replay

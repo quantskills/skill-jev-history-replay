@@ -1,5 +1,53 @@
 # CHANGELOG
 
+## 0.14.3 — 2026-11-13
+
+这一轮验证**代码能否在 CI 声明的环境里跑**（CI 矩阵 3.10/3.11/3.12，
+而我一直在 3.12 上测）。
+
+### 环境验证结果（全部通过）
+
+| 验证 | 结果 |
+|---|---|
+| Python 3.9.6 全量 `build.py` | ✅ 数字完全相同（0.9913 / 0.8896） |
+| Python 3.9.6 `verify_claims.py` | ✅ 79/79 |
+| **屏蔽 `panda_data` 后跑测试** | ✅ **255 passed, 13 skipped, 0 failed** |
+| 所有脚本在 3.9 下语法编译 | ✅ 通过 |
+| `match` 语句 / 无 `__future__` 的 PEP 604 注解 | ✅ 无 |
+
+屏蔽 `panda_data` 这一项很关键：CI 只装 `requirements-dev.txt`（不装
+`panda-data`），若任何测试间接依赖它，CI 会在 `pip install` 后直接 ImportError。
+实测确认不依赖。
+
+### 缺陷 52：离线审计把「上界」报成「已知项的最大值」
+
+`data_quality_audit --offline` 输出：
+
+```
+未建模占比上界：2.40%
+判定：moderate — 未建模状态占比 2.40%，属可接受但需声明的范围
+```
+
+但 ST / 停牌此时是 `null`（**未核验**）。在线实测上界是 **4.67%**——
+等于把「一半没查」说成「风险可接受」。
+
+这恰恰是文档反复强调的原则（"不能把未核验当 0"），却在聚合层漏了：
+上界取的是「已核验项的最大值」，把 `None` 直接过滤掉了。
+
+而且**原测试 `assert result["overall_unmodeled_upper_bound"] is not None`
+固化了这个错误行为**。
+
+### 修复
+- 有任一未核验项时：上界 `null`、级别 `unknown`，并给出
+  `unverified_components` 与 `known_components_max`
+- 修复后：`unknown — 有未核验的组成项：['st_or_suspended']（已核验部分最高 2.40%）`
+- 在线路径不变（4.67% / `moderate`）
+- 测试改为断言「离线时必须为 None」
+
+### 缺陷台账 51 → 52 项
+
+---
+
 ## 0.14.2 — 2026-11-13
 
 这一轮核对 §3.3（单边缺失口径）与 §4.5（样本外复现）的数字。
@@ -532,7 +580,7 @@ ModuleNotFoundError: No module named 'scripts'
 | 项 | 文档写的 | 实际 |
 |---|---|---|
 | `verify_claims.py` | 27/27（§1.1）、61/61（§1.0a） | **71/71** |
-| `pytest tests/ -q` | 113 passed | **269 passed, 1 skipped** |
+| `pytest tests/ -q` | 113 passed | **271 passed, 1 skipped** |
 | `build.py` | 54 秒 | **31 秒** |
 | Python | 3.12.12 / 3.11.16 | 3.12.12 / **3.9.6**（实测） |
 
@@ -547,7 +595,7 @@ env_check     ok=true
 validate      ok=true, 0 issues
 build         31 秒，exit 0
 verify_claims 71/71
-pytest        269 passed, 1 skipped
+pytest        271 passed, 1 skipped
 ```
 总一致率 0.9913、退出轴 0.8896，与本机完全一致；`output/` 由 `build.py` 自动创建。
 

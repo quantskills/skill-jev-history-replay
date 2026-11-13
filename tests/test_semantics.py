@@ -158,3 +158,39 @@ def test_missing_pyyaml_is_reported():
 
     assert warnings, "缺 pyyaml 时必须记录降级原因"
     assert "pyyaml" in warnings[0]
+
+
+def test_capital_params_are_part_of_semantics_hash():
+    """资金/手数/仓位必须计入 semantics_hash。
+
+    它们会改变实际成交股数与资金约束，直接影响回放结果。
+    此前被漏掉，导致**资金配置完全不同的两次 run 得到相同 hash**，
+    `compare_baseline` 会把它们判为"可比较"，给出不可解读的 delta。
+    """
+    from scripts import config as cfg
+    from scripts import semantics as sem
+
+    base = dict(cfg.REFERENCE_SEMANTICS)
+    for knob, value in (("initial_capital", 500_000.0),
+                        ("lot_size", 200),
+                        ("position_pct", 0.5)):
+        altered = dict(base)
+        altered[knob] = value
+        assert sem.semantics_hash(altered) != sem.semantics_hash(base), (
+            f"{knob} 变化未改变 semantics_hash")
+
+
+def test_extract_knobs_covers_all_configurable_semantics():
+    """`extract_knobs` 必须覆盖 REFERENCE_SEMANTICS 的全部可配置键。
+
+    否则报告里的 `logged_semantics.knobs` 不完整，读者无法据此重建配置；
+    更严重的是 hash 与 knobs 会互相矛盾（按 knobs 重算 ≠ 记录的 hash）。
+    """
+    from scripts import config as cfg
+    from scripts import semantics as sem
+
+    expected = {k for k in cfg.REFERENCE_SEMANTICS if not k.startswith("_")}
+    got = set(sem.extract_knobs(cfg.REFERENCE_SEMANTICS))
+    assert got == expected, (
+        f"extract_knobs 缺：{sorted(expected - got)}；"
+        f"多：{sorted(got - expected)}")

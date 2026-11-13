@@ -1,5 +1,45 @@
 # CHANGELOG
 
+## 0.15.6 — 2026-11-13
+
+这一轮核对报告里的 `semantics` / `logged_semantics` 是否如实回显配置——
+读者要靠它重建实验。
+
+### 缺陷 59：资金参数未计入 `semantics_hash`
+
+`initial_capital` / `lot_size` / `position_pct` 会改变成交股数与资金约束、
+直接影响回放结果，却**不参与 hash**。实测：
+
+```
+资金 100 万 vs 50 万          → hash 完全相同
+手数 100 vs 200、仓位 0.1 vs 0.5 → hash 完全相同
+```
+
+后果：`compare_baseline` 会把这两次 run 判为「可比较」，给出一个
+**不可解读的 delta**——而这正是 `config_hash` 机制存在的意义。
+
+### 缺陷 60：`logged_semantics.knobs` 只有 20/23，且与 hash 自相矛盾
+
+按 `knobs` 重算的 hash（`7a6da8e3`）**≠** 记录的 hash（`91fecace`）。
+读者按 `knobs` 重建配置，会得到一个不同的指纹。
+
+修复后 23 个键齐全，重算与记录一致。
+
+### 修复
+- 三项加入 `RISK_KNOBS`
+- 新增测试：
+  - `test_capital_params_are_part_of_semantics_hash`
+  - `test_extract_knobs_covers_all_configurable_semantics`
+  （实测回滚后两条同时变红）
+
+### 影响
+`semantics_hash` 值变化（`43c97eb4` → `50f2f5c1`），但对齐数字不受影响
+（仍是 0.9912 / 0.8878）。已有冻结基线需要重新 freeze。
+
+### 缺陷台账 58 → 60 项
+
+---
+
 ## 0.15.5 — 2026-11-13
 
 这一轮核对 `applicability`（报告里的适用范围声明）与实际能力是否一致。

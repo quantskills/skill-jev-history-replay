@@ -66,7 +66,7 @@ python3 -m pytest tests/ -q -m slow         # 区分度对照，约 2 分钟
 
 | 文件 | 用例数 | 覆盖 |
 |---|---|---|
-| `test_semantics.py` | 15 | 旋钮取值校验、哈希敏感性、**默认值与 YAML 一致**、降级可见、**config 未知键必报错**、**文档所列 config 键全部生效** |
+| `test_semantics.py` | 17 | 旋钮取值校验、哈希敏感性、**默认值与 YAML 一致**、降级可见、**config 未知键必报错**、**文档所列 config 键全部生效**、**资金参数计入 hash**、**extract_knobs 覆盖全部可配置键** |
 | `test_data_loader.py` | 21 | 格式容错、gzip、字段校验、重复检测、**分钟缺口与午休排除**、**多日 series 键带日期**、**代码大小写/空格归一** |
 | `test_replayer.py` | 19 | 条件判断、连续性、等待/入场、四条退出路径、T+1、时间边界、**强平推迟不重复累加 bars_held** |
 | `test_cross_day.py` | 6 | 跨日持仓传递、未平仓如实上报、单日行为不变 |
@@ -276,7 +276,7 @@ python3 scripts/env_check.py      # ok=true
 python3 scripts/validate.py       # ok=true, 0 issues
 python3 scripts/build.py          # 约 31 秒
 python3 scripts/verify_claims.py  # 79/79
-python3 -m pytest tests/ -q       # 279 passed, 1 skipped
+python3 -m pytest tests/ -q       # 281 passed, 1 skipped
 ```
 
 实测（v0.12.8，从 `origin/main` 全新 clone 到 /tmp）：各项全过，
@@ -1005,7 +1005,7 @@ python3 scripts/value_decomposition.py \
 
 ---
 
-## 6. 验证中发现并修复的缺陷（58 项）
+## 6. 验证中发现并修复的缺陷（60 项）
 
 以下都不是构造的测试用例，而是在真实数据上跑出来的：
 
@@ -1069,6 +1069,8 @@ python3 scripts/value_decomposition.py \
 | 56 | **价值结论的样本长度敏感性从未记录** | `negative` 只在 14 天样本上成立。实测缩短到 7 天方向就**翻转**、3 天 ref 均值变成 **+0.9948%**（正面）。文档此前把 `negative` 当作该样本的可靠结论交付，没有说明它不可外推到更短窗口 | §5.3 新增敏感性子节（14/7/5/3/2 天实测）、§9 列为未验证；`test_value_conclusion_sensitivity_is_documented` + slow 用例复现翻转 |
 | 57 | **`applicability` 把已实现能力列进了 out_of_scope** | `in_scope` 写「单一交易日」、`out_of_scope` 写「跨日持仓」，而实现完整支持跨日 + T+1（`tests/test_cross_day.py` 6 例、本样本 1,422 笔全部跨日结算）。**方向相反的误导**：读者会以为该功能不可用。`SKILL.md` 的表述反而是对的，只有报告里的 `applicability` 错 | 按实际能力重写 in/out_of_scope + `test_applicability_scope_matches_actual_capability`（实测回滚后立刻失败） |
 | 58 | **`SKILL.md` 的缺陷数停留在 9，台账已 56** | 读者会低估这个 skill 已历的验证强度 | 改为 56 + `test_skill_md_defect_count_matches_ledger` 双向对账 |
+| 59 | **资金参数未计入 `semantics_hash`** | `initial_capital` / `lot_size` / `position_pct` 会改变成交股数与资金约束、直接影响回放结果，却**不参与 hash**。实测：资金 100 万 vs 50 万、手数 100 vs 200 的两次 run **hash 完全相同**，`compare_baseline` 会把它们判为可比较并给出不可解读的 delta | 加入 `RISK_KNOBS` + 两条测试（实测回滚后立刻双红） |
+| 60 | **`logged_semantics.knobs` 只有 20/23，且与 hash 自相矛盾** | 按 `knobs` 重算的 hash（`7a6da8e3`）≠ 记录的 hash（`91fecace`）——读者无法据此重建配置，按 knobs 复现会得到不同的指纹。修复后 23 个键齐全且重算一致 | 同上；`test_extract_knobs_covers_all_configurable_semantics` 守住 |
 
 ---
 
@@ -1098,7 +1100,7 @@ python3 scripts/value_decomposition.py \
 | panda-data | 1.0.6（仅夹具再生） |
 | 三方依赖 | 无（对齐与回放为纯标准库；`python3 -S` 实测通过） |
 | 全量对齐 | 约 31 秒（4,200 序列 × 240 根，1,008,000 根） |
-| 单元测试 | 约 160 秒（279 passed, 1 skipped） |
+| 单元测试 | 约 160 秒（281 passed, 1 skipped） |
 
 ```bash
 git clone https://github.com/quantskills/skill-jev-history-replay

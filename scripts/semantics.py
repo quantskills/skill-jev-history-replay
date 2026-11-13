@@ -106,7 +106,11 @@ PROFILES: Dict[str, Dict[str, Any]] = {
     "jev_assumed": JEV_ASSUMED_PROFILE,
 }
 
-# 除档位外，回放侧还有一组来自配置文件的阈值/风控参数，同样计入语义哈希。
+# 除档位外，回放侧还有一组来自配置文件的阈值/风控/资金参数，同样计入语义哈希。
+#
+# `initial_capital` / `lot_size` / `position_pct` 曾被漏掉——它们会改变
+# 实际成交股数与资金约束，直接影响回放结果，却不参与哈希，于是资金配置
+# 完全不同的两次 run 会被 `compare_baseline` 判为"可比较"。
 RISK_KNOBS = (
     "signal_gain_pct",
     "breakout_window",
@@ -118,6 +122,9 @@ RISK_KNOBS = (
     "force_exit_time",
     "fee_bps",
     "slippage_bps",
+    "initial_capital",
+    "lot_size",
+    "position_pct",
 )
 
 

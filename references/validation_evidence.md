@@ -78,6 +78,7 @@ python3 -m pytest tests/ -q -m slow         # 区分度对照，约 2 分钟
 | `test_data_quality_audit.py` | 7 | 板块分类、涨跌停口径、**离线时上界必须为 unknown 而非部分值**、报告回显 |
 | `test_trade_audit.py` | 4 | **逐笔价格/算术反查**、跨日覆盖、故意改价必被抓 |
 | `test_doc_commands.py` | 9 | **文档引用的脚本必须存在 / 可解析**、**证据表格与实际测试文件一致**、**表格用例数 = pytest 收集数**、**README 目录树列全脚本**、**缺陷标题数 = 表行数**、**文档里的命令输出计数与实际一致** | **文档引用的脚本必须存在 / 可解析**、**证据表格与实际测试文件一致**、**表格用例数 = pytest 收集数**、**README 目录树列全脚本**、**缺陷标题数 = 表行数** |
+| `test_ledger_fields.py` | 4 | **by_axis_prior 与代码一致**、**first_divergence 真实存在于账本**、**api_guide 三个行数与报告对账**、辅助字段已文档化 |
 | `test_compare_baseline.py` | 9 | **冻结基线**、同配置给 delta、异配置拒绝、结构化错误、**仅 config_hash 变也要列出**、**改资金参数端到端拒绝给 delta** |
 | `test_value_decomposition.py` | 4 | **T+1 强制隔夜**、拆解前提、summary 形状 |
 | `test_credentials.py` | 6 | **引号去除**、别名回退、缺凭证结构化报错、非法 URL 拒绝 |
@@ -276,7 +277,7 @@ python3 scripts/env_check.py      # ok=true
 python3 scripts/validate.py       # ok=true, 0 issues
 python3 scripts/build.py          # 约 31 秒
 python3 scripts/verify_claims.py  # 79/79
-python3 -m pytest tests/ -q       # 282 passed, 1 skipped
+python3 -m pytest tests/ -q       # 286 passed, 1 skipped
 ```
 
 实测（v0.12.8，从 `origin/main` 全新 clone 到 /tmp）：各项全过，
@@ -1005,7 +1006,7 @@ python3 scripts/value_decomposition.py \
 
 ---
 
-## 6. 验证中发现并修复的缺陷（60 项）
+## 6. 验证中发现并修复的缺陷（62 项）
 
 以下都不是构造的测试用例，而是在真实数据上跑出来的：
 
@@ -1071,6 +1072,8 @@ python3 scripts/value_decomposition.py \
 | 58 | **`SKILL.md` 的缺陷数停留在 9，台账已 56** | 读者会低估这个 skill 已历的验证强度 | 改为 56 + `test_skill_md_defect_count_matches_ledger` 双向对账 |
 | 59 | **资金参数未计入 `semantics_hash`** | `initial_capital` / `lot_size` / `position_pct` 会改变成交股数与资金约束、直接影响回放结果，却**不参与 hash**。实测：资金 100 万 vs 50 万、手数 100 vs 200 的两次 run **hash 完全相同**，`compare_baseline` 会把它们判为可比较并给出不可解读的 delta | 加入 `RISK_KNOBS` + 两条测试（实测回滚后立刻双红） |
 | 60 | **`logged_semantics.knobs` 只有 20/23，且与 hash 自相矛盾** | 按 `knobs` 重算的 hash（`7a6da8e3`）≠ 记录的 hash（`91fecace`）——读者无法据此重建配置，按 knobs 复现会得到不同的指纹。修复后 23 个键齐全且重算一致 | 同上；`test_extract_knobs_covers_all_configurable_semantics` 守住 |
+| 61 | **`by_axis_prior` / `first_divergence` 完全没有文档** | 报告里有这两个字段，`api_guide.md` 里一个字都没提，读者拿到报告不知道含义 | 补两节说明（含各轴先验全表、first_divergence 的用途）+ `test_ledger_aux_fields_are_documented` |
+| 62 | **`api_guide` 的账本三行数全部过期** | `non_match_rows` 写 979,634（实际 979,639）、`divergence_rows` 写 314（实际 319） | 按实测更新 + `test_api_guide_ledger_counts_match_report`（篡改后立刻失败） |
 
 ---
 
@@ -1100,7 +1103,7 @@ python3 scripts/value_decomposition.py \
 | panda-data | 1.0.6（仅夹具再生） |
 | 三方依赖 | 无（对齐与回放为纯标准库；`python3 -S` 实测通过） |
 | 全量对齐 | 约 31 秒（4,200 序列 × 240 根，1,008,000 根） |
-| 单元测试 | 约 160 秒（282 passed, 1 skipped） |
+| 单元测试 | 约 160 秒（286 passed, 1 skipped） |
 
 ```bash
 git clone https://github.com/quantskills/skill-jev-history-replay

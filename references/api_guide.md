@@ -95,13 +95,33 @@ report = run(input_data, config=None)
 | 字段 | 含义 | 本样本实测 |
 |---|---|---|
 | `total_rows` | 账本全部行 | 1,015,406 |
-| `non_match_rows` | 全部**非 match** 行（含 `jev_missing`/`open_position`） | 979,634 |
-| `divergence_rows` | **真实冲突**行，与 `aggregate.total.divergent` 同口径 | 314 |
+| `non_match_rows` | 全部**非 match** 行（含 `jev_missing`/`open_position`） | 979,639 |
+| `divergence_rows` | **真实冲突**行，与 `aggregate.total.divergent` 同口径 | 319 |
 
 `alignment_conclusion.divergence_items`、`summary.divergence_items`、
 `ledger.divergence_rows`、`ledger.aggregate.total.divergent` **四处必须相等**。
 早期 `divergence_items` 取的是 `non_match_rows`，导致同一份报告里
 同一概念同时出现 979,634 和 314 两个数。
+
+### `ledger.by_axis_prior` —— 各轴的先验假设
+
+每个轴一句「差异最可能来自哪里」的**先验判断**，用于读账本时的初始假设，
+**不是**从数据推出的结论（结论在 `attribution` 里）。它固定写在代码中，
+不随样本变化：
+
+| 轴 | 先验 |
+|---|---|
+| condition | 日志侧未披露比较基准与窗口口径，差异归因需消融实验确认 |
+| signal | 信号时点差异主要由时间戳语义与连续性要求造成 |
+| wait | 等待根数差异由 `wait_bars` 与 `bar_timestamp` 共同决定 |
+| entry | 入场价差异由 `entry_price` 选择（当根收盘 / 下一根开盘）决定 |
+| exit | 退出差异由退出判定字段（收盘 / 高低价）与 T+1 约束决定 |
+
+### `ledger.first_divergence` —— 第一条差异
+
+`{axis, symbol, time, field, jev, replay, delta, status, note}`，
+按 `(symbol, time, axis)` 排序后的第一条 `divergent` 行。用于快速定位
+「最上游的第一处不一致」——排查时通常从这里开始，而不是直接看聚合数。
 
 ### `attribution.ranked[]`
 

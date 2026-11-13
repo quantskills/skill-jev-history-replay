@@ -1,5 +1,39 @@
 # CHANGELOG
 
+## 0.15.7 — 2026-11-13
+
+这一轮核对报告里几个尚未验证过的辅助字段：`by_axis_prior`、`first_divergence`、
+以及 `api_guide` 中账本三行数的准确性。
+
+### 缺陷 61：`by_axis_prior` / `first_divergence` 完全没有文档
+
+报告里有这两个字段，`api_guide.md` 里一个字都没提。读者拿到报告能看到它们，
+却不知道是什么、能用来做什么。
+
+- `by_axis_prior`：每个轴一句「差异最可能来自哪里」的**先验判断**，
+  固定写在代码中，**不是**从数据推出的结论（结论在 `attribution`）
+- `first_divergence`：按 `(symbol, time, axis)` 排序的第一条冲突，
+  排查通常从这里开始
+
+### 缺陷 62：`api_guide` 的账本三行数全部过期
+
+| 字段 | 文档 | 实际 |
+|---|---|---|
+| `non_match_rows` | 979,634 | **979,639** |
+| `divergence_rows` | 314 | **319** |
+
+### 核对中确认正确的项
+- `first_divergence` 指向的那一行**真实存在于 `ledger.jsonl`**（不是编的）
+- `by_axis_prior` 与 `aligner.PRIOR` 完全一致
+- `decision_change_count=177` 与内联 50 条（受 `max_inline_rows` 截断）自洽
+
+### 新增测试 `tests/test_ledger_fields.py`（4 例）
+实测有效：把 `non_match_rows` 改回 979,634，测试立刻报错。
+
+### 缺陷台账 60 → 62 项
+
+---
+
 ## 0.15.6 — 2026-11-13
 
 这一轮核对报告里的 `semantics` / `logged_semantics` 是否如实回显配置——

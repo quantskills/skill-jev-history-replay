@@ -225,8 +225,9 @@ report = run(input_data, config=None)
 | `scripts/validate.py` | 校验 K 线与日志契约 |
 | `scripts/env_check.py` | 环境自检，输出结构化 JSON |
 | `scripts/compare_baseline.py` | 冻结基线 freeze / compare / list |
-| `scripts/fetch_data.py` | 拉取分钟 K 线（需凭证） |
-| `scripts/build_fixtures.py` | 生成发布用夹具（需凭证） |
+| `scripts/fetch_data.py` | 由 MCP 落盘 JSON 生成分钟 K 线夹具 |
+| `scripts/build_fixtures.py` | 由 MCP 落盘 JSON 生成发布用夹具 |
+| `scripts/mcp_source.py` | 解析 MCP 返回信封（截断 / 缺列 / ok=false） |
 
 ```bash
 python3 scripts/build.py

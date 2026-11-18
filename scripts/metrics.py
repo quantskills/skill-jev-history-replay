@@ -78,10 +78,17 @@ def welch_test(a: List[float], b: List[float]) -> dict:
     va = sum((x - ma) ** 2 for x in a) / (len(a) - 1)
     vb = sum((x - mb) ** 2 for x in b) / (len(b) - 1)
     se = math.sqrt(va / len(a) + vb / len(b))
-    if se == 0:
+    # 零方差判定必须用容差，不能与 0 精确比较。
+    # 常数序列的方差理论上为 0，浮点误差会算出 1e-35 之类的残值，
+    # 使 se ≈ 1e-19 而非 0；此时 t = diff/se 会放大到 1e16 量级，
+    # 正态近似给出 p=0.0，把「无法判定」误报成「极显著」。
+    # 用相对容差：se 小于均值量级的极小比例即视为退化。
+    scale = max(abs(ma), abs(mb), 1e-12)
+    if se <= scale * 1e-9:
         return {"n_a": len(a), "n_b": len(b), "mean_a": round(ma, 8),
                 "mean_b": round(mb, 8), "diff": round(mb - ma, 8), "se": 0.0,
-                "t": None, "p": None}
+                "t": None, "p": None,
+                "note": "两组样本方差为 0（常数序列），Welch 检验无法判定显著性"}
     t = (mb - ma) / se
     # 正态近似（样本量远大于 30，t 分布与正态几乎一致）
     p = math.erfc(abs(t) / math.sqrt(2))

@@ -10,7 +10,7 @@ This package contains one evaluation skill:
 
 - Python 3.10+
 - `pip install -r requirements-dev.txt` for tests (pytest + PyYAML)
-- `panda-data==1.0.6` only if you regenerate fixtures (see `scripts/build_fixtures.py`); the alignment run itself needs no external dependency and no credentials
+- The runtime and the alignment run need **no third-party package and no login**. To regenerate fixtures, an MCP-capable AI client fetches data (see below)
 
 ---
 
@@ -111,24 +111,51 @@ hermes register ./skill-jev-history-replay --loader agents/portable-loader.md
 
 ```bash
 cd skill-jev-history-replay
+# 0. Work through the pre-flight checklist (## 前置检查) in SKILL.md first.
 python3 scripts/env_check.py     # expect ok=true, blocked=0
 python3 scripts/validate.py      # expect ok=true
 python3 -m pytest tests/ -v      # expect all pass
 python3 scripts/build.py         # writes output/report.json + output/ledger.jsonl
 ```
 
-`env_check.py` reports missing `panda_data` as a warning, not a blocker — alignment never needs it.
+`env_check.py` needs neither network nor login — alignment is fully offline.
 
 ---
 
-## Regenerating fixtures (optional, needs credentials)
+## Regenerating fixtures (optional, needs an MCP client)
 
-```bash
-export PANDA_DATA_USERNAME=<username>
-export PANDA_DATA_PASSWORD=<password>
-export PANDA_DATA_BASE_URL=<service_base_url>
+Data is fetched by the **AI reading this skill** through the PandaData MCP
+server (`pandadata`, Streamable HTTP). Login is **OAuth performed by your MCP
+client** — this skill stores no account identifier, password or token.
 
-python3 scripts/build_fixtures.py --date 20261112 --universe 300
+Call order:
+
+```
+mcp__pandadata__auth_status → mcp__pandadata__search_methods
+  → mcp__pandadata__get_method_doc → mcp__pandadata__call_pandadata
 ```
 
-See `references/data_access.md` for the full data-access contract.
+If `auth_status` reports not signed in, complete the OAuth browser flow in your
+client and retry; there is nothing to configure inside this skill.
+
+Example call:
+
+```json
+{"method": "get_stock_min",
+ "params": {"symbol": ["600519.SH"], "start_date": "20261112",
+            "end_date": "20261112"},
+ "preview_rows": 2000}
+```
+
+Write each raw response to `<dir>/<date>/<method>.json`, then:
+
+```bash
+python3 scripts/fetch_data.py --date 20261112 --from-mcp <dir>
+python3 scripts/build_fixtures.py --date 20261112 --from-mcp <dir> --universe 300
+```
+
+> ⚠️ Responses are truncated by byte limit (measured: 240 minute rows returned
+> as 180). Fetch narrow ranges — one day per call, ~50 symbols or fewer.
+
+See `references/data_access.md` for the full contract (methods, parameters,
+on-disk layout, truncation handling, error codes).

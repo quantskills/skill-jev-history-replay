@@ -30,7 +30,8 @@ max_inline_rows: 50
 logged_profile: jev_assumed
 
 semantics:
-  # 分钟线时间戳语义：bar_end = 该分钟收盘时刻（panda_data 实测口径）
+  # 分钟线时间戳语义：bar_end = 该分钟收盘时刻
+  # （PandaData 分钟线口径：09:31 覆盖 09:30–09:31）
   bar_timestamp: bar_end
 
   # 涨幅基准价

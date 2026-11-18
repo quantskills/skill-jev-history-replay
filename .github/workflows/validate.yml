@@ -15,7 +15,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-      # 评测本身不需要 panda_data：对齐与回放是纯标准库实现。
+      # 对齐与回放是纯标准库实现且完全离线：数据由 QuantStudio 宿主侧的 PandaData MCP 取回落盘。
       - name: Install test deps
         run: pip install -r requirements-dev.txt
       - name: Environment self-check

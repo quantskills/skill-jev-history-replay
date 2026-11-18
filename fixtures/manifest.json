@@ -116,14 +116,14 @@
         "share": 0.0467,
         "symbols": 14,
         "note": "ST 标的有 5% 涨跌幅限制与特殊交易规则，本 skill 未做区分",
-        "source": "panda_data.get_st_list"
+        "source": "MCP get_st_list"
       },
       "suspended": {
         "count": 0,
         "share": 0.0,
         "symbols": 0,
         "note": "停牌日不应产生任何成交，本 skill 未做过滤",
-        "source": "panda_data.get_suspended_list"
+        "source": "MCP get_suspended_list"
       }
     },
     "unmodeled_share": {
@@ -140,7 +140,7 @@
     }
   },
   "provenance": {
-    "bars": "panda-data==1.0.6 get_stock_min / get_stock_daily，仅生成阶段调用",
+    "bars": "PandaData MCP：mcp__pandadata__call_pandadata get_stock_min / get_stock_daily，仅生成阶段调用",
     "logs": "synthetic：由 log_synth 按 logged_profile 生成，非 JEV 真实输出"
   },
   "universe_policy": "全期固定（14 日 trade_list 交集，按代码排序等距抽样）"

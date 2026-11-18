@@ -1,11 +1,16 @@
-"""构建冻结夹具：拉取单日全市场分钟线 + 生成 JEV 模拟日志。
+"""构建冻结夹具：从 agent 落盘的 MCP 取数结果生成分钟线夹具 + JEV 模拟日志。
+
+取数由**阅读本方 skill 的 AI** 通过 PandaData MCP 完成
+（`mcp__pandadata__call_pandadata`），脚本只读落盘 JSON，不联网、无凭证。
 
 用法：
-    python3 scripts/build_fixtures.py --date 20261112 --universe 400
-    python3 scripts/build_fixtures.py --date 20261112 --symbols 600519.SH 000001.SZ
+    python3 scripts/build_fixtures.py --date 20261112 --from-mcp /tmp/mcp \\
+        --universe 400
+    python3 scripts/build_fixtures.py --date 20261112 --from-mcp /tmp/mcp \\
+        --symbols 600519.SH 000001.SZ
 
 产物（均随仓库发布，确定性、可离线回放）：
-    fixtures/bars/{date}.json            分钟 K 线
+    fixtures/bars/{date}.json.gz         分钟 K 线
     fixtures/reference/{date}.json       前收 / 当日 OHLC
     fixtures/logs/{date}.jsonl           JEV 模拟日志（logged_profile 语义）
     fixtures/manifest.json               夹具指纹与生成参数
@@ -22,7 +27,7 @@ import hashlib
 import json
 import sys
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 for _p in (str(REPO_ROOT),):
@@ -31,24 +36,26 @@ for _p in (str(REPO_ROOT),):
 
 from scripts import config as cfg  # noqa: E402
 from scripts import data_loader, log_synth, semantics as sem  # noqa: E402
-from scripts.fetch_data import DEFAULT_SYMBOLS, FetchError, _client, fetch  # noqa: E402
+from scripts.fetch_data import DEFAULT_SYMBOLS, FetchError, fetch  # noqa: E402
+from scripts.mcp_source import MCPSource  # noqa: E402
 
 
-def _pick_universe(client: Any, date: str, limit: int) -> List[str]:
+def _pick_universe(source: MCPSource, date: str, limit: int) -> List[str]:
     """单日抽样（保留供只构建一天时使用）。"""
-    frame = client.get_trade_list(date=date, exchange="SH")
-    if frame is None or len(frame) == 0:
+    if not source.has("get_trade_list", date):
         return list(DEFAULT_SYMBOLS)
-    symbols = [str(s) for s in frame["symbol"].tolist()]
+    symbols = sorted(source.symbols("get_trade_list", date))
+    if not symbols:
+        return list(DEFAULT_SYMBOLS)
     # 确定性抽样：按代码排序后等距取，避免"只挑涨了的"造成选择偏差
-    symbols.sort()
     if len(symbols) <= limit:
         return symbols
     step = len(symbols) / limit
     return [symbols[int(i * step)] for i in range(limit)]
 
 
-def _pick_fixed_universe(client: Any, dates: List[str], limit: int) -> List[str]:
+def _pick_fixed_universe(source: MCPSource, dates: List[str],
+                         limit: int) -> List[str]:
     """构造**全期固定**的标的池。
 
     为什么必须固定：跨日持仓的前提是同一只股票在相邻两个交易日都有数据。
@@ -61,10 +68,11 @@ def _pick_fixed_universe(client: Any, dates: List[str], limit: int) -> List[str]
     """
     common: set[str] | None = None
     for date in dates:
-        frame = client.get_trade_list(date=date, exchange="SH")
-        if frame is None or len(frame) == 0:
+        if not source.has("get_trade_list", date):
             continue
-        symbols = {str(s) for s in frame["symbol"].tolist()}
+        symbols = source.symbols("get_trade_list", date)
+        if not symbols:
+            continue
         common = symbols if common is None else (common & symbols)
     if not common:
         return list(DEFAULT_SYMBOLS)
@@ -85,18 +93,18 @@ def _fingerprint(paths: List[Path]) -> str:
 
 
 def build(date: str, symbols: List[str] | None, universe: int,
-          profile: str) -> Dict[str, Any]:
+          profile: str, mcp_dir: Path | None = None) -> Dict[str, Any]:
     bars_dir = REPO_ROOT / "fixtures" / "bars"
     ref_dir = REPO_ROOT / "fixtures" / "reference"
     logs_dir = REPO_ROOT / "fixtures" / "logs"
 
     if symbols:
-        selected = symbols
+        selected: List[str] | None = symbols
     else:
-        client = _client()
-        selected = _pick_universe(client, date, universe)
+        source = MCPSource(mcp_dir or Path())
+        selected = _pick_universe(source, date, universe)
 
-    info = fetch(date, selected, bars_dir, ref_dir)
+    info = fetch(date, selected, bars_dir, ref_dir, mcp_dir=mcp_dir)
 
     # 大夹具压成 .json.gz（回放器透明解压），避免仓库里放十几 MB 明文
     raw_bars_path = bars_dir / f"{date}.json"
@@ -109,7 +117,6 @@ def build(date: str, symbols: List[str] | None, universe: int,
         fh_out.write(fh_in.read())
     raw_bars_path.unlink()
 
-    records: List[Dict[str, Any]] = []   # 日志由 generate_logs() 统一生成
     logs_path = logs_dir / f"{date}.jsonl"
 
     manifest = {
@@ -126,7 +133,8 @@ def build(date: str, symbols: List[str] | None, universe: int,
             [p for p in (bars_gz_path, ref_dir / f"{date}.json", logs_path) if p.exists()]
         ),
         "provenance": {
-            "bars": "panda-data==1.0.6 get_stock_min / get_stock_daily，仅生成阶段调用",
+            "bars": ("PandaData MCP：mcp__pandadata__call_pandadata "
+                     "get_stock_min / get_stock_daily，仅生成阶段调用"),
             "logs": "synthetic：由 log_synth 按 logged_profile 生成，非 JEV 真实输出",
         },
     }
@@ -180,9 +188,12 @@ def generate_logs(profile: str) -> Dict[str, Any]:
 
 
 def main(argv: List[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Build frozen JEV replay fixtures")
+    parser = argparse.ArgumentParser(
+        description="Build frozen JEV replay fixtures from MCP-fetched JSON")
     parser.add_argument("--date", required=True,
                         help="交易日；多日用逗号分隔，如 20261110,20261111,20261112")
+    parser.add_argument("--from-mcp", required=True, dest="from_mcp",
+                        help="agent 落盘 MCP 取数结果的根目录")
     parser.add_argument("--symbols", nargs="*", default=None)
     parser.add_argument("--universe", type=int, default=200)
     parser.add_argument("--logged-profile", default="jev_assumed",
@@ -190,18 +201,20 @@ def main(argv: List[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     dates = [d.strip() for d in args.date.split(",") if d.strip()]
+    mcp_dir = Path(args.from_mcp)
     try:
         # 多日构建必须用全期固定标的池，否则跨日持仓无从谈起
         selected = args.symbols
         if not selected:
             if len(dates) > 1:
-                selected = _pick_fixed_universe(_client(), dates, args.universe)
+                selected = _pick_fixed_universe(MCPSource(mcp_dir), dates,
+                                                args.universe)
                 print(f"固定标的池：{len(selected)} 只（{dates[0]}–{dates[-1]} 全期可交易）")
             else:
                 selected = None  # 单日仍走 build() 内部抽样
 
         manifests = [
-            build(date, selected, args.universe, args.logged_profile)
+            build(date, selected, args.universe, args.logged_profile, mcp_dir)
             for date in dates
         ]
         # 数据拉完后统一生成一次日志（跨日持仓需要看到全部交易日）
@@ -210,7 +223,7 @@ def main(argv: List[str] | None = None) -> int:
         # 审计失败不阻断夹具生成。
         try:
             from scripts.data_quality_audit import audit as _audit
-            dq = _audit(offline=False)
+            dq = _audit(mcp_dir=mcp_dir)
         except Exception as exc:
             dq = {"error": f"{type(exc).__name__}: {exc}"}
 

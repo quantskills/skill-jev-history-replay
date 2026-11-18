@@ -1,15 +1,15 @@
 {
   "name": "skill-jev-history-replay",
-  "version": "0.16.3",
+  "version": "0.17.0",
   "entrypoint": "SKILL.md",
   "runtime": "python>=3.10",
   "license": "GPL-3.0-only",
-  "data_source": "PandaData",
+  "data_source": "PandaData MCP (QuantStudio)",
   "entry_script": "scripts/build.py",
   "evaluation": {
     "mode": "replay-only",
     "live_trading_access": false,
-    "description": "对齐与回放全程基于本地夹具，不连接实盘账户、真实交易网关或生产委托通道；不产生任何委托。panda_data 仅在夹具生成阶段调用。",
+    "description": "对齐与回放全程基于本地夹具，不连接实盘账户、真实交易网关或生产委托通道；不产生任何委托。数据取回由 agent 通过 PandaData MCP 完成，脚本只读落盘 JSON。",
     "models_under_test": [
       {
         "id": "deterministic-replayer",
@@ -24,5 +24,5 @@
     "group_by": "model_id",
     "comparability_policy": "跨 run 比对必须保持 semantics_hash、夹具指纹、容差与日志来源一致，四者计入 config_hash；不一致时明确标记不可比。"
   },
-  "data_source_note": "仅夹具生成阶段使用 panda-data==1.0.6；对齐与回放阶段只读本地 fixture，无凭证需求"
+  "data_source_note": "数据获取 = 调用 MCP 工具 mcp__pandadata__call_pandadata（auth_status → search_methods → get_method_doc → call_pandadata）取回并落盘；对齐与回放阶段完全离线，只读本地 fixture，无凭证需求"
 }

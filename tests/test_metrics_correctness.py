@@ -127,3 +127,28 @@ def test_paired_delta_ci_matches_manual():
     assert r["mean"] == pytest.approx(mu, abs=1e-8)
     assert r["ci95"][0] == pytest.approx(mu - 1.96 * se, abs=1e-8)
     assert r["ci95"][1] == pytest.approx(mu + 1.96 * se, abs=1e-8)
+
+
+def test_welch_constant_samples_is_degenerate_not_significant():
+    """常数序列的方差为 0，Welch 无法判定，不得靠浮点残值给出 p=0。
+
+    回归：此前 `se == 0` 精确比较漏判 vb≈1.2e-35 的残值，
+    se 变成 6.4e-19、t 放大到 -1.55e16、p 变成 0.0，
+    把「无法判定」误报成「极显著更差」。
+    """
+    from scripts import metrics
+
+    r = metrics.welch_test([0.0] * 1000, [-0.01] * 30)
+    assert r["p"] is None, f"常数序列不应给出 p，实际 {r['p']}"
+    assert r["t"] is None
+    assert r["diff"] == -0.01  # 均值差仍如实报告
+
+
+def test_welch_almost_constant_but_real_variance_still_works():
+    """只有极小但真实方差时，不能误判为退化。"""
+    from scripts import metrics
+
+    a = [0.0] * 999 + [0.0001]
+    b = [-0.01] * 999 + [0.01]
+    r = metrics.welch_test(a, b)
+    assert r["p"] is not None, "真实方差不应被判为退化"

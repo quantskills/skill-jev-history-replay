@@ -1,4 +1,4 @@
-# 运行依赖：仅在「生成夹具」时需要。
-# 对齐与回放（replayer / aligner / attribution / metrics）为纯标准库实现，
-# 不 import panda_data，因此评测执行阶段无需安装任何三方包。
-panda-data==1.0.6
+# 运行依赖：零第三方依赖（纯标准库）。
+# 取数由阅读本 skill 的 AI 通过 PandaData MCP 完成并落盘 JSON，
+# 脚本只解析落盘结果；对齐与回放（replayer / aligner / attribution / metrics）
+# 也全部是纯标准库实现，因此任何阶段都不需要安装三方包。

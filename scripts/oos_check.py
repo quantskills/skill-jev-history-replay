@@ -6,18 +6,19 @@
 如果 p 值从 7×10⁻⁶ 掉到 0.05 边缘，也必须如实说出来。
 
 用法：
-    python3 scripts/oos_check.py                 # 默认 2026-09 全月
-    python3 scripts/oos_check.py --dates 20260901,20260902,...
-    python3 scripts/oos_check.py --json
+    python3 scripts/oos_check.py --from-mcp /tmp/mcp-oos       # 默认 2026-09 全月
+    python3 scripts/oos_check.py --from-mcp /tmp/mcp-oos \\
+        --dates 20260901,20260902,...
+    python3 scripts/oos_check.py --from-mcp /tmp/mcp-oos --json
 
-需要 panda_data 凭证（要拉新数据）。结果写到临时目录，不污染 fixtures/。
+需要 agent 先用 PandaData MCP 取回样本外数据并落盘（脚本不联网、无凭证）。
+结果写到临时目录，不污染 fixtures/。
 """
 
 from __future__ import annotations
 
 import argparse
 import json
-import os
 import sys
 import tempfile
 from pathlib import Path
@@ -49,17 +50,24 @@ IN_SAMPLE = {
 }
 
 
-def _load_credentials() -> bool:
-    """凭证是否齐备。解析细节交给 scripts/credentials.py 统一处理。"""
-    from scripts.credentials import is_available
+def _has_mcp_data(mcp_dir: Path | None) -> bool:
+    """落盘目录里是否具备构建样本外夹具所需的取数结果。"""
+    if mcp_dir is None:
+        return False
+    from scripts.mcp_source import MCPSource
 
-    return is_available()
+    source = MCPSource(mcp_dir)
+    return source.has("get_stock_min") or any(
+        source.has("get_stock_min", d) for d in DEFAULT_DATES
+    )
 
 
 def build_and_evaluate(dates: List[str], universe: int = 300,
-                       workdir: Path | None = None) -> Dict[str, Any]:
-    """在临时目录构建 OOS 夹具并评测。"""
+                       workdir: Path | None = None,
+                       mcp_dir: Path | None = None) -> Dict[str, Any]:
+    """在临时目录构建 OOS 夹具并评测（数据来自 MCP 落盘目录）。"""
     from scripts import build_fixtures as bf
+    from scripts.mcp_source import MCPSource
     from scripts.run_eval import evaluate
 
     root = workdir or Path(tempfile.mkdtemp(prefix="jev-oos-"))
@@ -69,11 +77,11 @@ def build_and_evaluate(dates: List[str], universe: int = 300,
     original_root = bf.REPO_ROOT
     bf.REPO_ROOT = root
     try:
-        client = bf._client()
-        selected = bf._pick_fixed_universe(client, dates, universe)
+        source = MCPSource(mcp_dir or Path())
+        selected = bf._pick_fixed_universe(source, dates, universe)
         for date in dates:
             try:
-                bf.build(date, selected, universe, "jev_assumed")
+                bf.build(date, selected, universe, "jev_assumed", mcp_dir=mcp_dir)
             except FileNotFoundError:
                 # build() 的 fingerprint 曾依赖当日日志文件；日志稍后统一生成
                 pass
@@ -178,23 +186,30 @@ def main(argv: List[str] | None = None) -> int:
     parser.add_argument("--dates", default=None,
                         help="逗号分隔的交易日；默认 2026-09 的 11 天")
     parser.add_argument("--universe", type=int, default=300)
+    parser.add_argument("--from-mcp", default=None, dest="from_mcp",
+                        help="agent 落盘 MCP 取数结果的根目录")
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args(argv)
 
-    if not _load_credentials():
+    mcp_dir = Path(args.from_mcp) if args.from_mcp else None
+    dates = ([d.strip() for d in args.dates.split(",") if d.strip()]
+             if args.dates else DEFAULT_DATES)
+
+    if not _has_mcp_data(mcp_dir):
         print(json.dumps({
             "ok": False,
-            "error": {"code": "missing_credentials",
-                      "message": "样本外复现需要拉新数据，必须提供 panda_data 凭证"},
-            "hint": "写入 ~/.pandadata/pandadata.env 或 export PANDA_DATA_*",
+            "error": {"code": "missing_mcp_data",
+                      "message": "样本外复现需要新数据，必须先用 MCP 取数并落盘"},
+            "hint": ("让 agent 调用 mcp__pandadata__call_pandadata 取 "
+                     f"{dates[0]}–{dates[-1]} 的 get_stock_min / get_stock_daily / "
+                     "get_trade_list，按 references/data_access.md 的目录落盘，"
+                     "再传 --from-mcp <dir>"),
         }, ensure_ascii=False, indent=2))
         return 2
 
-    dates = ([d.strip() for d in args.dates.split(",") if d.strip()]
-             if args.dates else DEFAULT_DATES)
     try:
-        result = build_and_evaluate(dates, args.universe)
-    except Exception as exc:   # 网络/凭证/数据问题一律结构化报错，不抛堆栈
+        result = build_and_evaluate(dates, args.universe, mcp_dir=mcp_dir)
+    except Exception as exc:   # 数据/落盘/截断问题一律结构化报错，不抛堆栈
         code = getattr(exc, "code", type(exc).__name__)
         hint = getattr(exc, "hint", "")
         print(json.dumps({

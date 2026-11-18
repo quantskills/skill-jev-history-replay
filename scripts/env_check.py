@@ -1,7 +1,8 @@
 """环境自检：报告缺失依赖与缺失数据，输出结构化 JSON。
 
-设计原则：评测本身不需要 panda_data，因此缺它只报 warn 不报 blocked。
-真正 blocked 的只有「夹具缺失」——那是评测无法进行的原因。
+设计原则：运行环境是 QuantStudio 宿主，对齐全程离线、不需要网络。取数由 agent
+通过 PandaData MCP 完成，脚本只读落盘 JSON。真正 blocked 的只有
+「夹具缺失」——那是评测无法进行的原因。
 """
 
 from __future__ import annotations
@@ -12,6 +13,8 @@ from pathlib import Path
 from typing import Any, Dict, List
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 
 
 def check() -> Dict[str, Any]:
@@ -31,7 +34,7 @@ def check() -> Dict[str, Any]:
         "name": "fixtures_bars",
         "status": "pass" if bar_files else "blocked",
         "detail": [p.name for p in bar_files],
-        "hint": "" if bar_files else "运行 scripts/build_fixtures.py（需凭证）或放入 K 线 JSON",
+        "hint": "" if bar_files else "放入 K 线 JSON，或先跑 fetch_data.py --from-mcp",
     })
 
     logs_dir = REPO_ROOT / "fixtures" / "logs"
@@ -53,17 +56,17 @@ def check() -> Dict[str, Any]:
     })
 
     try:
-        import panda_data  # noqa: F401
-        panda_status = "pass"
-        panda_detail = "已安装（仅再生夹具时需要）"
-    except ImportError:
-        panda_status = "warn"
-        panda_detail = "未安装（评测不需要）"
+        from scripts import mcp_source  # noqa: F401
+        mcp_status = "pass"
+        mcp_detail = "MCP 落盘解析器可用（仅夹具再生时需要联网取数）"
+    except Exception as exc:  # noqa: BLE001 - 结构化报告，不抛堆栈
+        mcp_status = "warn"
+        mcp_detail = f"不可用：{type(exc).__name__}: {exc}"
     checks.append({
-        "name": "panda_data",
-        "status": panda_status,
-        "detail": panda_detail,
-        "hint": "pip install -r requirements.txt" if panda_status == "warn" else "",
+        "name": "mcp_source",
+        "status": mcp_status,
+        "detail": mcp_detail,
+        "hint": "" if mcp_status == "pass" else "检查 scripts/mcp_source.py 是否完整",
     })
 
     try:

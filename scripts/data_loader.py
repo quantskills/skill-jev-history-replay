@@ -176,7 +176,7 @@ def load_bars(bars_dir: str | Path) -> Dict[str, Dict[str, Any]]:
         raise LoadError(
             "bars_dir_not_found",
             f"K线目录不存在：{bars_dir}",
-            hint="先运行 scripts/fetch_data.py 拉取，或指向已有 fixtures/bars",
+            hint="先运行 scripts/fetch_data.py --from-mcp <dir> 生成，或指向已有 fixtures/bars",
         )
     files = _list_data_files(base)
     if not files:

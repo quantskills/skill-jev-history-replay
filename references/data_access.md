@@ -2,99 +2,212 @@
 
 **核心结论先说**：
 
-> 对齐与回放阶段**不需要任何凭证、不访问任何外部服务**，只读本地 fixture。
-> 只有「重新生成夹具」和「样本外复现」两步才调用 `panda_data`。
+> 对齐与回放阶段**完全离线**：只读本地 `fixtures/`，不访问任何外部服务，
+> clone 后直接 `python3 scripts/build.py` 即可跑。
+>
+> 需要新数据时，取数由**阅读本 skill 的 AI 通过 PandaData MCP 工具完成**，
+> 脚本只消费 agent 落盘的 JSON。skill 内不含账号、密码、token 或服务地址。
 
 ---
 
-## 1. 调用 panda_data 的脚本
+## 1. 流水线总览
 
-| 脚本 | 用途 | 何时调用 |
-|---|---|---|
-| `scripts/fetch_data.py` | 拉取指定日期的分钟 K 线与前收价 | 手动取数 |
-| `scripts/build_fixtures.py` | 生成整套夹具（K线 + 前收 + 合成日志 + 质量审计） | 重建夹具 |
-| `scripts/oos_check.py` | 样本外复现（自动拉数 → 建夹具 → 评测） | 复现检验 |
-| `scripts/data_quality_audit.py` | 量化未建模状态占比；**无凭证时自动降级为离线模式** | 审计 |
-
-其余脚本（`build.py` / `validate.py` / `adapt_logs.py` / `trade_audit.py` /
-`knob_efficacy.py` / `value_decomposition.py` / `compare_baseline.py` /
-`verify_claims.py` / `controls_check.py` / `env_check.py`）**不 import panda_data**。
-
-### 依赖
-
-| 项 | 值 |
-|---|---|
-| 包名 / 版本 | `panda-data==1.0.6`（`requirements.txt` 已固定） |
-| Python | `>=3.10` |
-| 认证入口 | `panda_data.init_token(username=..., password=..., base_url=...)` |
-| 凭证解析 | `scripts/credentials.py`（**唯一实现**） |
-
----
-
-## 2. 凭证
-
-| 环境变量 | 别名 | 含义 |
-|---|---|---|
-| `PANDA_DATA_USERNAME` | `DEFAULT_USERNAME` | 账号 |
-| `PANDA_DATA_PASSWORD` | `DEFAULT_PASSWORD` | 密码 |
-| `PANDA_DATA_BASE_URL` | `JAVA_SERVICE_BASE_URL` | 服务地址 |
-
-```bash
-export PANDA_DATA_USERNAME=<username>
-export PANDA_DATA_PASSWORD=<password>
-export PANDA_DATA_BASE_URL=<base_url>
+```
+① agent 调 MCP 取数                ② 落盘 JSON                 ③ 生成夹具           ④ 离线回放
+mcp__pandadata__call_pandadata  →  /tmp/mcp/<date>/*.json  →  fetch_data.py      →  build.py
+   auth_status                         get_stock_min.json       --from-mcp <dir>     replayer
+   search_methods                      get_stock_daily.json                          aligner
+   get_method_doc                      get_prev_trade_date.json                      attribution
+   call_pandadata                      get_trade_list.json                           report
 ```
 
-**兼容本地文件**：`~/.pandadata/pandadata.env`，每行 `KEY=VALUE` 或
-`export KEY=VALUE`。值可以带引号（`export X="abc"`），`credentials.py` 会自动去引号。
-
-> **踩过的坑**：曾直接把值 strip 进 URL，引号被带进去，panda_data 报
-> `unknown url type: "https`。现已统一到 `scripts/credentials.py`，
-> 并校验 `base_url` 必须以 `http://` / `https://` 开头。
-
-**缺失时行为**：抛 `CredentialError`，调用方转成结构化 JSON 并返回**非零退出码**。
-不会静默降级成"没有数据"。
-
----
-
-## 3. 实际用到并被验证的接口
-
-| 接口 | 签名要点 | 用途 |
+| 阶段 | 谁执行 | 是否联网 |
 |---|---|---|
-| `get_stock_min` | `symbol=[...], start_date, end_date, fields=[...]` | 单日分钟 K 线，240 根/标的 |
-| `get_stock_daily` | `symbol=[...], start_date, end_date, fields=[...]` | 前收 `pre_close` 与当日 OHLC |
-| `get_prev_trade_date` | `date='YYYYMMDD', exchange='SH', n=1` | 前一交易日 |
-| `get_trade_list` | `date='YYYYMMDD', exchange='SH'` | 当日可交易标的池 |
-| `get_st_list` | `start_date, end_date, is_st=True` | ST 名单 |
-| `get_suspended_list` | `start_date, end_date, is_suspended=True` | 停牌名单 |
+| ① 取数 | 阅读本 skill 的 AI（MCP 客户端） | 是（MCP + OAuth） |
+| ② 落盘 | 同一个 AI，把 `call_pandadata` 返回原样写文件 | 否 |
+| ③ 生成夹具 | `scripts/fetch_data.py --from-mcp` / `build_fixtures.py` | 否 |
+| ④ 对齐回放 | `scripts/build.py` | 否 |
 
-> **实测口径（2026-11-13，panda-data 1.0.6）**
-> - 分钟线时间戳是**该分钟结束时刻**：09:31 覆盖 09:30–09:31；每日 240 根。
->   这是 `semantics.bar_timestamp` 默认 `bar_end` 的依据。
-> - `get_trade_list` 的 `exchange` 只接受 `SH` / `HK` / `US`，传 `SZ` 报 `100006`；
->   A 股全市场用 `exchange='SH'` 一次取回（含深市代码）。
-> - **`pre_close` 不总等于前一交易日的 `close`**：实测 5/4,200 条序列不同，
->   源于除权除息或数据源自身的 pre_close 口径。夹具忠实复制 panda 返回值，
->   不做二次调整。若你的基准定义是"前一交易日收盘价"，需要自行处理除权。
-> - **集合竞价会让日线 `open` 与分钟线首根 `open` 不同**：实测 2/4,200 条，
->   最大差 1.385%。本 skill 的 `baseline_price=day_open` 取**分钟线首根**，
->   详见 `semantics_matrix.md`。参考语义用 `prev_close`，不受影响。
-> - `get_stock_min` 支持一次传多标的（实测 300 标的、72,000 根，**约 0.6 秒**）。
-> - 各接口返回列（实测）：
->   - `get_stock_min` → `symbol, date, amount, close, datetime, high, low, minute, num_trades, open, volume`
->   - `get_stock_daily` → `symbol, date, open, high, low, close, pre_close`（按 `fields` 裁剪）
->   - `get_st_list` → `symbol, date, is_st`
->   - `get_suspended_list` → `symbol, date, is_suspended`
->   - `get_prev_trade_date` → 返回 `str`（如 `'20261111'`），不是 DataFrame
-> - `get_trade_list(date='20261112', exchange='SH')` 实测返回 5,218 行（含深市代码）。
-> - `get_prev_trade_date` 在 1.0.6 中是 `date=` 而非 `nature_date=`。
-
-> 契约以 [`quantskills/skill-pandadata-api`](https://github.com/quantskills/skill-pandadata-api)
-> 为准。SDK 签名曾变更，凭记忆调用容易失败。
+脚本侧**没有**任何 HTTP 客户端、取数组件依赖或凭证读取。
 
 ---
 
-## 4. 已发布夹具（默认路径，不需要凭证）
+## 2. MCP 工具与调用顺序
+
+服务器名 `pandadata`（Streamable HTTP，OAuth 登录，由客户端配置）。
+模型可见的工具：
+
+| 工具 | 用途 |
+|---|---|
+| `mcp__pandadata__auth_status` | 确认 OAuth 登录有效 |
+| `mcp__pandadata__search_methods` | 按关键词找方法名 |
+| `mcp__pandadata__get_method_doc` | 读方法签名、参数、返回列 |
+| `mcp__pandadata__call_pandadata` | **真正取数** |
+
+固定顺序：
+
+```
+auth_status  →  search_methods  →  get_method_doc  →  call_pandadata
+```
+
+`call_pandadata` 的参数：
+
+```json
+{"method": "get_stock_min", "params": {...}, "preview_rows": 2000}
+```
+
+`preview_rows` 只控制**本地预览**行数（0–2000），不改变服务端实际返回量。
+返回信封：
+
+```json
+{"ok": true, "method": "get_stock_min", "params": {...},
+ "result": ..., "request_id": "..."}
+```
+
+---
+
+## 3. 数据需求 → 方法 → 参数 对照表
+
+| 数据需求 | 方法 | 参数 | 返回形态 |
+|---|---|---|---|
+| 分钟 K 线 | `get_stock_min` | `symbol`(list), `start_date`(必填), `end_date`(必填), `fields`, `time_zone`, `frequency` | dataframe：`symbol, datetime, date, minute, open, high, low, close, volume, amount` |
+| 日线与前收 | `get_stock_daily` | `symbol`(list), `start_date`(必填), `end_date`(必填), `fields`, `indicator`, `st` | dataframe：`date, symbol, open, high, low, close, pre_close, volume, amount, limit_up, limit_down, trade_status, name` |
+| 前一交易日 | `get_prev_trade_date` | `date`(必填), `exchange`(可选), `n`(可选) | `{"date": "YYYYMMDD"}` |
+| 当日可交易标的池 | `get_trade_list` | `date`(必填), `exchange`(可选) | `[{"date": "...", "symbol": "..."}]` |
+| ST 名单 | `get_st_list` | `start_date`, `end_date`(必填), `is_st` | dataframe：`symbol, date, is_st` |
+| 停牌名单 | `get_suspended_list` | `start_date`, `end_date`(必填), `is_suspended` | dataframe：`symbol, date, is_suspended` |
+
+> `date=` 而不是 `nature_date=`。`get_trade_list` 的 `exchange='SH'`
+> 一次取回 A 股全市场（含深市代码）；传 `SZ` 会报错。
+
+---
+
+## 4. 可复制的 MCP 调用示例
+
+### 4.1 分钟线（**一天一取，窄区间**）
+
+```json
+{
+  "method": "get_stock_min",
+  "params": {
+    "symbol": ["600519.SH", "000001.SZ"],
+    "start_date": "20261112",
+    "end_date": "20261112",
+    "fields": ["symbol", "datetime", "date", "minute",
+               "open", "high", "low", "close", "volume", "amount"],
+    "time_zone": "Asia/Shanghai",
+    "frequency": "1m"
+  },
+  "preview_rows": 2000
+}
+```
+
+### 4.2 日线（含前一交易日，供 `pre_close` 使用）
+
+```json
+{
+  "method": "get_stock_daily",
+  "params": {
+    "symbol": ["600519.SH", "000001.SZ"],
+    "start_date": "20261111",
+    "end_date": "20261112",
+    "fields": ["symbol", "date", "open", "high", "low", "close", "pre_close"]
+  },
+  "preview_rows": 2000
+}
+```
+
+### 4.3 前一交易日
+
+```json
+{"method": "get_prev_trade_date",
+ "params": {"date": "20261112", "exchange": "SH", "n": 1}}
+```
+
+### 4.4 当日标的池
+
+```json
+{"method": "get_trade_list",
+ "params": {"date": "20261112", "exchange": "SH"},
+ "preview_rows": 2000}
+```
+
+### 4.5 ST / 停牌名单（整段日期一次取）
+
+```json
+{"method": "get_st_list",
+ "params": {"start_date": "20261026", "end_date": "20261112", "is_st": true},
+ "preview_rows": 2000}
+```
+
+```json
+{"method": "get_suspended_list",
+ "params": {"start_date": "20261026", "end_date": "20261112", "is_suspended": true},
+ "preview_rows": 2000}
+```
+
+---
+
+## 5. ⚠️ 截断：必须按窄日期区间分批
+
+**实测：一次取 240 根分钟线，只回 180 行**，信封里是
+
+```json
+{"type": "dataframe", "row_count": 180, "total_rows": 240,
+ "truncated": true, "truncation_reasons": ["byte_limit"]}
+```
+
+`preview_rows` 调大也不能解决——它只控预览。正确做法：
+
+- 分钟线**一次一天、标的数尽量少**（建议 ≤ 50 只/次）；
+- 标的更多时按代码段分批，分别落盘到不同目录，再合并；
+- 拿到 `truncated: true` 时**不要落盘当完整数据**，缩小区间重取。
+
+`scripts/mcp_source.py` 会检查 `truncated` 与 `row_count < total_rows`，
+两种情况都抛 `MCPDataError(code="truncated_result")`，不会静默接受。
+
+---
+
+## 6. 落盘目录约定
+
+```
+<dir>/<date>/get_stock_min.json          # 必须是一天的窄区间结果
+<dir>/<date>/get_stock_daily.json        # 覆盖前一交易日 + 当日
+<dir>/<date>/get_prev_trade_date.json    # {"date": "..."}
+<dir>/<date>/get_trade_list.json         # 当日标的池（可选）
+<dir>/get_st_list.json                   # 整段日期（可选）
+<dir>/get_suspended_list.json            # 整段日期（可选）
+```
+
+也可平铺为 `<dir>/<method>.<date>.json` 或 `<dir>/<method>.json`。
+文件内容可以是**完整信封**，也可以直接是 `result`。
+
+之后：
+
+```bash
+python3 scripts/fetch_data.py --date 20261112 --from-mcp <dir>
+```
+
+---
+
+## 7. 解析器与错误码
+
+`scripts/mcp_source.py`（纯标准库）负责：
+
+| 校验 | 错误码 |
+|---|---|
+| 文件不存在 | `missing_mcp_file` |
+| 不是合法 JSON | `invalid_mcp_json` |
+| 信封 `ok=false` | 透传服务端 `code`（如 `auth_required`） |
+| 缺少 `result` | `invalid_envelope` |
+| 被截断 / 行数不一致 | `truncated_result` |
+| 缺必需列 | `missing_columns` |
+| 行宽与 columns 不符 | `ragged_rows` |
+| 空表（未显式允许） | `no_data` |
+
+---
+
+## 8. 已发布夹具（默认路径，完全离线）
 
 | 文件 | 内容 |
 |---|---|
@@ -102,6 +215,15 @@ export PANDA_DATA_BASE_URL=<base_url>
 | `fixtures/reference/{date}.json` | 每标的前收与当日 OHLC |
 | `fixtures/logs/{date}.jsonl` | JEV 侧日志（**合成**） |
 | `fixtures/manifest.json` | 指纹、生成参数、`logged_profile`、数据质量审计 |
+
+### 口径备注（实测，随夹具一起冻结）
+
+- 分钟线时间戳是**该分钟结束时刻**：09:31 覆盖 09:30–09:31；每日 240 根。
+  这是 `semantics.bar_timestamp` 默认 `bar_end` 的依据。
+- `pre_close` 不总等于前一交易日的 `close`（实测 5/4,200 条），源于除权除息
+  或数据源自身的 `pre_close` 口径。夹具忠实复制返回值，不做二次调整。
+- 集合竞价会让日线 `open` 与分钟线首根 `open` 不同（实测 2/4,200 条，
+  最大差 1.385%）。`baseline_price=day_open` 取**分钟线首根**。
 
 ### 合成日志不是 JEV 真实输出
 
@@ -112,33 +234,32 @@ export PANDA_DATA_BASE_URL=<base_url>
 - 真实 JEV 日志到位后，**直接替换 `fixtures/logs/` 即可**，
   回放器/对齐器/归因器都不用改；此时 `log_source` 自动变 `actual`。
 - **多日夹具要求每条记录带 `date`（`YYYYMMDD`）**，否则
-  `LoadError("missing_log_field")`。这条曾只在代码里要求、文档没写，
-  照文档准备的真实日志会被直接拒收。
+  `LoadError("missing_log_field")`。
 
 字段契约见 `references/log_contract.md`。若字段名与契约不同，
 先用 `scripts/adapt_logs.py` 显式映射，不要手改日志。
 
 ---
 
-## 5. 为什么对齐阶段完全离线
+## 9. 为什么对齐阶段完全离线
 
 ```
-fetch_data / build_fixtures  ──(panda_data)──▶  fixtures/*
-                                                    │
-                                                    ▼
+MCP 取数（agent）  ──▶  落盘 JSON  ──▶  fetch_data.py / build_fixtures.py  ──▶  fixtures/*
+                                                                                    │
+                                                                                    ▼
 build.py / run_eval  ──(只读本地文件)──▶  replayer → aligner → attribution → report
 ```
 
 - `replayer.py` / `aligner.py` / `attribution.py` / `metrics.py` 纯标准库
-- CI 不安装 panda_data，测试 80 秒内跑完
-- clone 后直接 `python3 scripts/build.py` 即可，无需账号
+- CI 不安装任何取数组件，测试在分钟内跑完
+- clone 后直接 `python3 scripts/build.py` 即可，无需登录、无需网络
 
 ---
 
-## 6. 复现命令
+## 10. 复现命令
 
 ```bash
-# 完整对齐（无需凭证）
+# 完整对齐（离线）
 python3 scripts/build.py
 python3 scripts/verify_claims.py
 
@@ -146,15 +267,22 @@ python3 scripts/verify_claims.py
 python3 scripts/env_check.py
 python3 scripts/validate.py
 
-# 数据质量审计（无凭证时自动离线）
-python3 scripts/data_quality_audit.py
+# 数据质量审计（无 MCP 落盘目录时自动只做 OHLC 推断）
+python3 scripts/data_quality_audit.py --from-mcp <dir>
+python3 scripts/data_quality_audit.py --offline
 
-# 再生夹具（需要凭证）
-export PANDA_DATA_USERNAME=...
-export PANDA_DATA_PASSWORD=...
-export PANDA_DATA_BASE_URL=...
-python3 scripts/build_fixtures.py --date 20261104,...,20261112 --universe 300
+# 再生夹具（先让 agent 通过 MCP 取数并落盘）
+python3 scripts/fetch_data.py --date 20261112 --from-mcp <dir>
+python3 scripts/build_fixtures.py --date 20261104,...,20261112 --from-mcp <dir> --universe 300
 
-# 样本外复现（需要凭证）
-python3 scripts/oos_check.py
+# 样本外复现（同样先取数落盘）
+python3 scripts/oos_check.py --from-mcp <dir>
 ```
+
+---
+
+## 11. 客户端登录
+
+PandaData MCP 走 **OAuth** 登录，登录在 MCP 客户端完成（Claude Code 首次
+调用 `mcp__pandadata__auth_status` 时会引导浏览器授权）。本 skill 不保存、
+不传递任何凭证；`auth_status` 返回未登录时，由客户端重新授权后重试。

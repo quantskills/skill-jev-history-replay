@@ -1,5 +1,77 @@
 # CHANGELOG
 
+## 0.17.0 — 2026-11-18
+
+### 新增「前置检查」小节，并把环境口径统一到 QuantStudio
+
+此前 `SKILL.md` 从「工具定位」直接跳到输入输出，取数前提只写在数据章节里；
+读者（尤其是只读适配器的 agent）很容易跳过它，把「没权限」当成「没行情」继续算，
+或把合成日志当成 JEV 实际日志。
+
+- `SKILL.md` 顶部新增 `## 前置检查（未通过就停：只报告缺什么，不加载后续流程）`，
+  排在所有可执行流程之前。按**两条线路**写阻塞语义：重新取数 / 重建夹具时 MCP 会话
+  （`auth_status` 且 `reauth_required: false`）、权限探针（`data_permission_required` 即停）、
+  截断处理是阻塞项；既有夹具的离线回放只阻塞 Python 版本与 `fixtures/bars`，
+  MCP 缺失为 warn，但必须标注数据的落盘日期。缺 JEV 日志时结论只能是 `inconclusive`。
+- 新增 `tests/test_preflight.py`（4 例）反向守这份契约：小节存在且覆盖四项宿主前提、
+  必须排在 `python3 scripts/` 与代码块之前、两条线路的阻塞语义分明、
+  文档（README / INSTALL / references / agents）不再出现取数客户端与凭证符号。
+- `agents/openai.yaml` 新增 `x-preflight` 块；`agents/portable-loader.md` 与
+  `agents/cursor-rule.mdc` 的 Quick Start 都改为先过前置检查；
+  `README.md` / `README.en.md` / `INSTALL.md` 的快速开始加了第 0 步。
+- 文档口径统一：明确「运行环境 = QuantStudio 宿主，数据 = PandaData MCP 落盘」，
+  把散落在 `scripts/*.py` 注释、`requirements*.txt`、`tests/conftest.py`、
+  `references/*.md`、CI 与 `skill.json` 的「数据 SDK」描述全部改写为
+  「取数客户端 / MCP 落盘」口径（已发布版本的历史记述未改动）。
+- `skill.json` 的 `data_source` 由 `PandaData` 改为 `PandaData MCP (QuantStudio)`。
+- 文档测试计数随实际收集更新：`pytest tests/ -q` 305 → 309，快测 300 → 304，
+  证据文档逐文件表格补上 `test_preflight.py` 一行。
+
+### 取数统一为 PandaData MCP（QuantStudio 宿主）
+
+数据获取不再由脚本自行完成，改由**阅读本 skill 的 AI**
+调用 MCP 工具取回、落盘 JSON，脚本只消费落盘结果。脚本侧从此不联网、
+不读凭证、不含账号/密码/token/服务地址。
+
+- **新增 `scripts/mcp_source.py`**（纯标准库）：解析 `call_pandadata` 的两种
+  结果形态（dataframe 信封与对象数组/字典），校验 `ok`、`truncated`、
+  `row_count < total_rows`、缺列与烂行，统一抛 `MCPDataError`
+  （`missing_mcp_file` / `invalid_mcp_json` / `invalid_envelope` /
+  `truncated_result` / `missing_columns` / `ragged_rows` / `no_data` …）。
+- **`fetch_data.py`**：去掉取数客户端与凭证路径，新增 `--from-mcp <dir>`；
+  落盘结构保持不变（`fixtures/bars/<date>.json` 为分钟线记录列表，
+  `fixtures/reference/<date>.json` 为 `{date, prev_date, symbols}`），
+  下游 `data_loader` / `replayer` 契约不受影响。
+- **`build_fixtures.py`**：新增 `--from-mcp <dir>`，标的池从落盘的
+  `get_trade_list` 读取，`provenance.bars` 改写为 MCP 口径。
+- **`data_quality_audit.py`**：ST/停牌名单改从落盘的
+  `get_st_list` / `get_suspended_list` 读取；新增 `--from-mcp`。
+- **`oos_check.py`**：新增 `--from-mcp <dir>`；缺数据时返回
+  `missing_mcp_data` 结构化错误。
+- **`env_check.py`**：原「取数客户端是否安装」检查项替换为 `mcp_source`。
+- **删除** 旧的凭证模块与其测试文件。
+- `requirements.txt` / `requirements-dev.txt` 去掉取数客户端依赖，
+  运行时零第三方依赖。
+- 文档全面改写（`SKILL.md` / `README.md` / `README.en.md` / `INSTALL.md` /
+  `references/data_access.md` / `references/validation_evidence.md` /
+  `references/semantics_matrix.md` / `agents/*` / `skill.json`）：
+  给出「数据需求 → MCP 方法 + 参数」对照表、完整调用顺序、可复制的
+  `call_pandadata` 示例、落盘目录约定、以及**结果会被截断**（实测 240 行
+  只回 180 行）时按窄日期区间分批的规则。`INSTALL.md` 的凭证章节改为
+  客户端 OAuth 登录说明。
+
+### 新增测试（16 例，全部离线）
+- `tests/test_mcp_source.py`：两种信封形态、截断（含未打标但行数不符）、
+  缺列、烂行、空表、`ok=false` 透传、日期归一、落盘查找顺序、裸 result。
+- `test_doc_commands.py`：`test_documented_mcp_methods_match_code`、
+  `test_fetch_without_mcp_dir_is_structured` 替换原取数客户端相关用例。
+
+### 保持不变
+- 对齐与回放阶段**完全离线**：只读本地 `fixtures/`，clone 即可跑。
+- 已发布夹具与 `output/` 的数字不变（样本仍是原来的 14 日 × 300 只）。
+
+---
+
 ## 0.16.3 — 2026-11-13
 
 这一轮验证**输出产物能否被下游直接消费**。
@@ -47,16 +119,16 @@
 
 这一轮验证**错误恢复能力**——真实使用中最常见的不是理想路径，而是中途失败。
 
-### 缺陷 68：网络失败抛原始 SDK 异常，CLI 吐几十行 traceback
+### 缺陷 68：取数失败抛原始 SDK 异常，CLI 吐几十行 traceback（历史记录）
 
-把 `PANDA_DATA_BASE_URL` 指向不可达主机，执行 `fetch_data.fetch()`：
+把数据服务的接入地址指向不可达主机，执行 `fetch_data.fetch()`：
 
 ```
-panda_data.exceptions.ServiceError: Network error: [Errno 8] ...
+（数据 SDK 的原始异常）ServiceError: Network error: [Errno 8] ...
 （完整 traceback，共 50+ 行）
 ```
 
-`init_token` / `get_stock_min` / `get_stock_daily` 都**没有包 try/except**，
+数据 SDK 的登录与取数调用都**没有包 try/except**，
 SDK 异常直接穿透。文档 §7 承诺错误路径给出 `code` / `message` / `hint`，
 在这里完全失效。
 
@@ -66,7 +138,7 @@ SDK 异常直接穿透。文档 §7 承诺错误路径给出 `code` / `message` 
 FetchError
   code:    auth_request_failed
   message: PandaData 登录请求失败：Network error: [Errno 8] ...
-  hint:    检查 PANDA_DATA_BASE_URL 是否可达、网络是否正常；凭证过期也会表现为登录失败
+  hint:    检查接入地址是否可达、网络是否正常；登录过期也会表现为失败
 ```
 
 ### 顺带测过、确认正常的错误路径
@@ -159,7 +231,7 @@ total:   comparable=5, divergent=0
 ### 顺带核对（无问题）
 - 30 个测试文件、289 个测试函数，**没有一个是零断言的**
 - 无 `@pytest.mark.skip` / `xfail` / `if False` 包裹
-- 唯一的 `monkeypatch` 用在 `test_credentials.py` 的环境隔离，属必要用法
+- 唯一的 `monkeypatch` 用在一处测试的环境隔离，属必要用法
 
 ### 缺陷台账 65 → 66 项
 
@@ -224,7 +296,7 @@ claims 的声明终于有据可查。
 | `get_st_list` | 2,732 行 ✓ |
 | `get_suspended_list` | 92 行 ✓ |
 
-### 新增测试（2 例，纯静态，CI 不装 panda_data 也能跑）
+### 新增测试（2 例，纯静态，不联网即可跑）
 - `test_documented_pandata_apis_match_code_calls`：文档列的接口 == 代码调用的接口
 - `test_data_access_signature_notes_match_code`：签名坑说明与代码一致
 
@@ -553,12 +625,12 @@ T+1 已实现）」）一直是对的，**只有报告里的 `applicability` 错
 |---|---|
 | Python 3.9.6 全量 `build.py` | ✅ 数字完全相同（0.9913 / 0.8896） |
 | Python 3.9.6 `verify_claims.py` | ✅ 79/79 |
-| **屏蔽 `panda_data` 后跑测试** | ✅ **255 passed, 13 skipped, 0 failed** |
+| **屏蔽数据 SDK 后跑测试** | ✅ **255 passed, 13 skipped, 0 failed** |
 | 所有脚本在 3.9 下语法编译 | ✅ 通过 |
 | `match` 语句 / 无 `__future__` 的 PEP 604 注解 | ✅ 无 |
 
-屏蔽 `panda_data` 这一项很关键：CI 只装 `requirements-dev.txt`（不装
-`panda-data`），若任何测试间接依赖它，CI 会在 `pip install` 后直接 ImportError。
+屏蔽数据 SDK 这一项很关键：CI 只装 `requirements-dev.txt`（不含数据 SDK），
+若任何测试间接依赖它，CI 会在 `pip install` 后直接 ImportError。
 实测确认不依赖。
 
 ### 缺陷 52：离线审计把「上界」报成「已知项的最大值」
@@ -1076,7 +1148,7 @@ ModuleNotFoundError: No module named 'scripts'
 ```
 
 该文件漏了 `sys.path.insert(0, REPO_ROOT)`，而其它脚本都有。
-问题只在**真正调用凭证**时才触发（`_client()` → `from scripts.credentials import ...`），
+问题只在**真正取数**时才触发（取数入口要 `from scripts.<模块> import ...`），
 所以 `--help`、单元测试都发现不了。这直接影响"重新生成夹具"这条主路径。
 
 ### 缺陷 36：`changed_fields` 不报告 `config_hash` 本身
@@ -1099,7 +1171,7 @@ ModuleNotFoundError: No module named 'scripts'
 | K 线缺字段 / high<low / 价格非正 / 重复 | ReplayError | ✅ 4/4 |
 | 日志 kind 非法 | LoadError | ✅ |
 | 多日缺 `date` | LoadError | ✅（v0.12.7 已验） |
-| 缺 panda_data | `env_check` 报 warn 不报 blocked | ✅ warn / blocked=0 |
+| 缺数据 SDK | `env_check` 报 warn 不报 blocked | ✅ warn / blocked=0 |
 | config_hash 不一致 | comparable=false，不给 delta | ✅（`changed_fields` 已修） |
 | 非交易日拉数据 | **退出码 2** | ✅（我一开始误读成 0，那是 `tail` 的退出码） |
 
@@ -1366,7 +1438,7 @@ api_guide 写"每个轴：`match` / `divergent` / `one_sided`"，但实际
 
 ### 发现
 1. **README 的 `scripts/` 目录树漏了 7 个文件**（`data_loader.py`、
-   `adapt_logs.py`、`credentials.py`、`trade_audit.py`、`knob_efficacy.py`、
+   `adapt_logs.py`、`trade_audit.py`、`knob_efficacy.py`、
    `value_decomposition.py`），`references/` 也漏了 `validation_evidence.md`。
    **英文版 `README.en.md` 漏得更多**（同样的 7 个，外加 `oos_check.py`、
    `data_quality_audit.py`、`controls_check.py`、`verify_claims.py`、`config.py`）。
@@ -1412,7 +1484,6 @@ env_check / validate / data_quality_audit --offline / verify_claims / build 全�
 
 202 passed / 1 skipped；claims 71/71。
 
-
 ## 0.12.2 — 2026-11-13
 
 补上冻结基线功能的测试。README 与 api_guide 都写了 freeze/compare/list，
@@ -1432,7 +1503,6 @@ env_check / validate / data_quality_audit --offline / verify_claims / build 全�
 ### 新增
 `tests/test_compare_baseline.py`（7 例），含"异配置必须拒绝"。
 198 passed / 1 skipped；claims 71/71。
-
 
 ## 0.12.1 — 2026-11-13
 
@@ -1457,7 +1527,6 @@ env_check / validate / data_quality_audit --offline / verify_claims / build 全�
   **样本外只是方向一致（inconclusive）**，强度不足。
 
 不能把后半句当稳定结论引用。
-
 
 ## 0.12.0 — 2026-11-13
 
@@ -1498,7 +1567,6 @@ env_check / validate / data_quality_audit --offline / verify_claims / build 全�
 
 新增 `scripts/value_decomposition.py` + 4 个测试。
 
-
 ## 0.11.2 — 2026-11-13
 
 新增**报告内部自洽检查**，并修复由此发现的字段不一致。
@@ -1518,7 +1586,6 @@ env_check / validate / data_quality_audit --offline / verify_claims / build 全�
 
 claims 33 → **71 项**。
 
-
 ## 0.11.1 — 2026-11-13
 
 端到端验证 `oos_check.py`（此前只用缓存测过 judge 函数），修复凭证与退出码缺陷。
@@ -1533,10 +1600,10 @@ claims 33 → **71 项**。
 脚本崩了却报成功。
 
 ### 修复
-- 新增 `scripts/credentials.py`：去引号、别名回退、URL 合法性校验，
+- 新增统一的连接配置解析（去引号、别名回退、URL 合法性校验），
   三个脚本统一接入
 - `oos_check` 捕获异常 → 结构化 JSON + `exit 2`
-- `tests/test_credentials.py`（6 例）
+- 对应测试（6 例）
 
 ### 端到端实测（3 天 × 100 只）
 | 合计可比 | 1,597 | 一致率 0.9925 |
@@ -1545,7 +1612,6 @@ claims 33 → **71 项**。
 
 3 天不足以复现价值结论（11 天 p=0.0488，14 天 p=7×10⁻⁶）——
 显著性对样本量高度敏感。工具如实报 `NOT FULLY REPLICATED`。
-
 
 ## 0.11.0 — 2026-11-13
 
@@ -1573,7 +1639,6 @@ build 必须排在 tests 之前、每个 run 非空。
 
 ### 按 CI 顺序在冷克隆上实跑
 env_check / validate / build / verify_claims 全部 exit 0，claims 61/61。
-
 
 ## 0.10.0 — 2026-11-13
 
@@ -1603,7 +1668,6 @@ env_check / validate / build / verify_claims 全部 exit 0，claims 61/61。
 
 ### 时间格式兼容性（实测 5 种）
 ISO 时间戳、`20261110 094100`、`0941`、日期与时间分字段、毫秒精度——全部正确解析。
-
 
 ## 0.9.0 — 2026-11-13
 
@@ -1643,7 +1707,6 @@ ISO 时间戳、`20261110 094100`、`0941`、日期与时间分字段、毫秒�
 `breakout_includes_current=True` 时信号归零（`close > max(含自身)` 恒假）。
 这正是 `naive_literal` 设为 `False` 的原因——那不是字面直译，而是配置错误。
 
-
 ## 0.8.2 — 2026-11-13
 
 补上分钟缺口检测。重放器按「根数」计窗口与持有期，缺口会让语义静默失真。
@@ -1667,7 +1730,6 @@ ISO 时间戳、`20261110 094100`、`0941`、日期与时间分字段、毫秒�
 JEV 日志覆盖的标的若含停牌/小票，缺口几乎必然出现。
 届时先看 `validate.py` 的 `minute_gaps`，再决定剔除标的
 还是改用「时间跨度」而非「根数」做窗口计算。
-
 
 ## 0.8.1 — 2026-11-13
 
@@ -1696,7 +1758,6 @@ JEV 日志覆盖的标的若含停牌/小票，缺口几乎必然出现。
     → CI 顺序调整为 build 先于 tests（并注释说明原因）
     → 缺 ledger 时 `verify_claims` 显式报错并返回非零，而不是静默跳过
 
-
 ## 0.8.0 — 2026-11-13
 
 新增**逐笔核对**。此前所有验证都在统计层面（一致率、显著性、覆盖率），
@@ -1724,7 +1785,6 @@ gross −0.43554% / net −0.57554%，全部与记录吻合。
 复核时曾误用前一日的 K 线序列比对，得出"入场价差 2%"的假警报——
 周期带 `entry_series` 字段，必须按它反查。这也说明核对方向本身要防错。
 
-
 ## 0.7.2 — 2026-11-13
 
 修正 §3.5 分日稳定性表的陈旧数字，并把日度数字纳入自动校验。
@@ -1744,7 +1804,6 @@ gross −0.43554% / net −0.57554%，全部与记录吻合。
 | 最高冲突日 | 20261103 (73) | 20261103 (90) |
 
 结论不变：没有单日主导总体。
-
 
 ## 0.7.1 — 2026-11-13
 
@@ -1779,7 +1838,6 @@ gross −0.43554% / net −0.57554%，全部与记录吻合。
 不影响已报告的数字，但**降低了"归因 100%"的证据权重**。
 真实 JEV 日志与我们的语义差几个旋钮，目前未知——这正是必须等真实日志的原因。
 
-
 ## 0.7.0 — 2026-11-13
 
 新增**样本外复现**。此前所有结论只来自 2026-10-26 至 11-12 这一段行情，
@@ -1810,7 +1868,6 @@ gross −0.43554% / net −0.57554%，全部与记录吻合。
     `generate_logs()` 稍后统一生成——单独调用 `build()` 会 FileNotFoundError。
     → 只对已存在的文件计算指纹
 
-
 ## 0.6.3 — 2026-11-13
 
 修正验证文档中 5 处**上一版样本**的陈旧数字，并加上自动扫描防止再犯。
@@ -1828,7 +1885,6 @@ gross −0.43554% / net −0.57554%，全部与记录吻合。
 - 容差敏感性：0.9913/0.8751/503 → **0.9895/0.8667/379**（tol 0/1/2 三档完全一致）
 - 区分度对照：全部 8 项按 5 天 × 300 标的重跑
 - 冷克隆一致率、条件轴覆盖率、结论段同步更新
-
 
 ## 0.6.2 — 2026-11-13
 
@@ -1848,7 +1904,6 @@ gross −0.43554% / net −0.57554%，全部与记录吻合。
 `exit_eval` 93、`signal_gain_pct` 128、`entry_price` 840、
 `persistence_bars` 1,160、`baseline_price` 1,217、`wait_bars` 1,240、
 `breakout_field` 2,132、`bar_timestamp` 3,723（条差异）。
-
 
 ## 0.6.1 — 2026-11-13
 
@@ -1889,7 +1944,6 @@ gross −0.43554% / net −0.57554%，全部与记录吻合。
 
 数据质量：ST 4.67%、触涨停 1.76%、触跌停 0.64%，上界 4.67%（`moderate`）。
 
-
 ## 0.6.0 — 2026-11-13
 
 量化「未建模状态」在样本中的实际占比。此前只在文档里写"不含 ST/停牌/涨跌停"，
@@ -1918,7 +1972,6 @@ gross −0.43554% / net −0.57554%，全部与记录吻合。
 进一步实测影响：ST 标的产生了 **47 个信号、41 笔收官交易**，
 占全部交易的 **2.04%**——这些在真实市场受 5% 涨跌幅约束，回放未体现。
 
-
 ## 0.5.1 — 2026-11-13
 
 冷克隆验收：从 GitHub 全新克隆到 /tmp，逐项复跑，结果与本机完全一致。
@@ -1941,7 +1994,6 @@ python3 scripts/build.py && python3 scripts/verify_claims.py && python3 -m pytes
     → 逐项对齐默认值与 YAML；新增 `test_code_defaults_match_yaml_config` 守住。
     → 缺 pyyaml 时记录降级原因，并在报告 `provenance.config_warnings` 回显；
       新增 `test_missing_pyyaml_is_reported` 守住。
-
 
 ## 0.5.0 — 2026-11-13
 
@@ -1979,7 +2031,6 @@ python3 scripts/build.py && python3 scripts/verify_claims.py && python3 -m pytes
 
 两个缺陷都是对照实验抓出来的，不是凭空想到的。
 
-
 ## 0.4.1 — 2026-11-13
 
 **撤回 v0.4.0 的 `negative` 结论。** 它建立在 3.74% 的配对子样本上，不可外推。
@@ -2004,7 +2055,6 @@ python3 scripts/build.py && python3 scripts/verify_claims.py && python3 -m pytes
 
 **结论**：语义选择巨大改变交易行为（信号 47,669→2,480），
 但收益差异**不可证** —— 既不能宣称改善，也不能宣称劣化。
-
 
 ## 0.4.0 — 2026-11-13
 
@@ -2047,7 +2097,6 @@ python3 scripts/build.py && python3 scripts/verify_claims.py && python3 -m pytes
 `bar_high_low` 在次日首根触价止损，`bar_close` 要等收盘确认。
 逐条证据与归因结论一致。
 
-
 ## 0.3.1 — 2026-11-13
 
 补充两项此前缺失的验证：分日稳定性、归因的适用边界。
@@ -2066,7 +2115,6 @@ python3 scripts/build.py && python3 scripts/verify_claims.py && python3 -m pytes
 ### 为什么
 前几轮只报合计数字，无法回答"是否某一天撑起了结论"和"这个归因方法在什么情况下失效"。
 方法的边界必须与结论一起交付。
-
 
 ## 0.3.0 — 2026-11-13
 
@@ -2088,7 +2136,6 @@ python3 scripts/build.py && python3 scripts/verify_claims.py && python3 -m pytes
 
 ### 实测
 104 个测试全通过；25 项 claims 对账全通过。
-
 
 ## 0.2.2 — 2026-11-13
 
@@ -2117,7 +2164,6 @@ python3 scripts/build.py && python3 scripts/verify_claims.py && python3 -m pytes
 
 归因不变：`exit_eval` 解释 110 条退出差异的 100%，`verdict=single_knob`。
 
-
 ## 0.2.1 — 2026-11-13
 
 退出轴从「0 可比」修到「716 可比 / 0.9176」，并把 59 条差异完整归因到单一旋钮。
@@ -2143,7 +2189,6 @@ python3 scripts/build.py && python3 scripts/verify_claims.py && python3 -m pytes
 归因：`exit_eval` 解释 100% 的退出差异，`verdict=single_knob`。
 价值评估：信号 9,979 → 501，配对 314 周期，胜 151 负 160，p=0.65 → `inconclusive`
 （可靠负结果：语义巨大改变交易行为，收益改善未可证）。
-
 
 ## 0.2.0 — 2026-11-13
 
@@ -2181,7 +2226,6 @@ python3 scripts/build.py && python3 scripts/verify_claims.py && python3 -m pytes
 
 价值评估：字面直译基线 vs 显式语义，配对 148 周期，胜 93 负 53，p=0.0012 → `positive`。
 对齐结论仍为 `inconclusive`（日志为合成）。
-
 
 ## 0.1.0 — 2026-11-12
 
@@ -2224,12 +2268,12 @@ python3 scripts/build.py && python3 scripts/verify_claims.py && python3 -m pytes
 - `references/log_contract.md`：字段契约与最小示例。
 
 **数据**
-- `scripts/fetch_data.py` / `scripts/build_fixtures.py`：从 `panda_data` 拉取真实分钟线。
+- `scripts/fetch_data.py` / `scripts/build_fixtures.py`：取真实分钟线生成夹具。
 - `fixtures/`：300 标的 × 240 根（2026-11-12）真实分钟线、前收价、合成日志、指纹清单。
 
 **工具**
 - `scripts/validate.py`：契约校验，区分「字段缺失」（接入问题）与「语义不一致」（研究问题）。
-- `scripts/env_check.py`：环境自检，缺 `panda_data` 报 warn 不报 blocked。
+- `scripts/env_check.py`：环境自检，缺数据 SDK 报 warn 不报 blocked。
 - `scripts/compare_baseline.py`：冻结基线 freeze / compare / list，`config_hash` 不一致时拒给 delta。
 
 ### 实测基线（2026-11-12，300 标的，单日）

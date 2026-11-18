@@ -1,7 +1,11 @@
 # 实测验证记录 / Validation Evidence
 
 本文件记录在真实环境下跑出的结果，供审核方核对。
-除「夹具再生」外，下列命令**均可由 clone 后直接复现，无需任何凭证**。
+除「夹具再生」外，下列命令**均可由 clone 后直接复现，无需登录、无需网络**。
+
+> **取数方式（2026-11 起）**：历史行情由阅读本 skill 的 AI 通过 PandaData MCP
+> 取回并落盘，脚本只读 JSON。`auth_status → search_methods → get_method_doc
+> → call_pandadata`；落盘目录与截断处理见 `references/data_access.md`。
 
 ---
 
@@ -53,16 +57,16 @@ python3 -m pytest tests/test_validation_claims.py -v
 ## 1. 单元测试
 
 ```bash
-python3 -m pytest tests/ -q -m "not slow"   # 127 passed, 47 秒
+python3 -m pytest tests/ -q -m "not slow"   # 304 passed, 约 6 分钟
 python3 -m pytest tests/ -q -m slow         # 区分度对照，约 2 分钟
 ```
 
 | 项 | 结果 |
 |---|---|
-| 用例总数 | 203（201 通过 + 1 跳过 + 1 慢测单独跑） |
+| 用例总数 | 309（304 快测 + 5 慢测单独跑） |
 | 失败 | 0 |
 | 环境 | Python 3.12.12 / 3.11.16 |
-| 全量耗时 | 快测约 47 秒；慢测（区分度对照）另约 2 分钟 |
+| 全量耗时 | 快测约 6 分钟；慢测（区分度对照）另约 2 分钟 |
 
 | 文件 | 用例数 | 覆盖 |
 |---|---|---|
@@ -81,20 +85,21 @@ python3 -m pytest tests/ -q -m slow         # 区分度对照，约 2 分钟
 | `test_ledger_fields.py` | 6 | **by_axis_prior 与代码一致**、**first_divergence 真实存在于账本**、**api_guide 三个行数与报告对账**、辅助字段已文档化、**diff 模式不写 match 行**、**文档须警告不能用账本算一致率** |
 | `test_compare_baseline.py` | 9 | **冻结基线**、同配置给 delta、异配置拒绝、结构化错误、**仅 config_hash 变也要列出**、**改资金参数端到端拒绝给 delta** |
 | `test_value_decomposition.py` | 4 | **T+1 强制隔夜**、拆解前提、summary 形状 |
-| `test_credentials.py` | 6 | **引号去除**、别名回退、缺凭证结构化报错、非法 URL 拒绝 |
+| `test_mcp_source.py` | 16 | **两种信封形态**（dataframe 与对象数组）、**截断必报错**、行数不一致、缺列、烂行、ok=false 透传、日期归一、落盘查找顺序 |
 | `test_ci_config.py` | 4 | **CI 配置合法**、步骤齐全、build 先于 tests |
 | `test_ledger_mode.py` | 3 | **账本瘦身**、full 可回溯、per_day 入报告 |
 | `test_adapt_logs.py` | 22 | **外部日志字段映射**、布尔规范化、缺字段必失败、**纯契约日志可端到端接入**、**多日缺 date 必报错（加载器与 validate 两处）**、**无法判定的 hit 必报错**、**时间戳写法不影响结论** |
 | `test_knob_efficacy.py` | 3 | **旋钮全部接线**、指纹稳定性、含当前根必归零 |
-| `test_metrics_correctness.py` | 15 | **统计函数正确性**：精确值对比、蒙特卡洛 Type-I/覆盖率 |
+| `test_metrics_correctness.py` | 17 | **统计函数正确性**：精确值对比、蒙特卡洛 Type-I/覆盖率 |
 | `test_fixture_universe.py` | 7 | **14 日标的池恒定**、每条序列 K 线完整、**manifest 与实际夹具对账**、**gzip mtime=0 可重现**、**夹具日志与当前重放一致**、**manifest 记录标的池策略**、**日期必须是单一连续区间**（防混入外部夹具） |
 | `test_oos_check.py` | 4 | **IN_SAMPLE 基准与当前报告一致**、judge 能识别显著性减弱 |
 | `test_multi_knob_docs.py` | 5 | **多旋钮表内部一致**、仅 exit_eval 行与报告一致、**naive 消融表单项不解释**、**wait_bars/合并数可在真实夹具复现**（slow）、**naive 消融表可复现**（slow） |
 | `test_report_consistency.py` | 5 | **divergence_items 四处同口径**、各轴 divergent 加总、**non_match_rows 单列**、per_day 加总=total、inline 截断标记 |
 | `test_fixture_integrity.py` | 4 | **pre_close 口径**、日线 high/low/close 与分钟线一致、**day_open 取首根**、文档写明口径 |
 | `test_conclusion_consistency.py` | 8 | **§9 的数字与报告对账**：总体/退出轴一致率、未建模上界、**不得再称容差结果不变**、ST 占比两处一致、**样本长度敏感性已声明**、**方向翻转可复现**（slow） |
-| `test_release_compliance.py` | 7 | **免责声明四点**、INSTALL 五平台、SPDX 许可证、三处 name 一致、无占位符、**无凭证/内网/邮箱泄露**、entry 存在 |
+| `test_release_compliance.py` | 7 | **免责声明四点**、INSTALL 五平台、SPDX 许可证、三处 name 一致、无占位符、**无敏感值/内网/邮箱泄露**、entry 存在 |
 | `test_runtime_adapters.py` | 9 | **适配器文件齐备**、声明的脚本/entry 存在、**旋钮清单与代码一致**、版本与 skill.json 一致、**README 实例数字与报告一致** |
+| `test_preflight.py` | 4 | **前置检查小节存在且覆盖宿主四项前提**、**排在所有可执行流程之前**、**取新数据与离线回放两条线路的阻塞语义分明**、**文档不再描述取数组件与凭证通道** |
 
 ---
 
@@ -277,7 +282,7 @@ python3 scripts/env_check.py      # ok=true
 python3 scripts/validate.py       # ok=true, 0 issues
 python3 scripts/build.py          # 约 31 秒
 python3 scripts/verify_claims.py  # 84/84
-python3 -m pytest tests/ -q       # 293 passed, 0 skipped
+python3 -m pytest tests/ -q       # 309 passed, 0 skipped
 ```
 
 实测（v0.12.8，从 `origin/main` 全新 clone 到 /tmp）：各项全过，
@@ -322,7 +327,7 @@ python3 scripts/build_fixtures.py \
 
 | 项 | 值 |
 |---|---|
-| 数据源 | `panda-data==1.0.6`，`get_stock_min` / `get_stock_daily` |
+| 数据源 | PandaData MCP：`get_stock_min` / `get_stock_daily`（agent 取数后落盘，脚本离线消费） |
 | 交易日 | **14 个**（2026-10-26 至 2026-11-12，跨两周） |
 | 标的数 | **300 / 日**，**全期固定同一批** |
 | 序列数 | **4,200**（`symbol@date`） |
@@ -590,8 +595,8 @@ python3 scripts/adapt_logs.py --src raw/ --dst adapted/
 占全部交易的 **3.31%**（47/1,422）。这些交易在真实市场受 5% 涨跌幅约束，回放未体现。
 
 ```bash
-python3 scripts/data_quality_audit.py            # 有凭证，含 ST/停牌名单
-python3 scripts/data_quality_audit.py --offline  # 无凭证，只算涨跌停可达性
+python3 scripts/data_quality_audit.py --from-mcp <dir>  # 含 ST/停牌名单（由 MCP 取回）
+python3 scripts/data_quality_audit.py --offline         # 只算涨跌停可达性
 ```
 
 审计结果写入 `fixtures/manifest.json`，并在报告
@@ -797,7 +802,7 @@ python3 -c "import json;print(json.load(open('output/report.json'))['attribution
 ## 4.5 样本外复现（2026-09，与主样本完全不重叠）
 
 ```bash
-python3 scripts/oos_check.py            # 需凭证；11 天 × 300 只固定标的
+python3 scripts/oos_check.py --from-mcp <dir>   # 需先 MCP 取数落盘；11 天 × 300 只固定标的
 ```
 
 主结论来自 2026-10-26 至 11-12。只在**一段**行情上成立的结论，可能只是那段
@@ -1064,7 +1069,7 @@ python3 scripts/value_decomposition.py \
 | 32 | **`time_tolerance_minutes` 根本不参与判定** | 四处判定都写死 `"match" if gap == 0`，容差只影响配对搜索半径。把容差 0→1→2→5 调，结果**一模一样**；文档还把这个"四档一致"解释成"时刻差是整分钟离散值、比较天然精确"——把参数没生效说成了结论。真实影响：201 条退出时间冲突中 65 条差值 ≤1 分钟 | 四处改为 `abs(gap) <= tol_minutes`；`test_verdict_tolerance_actually_changes_verdict` 与 `test_entry_and_signal_axes_honour_tolerance` 锁住。修复后四档才真正分化（0.9895/0.9913/0.9920/0.9931） |
 | 33 | **`oos_check.IN_SAMPLE` 硬编码基准会过期** | 修好容差后主样本变成 0.9913/0.8896，但 `IN_SAMPLE` 仍是 0.9895/0.8667，复现判定拿旧基准比新结果 | 同步基准 + `test_oos_check.py` 以 `output/report.json` 反查，主样本一变就红 |
 | 34 | **§1.1 / §8 的验收数字长期过期** | 文档写 `verify_claims 27/27`（实际 71/71）、`pytest 113 passed`（实际 222）、`build 54 秒`（实际 31 秒）。这些数字从 v0.7 起就没跟上，而冷克隆验收正是最容易被人照抄的一节 | 按 v0.12.8 冷克隆实测重写；新增 `test_doc_counts_match_actual` 以实际值对账 |
-| 35 | **`fetch_data.py` 直接运行必崩** | 漏了 `sys.path.insert(0, REPO_ROOT)`，直接 `python3 scripts/fetch_data.py` 会在 `_client()` 里 `from scripts.credentials import ...` 抛 ModuleNotFoundError。只在真正调用凭证时触发，`--help` 与单元测试都发现不了——按 §8 的复现命令手跑才暴露 | 补 sys.path + `test_fetch_data_can_run_as_script` |
+| 35 | **`fetch_data.py` 直接运行必崩** | 漏了 `sys.path.insert(0, REPO_ROOT)`，直接 `python3 scripts/fetch_data.py` 会在取数入口 `from scripts.mcp_source import ...` 抛 ModuleNotFoundError。只在真正取数时触发，`--help` 与单元测试都发现不了——按 §8 的复现命令手跑才暴露 | 补 sys.path + `test_fetch_data_can_run_as_script` |
 | 36 | **`changed_fields` 不报告 `config_hash` 本身** | `comparable=false` 时 `changed_fields=[]`，而 note 还写着"请确认语义、夹具或日志来源是否变化"——只改了 config_hash 的话读者无从判断哪里变了 | 加 `cur_hash != base_hash` 判断 + `test_changed_config_hash_alone_is_reported` |
 | 37 | **README（中/英）「实例」数字严重过时** | 写的是单日小样本（条件 1,576 项、退出 0.80 / 282 项），而仓库夹具是 14 天，读者跑 `build.py` 得到 28,754 / 0.8896，完全对不上。英文版同样错 | 按实际输出重写 + `test_readme_measured_numbers_match_report` |
 | 38 | **`openai.yaml` 旋钮清单与代码三处不一致** | 声明 18 个旋钮，而 `REFERENCE_SEMANTICS` 可配置键是 23 个、`KNOB_VALUES` 可消融旋钮是 10 个——18 既不是前者也不是后者，是手抄残留 | 拆成 `x-semantics-knobs`（=23，可配置全集）与 `x-attribution-knobs`（=10，可消融子集），并加测试双向对账 |
@@ -1092,12 +1097,12 @@ python3 scripts/value_decomposition.py \
 | 60 | **`logged_semantics.knobs` 只有 20/23，且与 hash 自相矛盾** | 按 `knobs` 重算的 hash（`7a6da8e3`）≠ 记录的 hash（`91fecace`）——读者无法据此重建配置，按 knobs 复现会得到不同的指纹。修复后 23 个键齐全且重算一致 | 同上；`test_extract_knobs_covers_all_configurable_semantics` 守住 |
 | 61 | **`by_axis_prior` / `first_divergence` 完全没有文档** | 报告里有这两个字段，`api_guide.md` 里一个字都没提，读者拿到报告不知道含义 | 补两节说明（含各轴先验全表、first_divergence 的用途）+ `test_ledger_aux_fields_are_documented` |
 | 62 | **`api_guide` 的账本三行数全部过期** | `non_match_rows` 写 979,634（实际 979,639）、`divergence_rows` 写 314（实际 319） | 按实测更新 + `test_api_guide_ledger_counts_match_report`（篡改后立刻失败） |
-| 63 | **`data_access.md` 的接口耗时与返回列未经实测** | 写「300 标的 / 72,000 根约 3 秒」，实测 **0.6 秒**（快 5 倍）。返回列、`get_prev_trade_date` 返回 `str` 而非 DataFrame 等信息都缺失，读者据此写代码容易出错 | 按实测更新 + 补返回列清单；`test_documented_pandata_apis_match_code_calls` 与 `test_data_access_signature_notes_match_code` 双向对账（纯静态，CI 不装 panda_data 也能跑） |
+| 63 | **`data_access.md` 的接口耗时与返回列未经实测** | 写「300 标的 / 72,000 根约 3 秒」，实测 **0.6 秒**（快 5 倍）。返回列、`get_prev_trade_date` 返回 `str` 而非 DataFrame 等信息都缺失，读者据此写代码容易出错 | 按实测更新 + 补返回列清单；`test_documented_mcp_methods_match_code` 与 `test_data_access_signature_notes_match_code` 双向对账（纯静态，不联网） |
 | 64 | **`claims.fixture` 整段从未被 `verify_claims` 检查** | 5 个字段（dates/symbol_count/series_count/bar_count/universe_policy）写进了 claims，却没有任何代码读它——一整块失效的对账数据 | `verify_claims` 补 fixture 段检查（79 → **84** 项），实测篡改后立刻报错 |
 | 65 | **`universe_policy` 声称存在但产物里根本没有** | claims 声明"全期固定（14 日 trade_list 交集…）"，而 `build_fixtures` 从不写该字段、manifest 里也没有。读者无法核实标的池策略 | `build_fixtures` 落盘该字段 + `test_manifest_records_universe_policy` |
 | 66 | **一条核心测试长期 `pytest.skip`，断言从未执行** | `test_single_knob_difference_is_attributed_to_that_knob` 号称验证「单旋钮时可定位」，但小样本下 exit 轴 `comparable=0`（唯一一笔还是 `open_position`），每次跑到 `if agg["divergent"]==0: pytest.skip(...)` 就退出。**测试存在、绿灯、却从未验证过任何东西** | 改用真实夹具（`@pytest.mark.slow`），并加前置断言 `exit_axis["comparable"] > 0` 防止再次空转；实测改错预期即失败 |
 | 67 | **`build_fixtures.py` 增量写入，混入新日期不会报错** | 为验证"陌生数据可用性"生成 2026-09-16/17/18 三天后，`fixtures/` 里同时存在 2026-09 与 2026-10/11 两段（该脚本只加不清）。若不核对，后续所有 run 都会基于混入样本 | `test_fixture_dates_are_contiguous_trading_days` 守"日期必须是单一连续区间"（实测注入 20260916 立刻报 40 天断档）；本次已还原夹具 |
-| 68 | **网络失败抛原始 SDK 异常，CLI 吐几十行 traceback** | `base_url` 指到不可达主机时，`init_token` 抛 `ServiceError("Network error: ...")`，`fetch_data.py` 没兜住 → 读者看到的是 traceback 而非 `code`/`message`/`hint`。文档 §7 承诺的结构化错误在这里失效 | `init_token` / `is_authenticated` / `get_stock_min` / `get_stock_daily` 四处包成 `FetchError`（含可操作 hint）+ `test_fetch_network_error_becomes_structured`（实测回滚后立刻失败） |
+| 68 | **取数失败抛原始异常，CLI 吐几十行 traceback** | 早期取数路径（脚本直连数据源，已废弃）下，网络不可达会抛原始 `ServiceError`，`fetch_data.py` 没兜住 → 读者看到的是 traceback 而非 `code`/`message`/`hint`。**现已改为 MCP 落盘消费路径**：所有取数异常统一为 `MCPDataError`（含可操作 hint），由 `test_fetch_without_mcp_dir_is_structured` 与 `test_mcp_source.py` 守住 |
 | 69 | **文档说账本含 `match`，但默认 diff 模式根本不写** | `api_guide` 把 `status` 枚举写成含 `match`，实际默认配置下账本只有 `divergent` / `open_position`（本样本 393 行，而 match 有 35,767 条一条没写）。读者据此统计一致率会得到严重错误的分母 | api_guide 补 ⚠️ 说明「不能用 ledger 算一致率」+ 两条测试（实测 `full` 模式确实写入全部 35,767 条 match） |
 
 ---
@@ -1114,7 +1119,7 @@ python3 scripts/value_decomposition.py \
 | 语义旋钮取值非法 | `ReplayError: invalid_semantics` |
 | 日志 `kind` 非法 | `LoadError: invalid_log_kind` |
 | 多日模式日志缺 `date` | `LoadError: missing_log_field` |
-| 缺 panda_data | `env_check` 报 `warn` 而非 `blocked` |
+| 缺 MCP 落盘解析器 | `env_check` 报 `warn` 而非 `blocked` |
 | `config_hash` 不一致时比对基线 | `comparable=false`，不给 delta |
 | 非交易日拉数据 | `FetchError: no_data`，退出码 2 |
 
@@ -1125,7 +1130,7 @@ python3 scripts/value_decomposition.py \
 | 项 | 值 |
 |---|---|
 | Python | 3.12.12（主）、3.9.6（系统自带，实测通过） |
-| panda-data | 1.0.6（仅夹具再生） |
+| 运行时三方依赖 | 无（纯标准库） |
 | 三方依赖 | 无（对齐与回放为纯标准库；`python3 -S` 实测通过） |
 | 全量对齐 | 约 31 秒（4,200 序列 × 240 根，1,008,000 根） |
 | 单元测试 | 约 273 秒（293 passed, 0 skipped） |

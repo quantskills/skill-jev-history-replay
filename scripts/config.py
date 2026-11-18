@@ -18,7 +18,8 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 # 参考语义（aligned）：文档化的 JEV 条件与回放语义约定。
 # 所有字段都是"可被另一种解释替换"的旋钮，替换后由账本给出差异归因。
 REFERENCE_SEMANTICS: Dict[str, Any] = {
-    # 分钟线时间戳所指的时点：bar_end = 该分钟的收盘时刻（panda_data 口径）
+    # 分钟线时间戳所指的时点：bar_end = 该分钟的收盘时刻
+    # （PandaData 分钟线口径：09:31 覆盖 09:30–09:31）
     "bar_timestamp": "bar_end",
     # 涨幅基准价
     "baseline_price": "prev_close",

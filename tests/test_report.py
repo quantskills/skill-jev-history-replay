@@ -210,8 +210,16 @@ def test_paired_delta_ci_requires_two_samples():
     assert two["n"] == 2 and two["ci95"] is not None
 
 def test_low_pairing_coverage_forces_inconclusive():
-    """配对覆盖率过低时，不能凭符号检验给 positive/negative。"""
-    # 基线 1000 个周期，只有 30 个能配上 → 覆盖率 3%
+    """配对覆盖率过低时，不能凭符号检验给 positive/negative。
+
+    基线 1000 个周期、只有 30 个能配上（覆盖率 3%）。此时配对结论不可外推。
+    注意：这里符号检验与全样本 Welch 都必须**无法判定**——
+    两组样本各自是常数序列（方差 0），Welch 的 se 退化，p 只能为 None。
+    因此全样本闸门也不满足 → 必须 `inconclusive`。
+
+    回归提示：曾因 `se == 0` 的精确比较漏判浮点残值（vb≈1.2e-35），
+    t 被放大到 1e16、p 误报 0.0，把 inconclusive 误判成 negative。
+    """
     base = _replay([0.0] * 1000)
     cur = _replay([-0.01] * 30)
     out = report.build_value_assessment(base, cur, min_cycles=20)

@@ -6,11 +6,12 @@
 让读者在相信结论前先看到边界。
 
 两种数据来源：
-  1. 有凭证时：调用 panda_data 取真实 ST / 停牌名单（最准）
-  2. 无凭证时：只做 OHLC 层面推断（涨跌停可达性），ST/停牌标注为未核验
+  1. 提供了 MCP 落盘目录时：读取其中的 `get_st_list` / `get_suspended_list`
+     结果（由 agent 调用 `mcp__pandadata__call_pandadata` 取回），最准
+  2. 没有或不可用时：只做 OHLC 层面推断（涨跌停可达性），ST/停牌标注为未核验
 
 用法：
-    python3 scripts/data_quality_audit.py
+    python3 scripts/data_quality_audit.py --from-mcp /tmp/mcp
     python3 scripts/data_quality_audit.py --offline
     python3 scripts/data_quality_audit.py --json
 """
@@ -18,7 +19,6 @@
 from __future__ import annotations
 
 import argparse
-import glob
 import json
 import sys
 from pathlib import Path
@@ -66,47 +66,44 @@ def _load_reference(ref_dir: Path) -> Dict[tuple, Dict[str, Any]]:
     return out
 
 
-def _fetch_exchange_lists(start: str, end: str) -> Optional[Dict[str, Any]]:
-    """取 ST / 停牌名单。无凭证或调用失败时返回 None（不静默当成空集）。"""
-    import os
+def _fetch_exchange_lists(start: str, end: str,
+                          mcp_dir: Path | None = None) -> Optional[Dict[str, Any]]:
+    """从 MCP 落盘结果读取 ST / 停牌名单。
 
-    try:
-        import panda_data  # type: ignore[import-not-found]
-    except ImportError:
+    缺目录、缺文件或调用失败时返回 None——不静默当成空集。
+    """
+    if mcp_dir is None:
         return None
 
-    from scripts.credentials import CredentialError, require
+    from scripts.mcp_source import MCPDataError, MCPSource, ST_COLUMNS, SUSPENDED_COLUMNS
 
-    try:
-        creds = require()
-    except CredentialError:
-        return None
-    username, zinfoid, base_url = (
-        creds["username"], creds["zinfoid"], creds["base_url"]
-    )
-
-    try:
-        panda_data.init_token(username=username, password=zinfoid, base_url=base_url)
-        st = panda_data.get_st_list(start_date=start, end_date=end, is_st=True)
-        susp = panda_data.get_suspended_list(
-            start_date=start, end_date=end, is_suspended=True
-        )
-    except Exception:
+    source = MCPSource(mcp_dir)
+    if not source.has("get_st_list"):
         return None
 
-    st_set = set()
-    if st is not None and hasattr(st, "itertuples"):
-        st_set = {(str(row.symbol), str(row.date))
-                  for row in st.itertuples() if getattr(row, "is_st", False)}
-    susp_set = set()
-    if susp is not None and hasattr(susp, "itertuples"):
-        susp_set = {(str(row.symbol), str(row.date))
-                    for row in susp.itertuples()
-                    if getattr(row, "is_suspended", False)}
+    try:
+        st_rows = source.dataframe("get_st_list", required=ST_COLUMNS,
+                                   allow_empty=True)
+        susp_rows = source.dataframe("get_suspended_list",
+                                     required=SUSPENDED_COLUMNS,
+                                     allow_empty=True)
+    except MCPDataError:
+        return None
+
+    st_set = {(str(row["symbol"]), str(row["date"]))
+              for row in st_rows if _truthy(row.get("is_st"))}
+    susp_set = {(str(row["symbol"]), str(row["date"]))
+                for row in susp_rows if _truthy(row.get("is_suspended"))}
     return {"st": st_set, "suspended": susp_set}
 
 
-def audit(offline: bool = False) -> Dict[str, Any]:
+def _truthy(value: Any) -> bool:
+    if isinstance(value, str):
+        return value.strip().lower() in ("1", "true", "yes", "y", "t")
+    return bool(value)
+
+
+def audit(offline: bool = False, mcp_dir: Path | None = None) -> Dict[str, Any]:
     bars_dir = REPO_ROOT / "fixtures" / "bars"
     ref_dir = REPO_ROOT / "fixtures" / "reference"
     bars = data_loader.load_bars(bars_dir)
@@ -167,8 +164,10 @@ def audit(offline: bool = False) -> Dict[str, Any]:
         k: {"count": v, "share": round(v / total, 4)} for k, v in sorted(boards.items())
     }
 
-    # 交易所名单（需凭证）
-    lists = None if offline else (len(dates) >= 2 and _fetch_exchange_lists(dates[0], dates[-1]))
+    # 交易所名单（需要 agent 先通过 MCP 取数并落盘）
+    lists = None if offline else (
+        len(dates) >= 2
+        and _fetch_exchange_lists(dates[0], dates[-1], mcp_dir=mcp_dir))
     if lists:
         series_set = set(series)
         st_hit = series_set & lists["st"]
@@ -178,14 +177,14 @@ def audit(offline: bool = False) -> Dict[str, Any]:
             "share": round(len(st_hit) / total, 4),
             "symbols": len({s for s, _ in st_hit}),
             "note": "ST 标的有 5% 涨跌幅限制与特殊交易规则，本 skill 未做区分",
-            "source": "panda_data.get_st_list",
+            "source": "MCP get_st_list",
         }
         result["checks"]["suspended"] = {
             "count": len(susp_hit),
             "share": round(len(susp_hit) / total, 4),
             "symbols": len({s for s, _ in susp_hit}),
             "note": "停牌日不应产生任何成交，本 skill 未做过滤",
-            "source": "panda_data.get_suspended_list",
+            "source": "MCP get_suspended_list",
         }
         unmodeled = st_hit | susp_hit
         result["unmodeled_share"]["st_or_suspended"] = (
@@ -194,11 +193,12 @@ def audit(offline: bool = False) -> Dict[str, Any]:
     else:
         result["checks"]["st"] = {
             "count": None, "share": None,
-            "note": "未核验（无凭证或 --offline）；ST 状态需交易所名单才能判定",
+            "note": ("未核验（未提供 MCP 取数目录或 --offline）；"
+                     "ST 状态需交易所名单才能判定"),
         }
         result["checks"]["suspended"] = {
             "count": None, "share": None,
-            "note": "未核验（无凭证或 --offline）",
+            "note": "未核验（未提供 MCP 取数目录或 --offline）",
         }
         result["unmodeled_share"]["st_or_suspended"] = None
 
@@ -252,11 +252,14 @@ def _verdict(result: Dict[str, Any]) -> Dict[str, Any]:
 def main(argv: List[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Audit unmodeled market states")
     parser.add_argument("--offline", action="store_true",
-                        help="不调用 panda_data，只做 OHLC 层面推断")
+                        help="不做任何推断以外的核验（ST/停牌标为未核验）")
+    parser.add_argument("--from-mcp", default=None, dest="from_mcp",
+                        help="agent 落盘 MCP 取数结果的目录（含 get_st_list 等）")
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args(argv)
 
-    result = audit(offline=args.offline)
+    result = audit(offline=args.offline,
+                   mcp_dir=Path(args.from_mcp) if args.from_mcp else None)
     if args.json:
         print(json.dumps(result, ensure_ascii=False, indent=2, default=str))
     else:

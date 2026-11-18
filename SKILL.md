@@ -7,6 +7,39 @@ license: GPL-3.0-only
 
 # JEV 盯盘条件与历史回放语义对齐
 
+## 前置检查（未通过就停：只报告缺什么，不加载后续流程）
+
+本技能运行在 **QuantStudio** 环境：解释器、模型与数据通道都由宿主提供。行情数据一律由
+**阅读本 skill 的 AI** 调用 **PandaData MCP** 取回并落盘为 JSON，脚本只读写本地文件——
+不联网、不读凭证，skill 内不含任何账号、密码、token 或服务地址。
+
+执行任何流程之前按顺序确认下列各项，**任一不过即停止**，且只输出「缺什么 + 怎么补」，
+不得产出任何数字、不得改用其他数据源、不得静默降级：
+
+1. **运行环境**：QuantStudio 宿主内 Python ≥ 3.10（`env_check.py` 的 `python` 项）。
+   不过 → 换到 3.10+ 解释器再跑，不靠降级绕过。
+2. **依赖**：对齐、回放与取数转换**只用标准库**（`requirements.txt` 声明无三方依赖），
+   `pyyaml` 缺失只是 warn（回退内置默认参数）。需要三方包的只有**验收测试**：
+   `import pytest` 通过即可。把 pandas 之类写成闸门，等于在一台按设计完全能跑的机器上
+   报告「依赖缺失」。
+3. **要新数据时（换日期区间 / 换标的池 / 重建夹具）——MCP 会话是阻塞项**：
+   - `mcp__pandadata__auth_status` 须 `ok: true` 且 `reauth_required: false`。
+     不过 → 告知用户在 QuantStudio 宿主的 Settings → PandaData 完成 OAuth 登录；
+     不重试登录、不索要密码。
+   - 权限探针：先调一次最小 `get_prev_trade_date`。返回 `data_permission_required`
+     → 停止并原样转述返回里的 message 与购买入口，不换源重试。
+   - 每次 `call_pandadata` 必须核对 `truncated` 与 `row_count < total_rows`，
+     截断没取完不得进入对齐。
+4. **只做既有夹具的离线回放时——MCP 不是阻塞项**：`fixtures_bars` 非空即可跑
+   （`env_check.py` 对 `fixtures_logs` / `fixtures_reference` / `mcp_source` 缺失只报
+   warn，这是设计如此，不是漏检）。但此时必须在结论里写明**这批数据的落盘日期**并注明
+   本次未复核取数——没有 MCP 也绝不声称数据是新取的。
+5. **JEV 侧输入**：实际条件/判断日志的来源与口径必须已确认并落盘（见
+   `references/log_contract.md`）。缺日志 → 只能走合成模式，`alignment_conclusion`
+   只能是 `inconclusive`，**不得**把合成日志包装成「与 JEV 语义对齐通过」。
+
+另需确认目标区间在 PandaData 侧确有已完成的历史 K 线；未收盘的当日数据不得进入对齐。
+
 ## 工具定位
 - 工具类型：评测 / 对齐工具型
 - 工程形态：工程型（通用工具类）
@@ -129,15 +162,75 @@ python3 scripts/validate.py       # 先检查日志契约，区分"字段缺失"
 
 均值差只作幅度参考，不单独决定方向——少数大亏可以主导均值而多数周期只小赢。
 
-## 数据来源
-- 历史分钟 K 线：`panda_data` 的 `get_stock_min` / `get_stock_daily`，**仅夹具生成阶段调用**
+## 数据来源：通过 PandaData MCP 取数
+
+历史行情由**阅读本 skill 的 AI** 调用 PandaData MCP 取回并落盘，
+脚本只消费落盘 JSON。skill 内**不含**账号、密码、token 或服务地址。
+
+MCP 服务器 `pandadata`（Streamable HTTP，OAuth 登录）。调用顺序：
+
+```
+mcp__pandadata__auth_status → mcp__pandadata__search_methods
+  → mcp__pandadata__get_method_doc → mcp__pandadata__call_pandadata
+```
+
+每个数据需求对应的方法：
+
+| 数据需求 | 方法 | 关键参数 |
+|---|---|---|
+| 分钟 K 线 | `get_stock_min` | `symbol`(list), `start_date`, `end_date`, `fields` |
+| 日线与前收 | `get_stock_daily` | `symbol`(list), `start_date`, `end_date`, `fields` |
+| 前一交易日 | `get_prev_trade_date` | `date`, `exchange='SH'`, `n=1` |
+| 当日标的池 | `get_trade_list` | `date`, `exchange='SH'` |
+| ST 名单 | `get_st_list` | `start_date`, `end_date`, `is_st=True` |
+| 停牌名单 | `get_suspended_list` | `start_date`, `end_date`, `is_suspended=True` |
+
+`call_pandadata` 参数与返回信封：
+
+```json
+// 请求
+{"method": "get_stock_min",
+ "params": {"symbol": ["600519.SH"], "start_date": "20261112",
+            "end_date": "20261112"},
+ "preview_rows": 2000}
+
+// 返回（表格）
+{"ok": true, "method": "get_stock_min",
+ "result": {"type": "dataframe", "columns": ["symbol", "datetime", "..."],
+            "rows": [["600519.SH", "2026-11-12 09:31:00", "..."]],
+            "row_count": 240, "total_rows": 240,
+            "truncated": false, "truncation_reasons": []},
+ "request_id": "..."}
+```
+
+`get_trade_list` / `get_prev_trade_date` 返回普通列表/字典，解析器同样支持：
+
+```json
+// get_trade_list → [{"date": "20251110", "symbol": "000001.SZ"}, ...]
+// get_prev_trade_date → {"date": "20251107"}
+```
+
+> ⚠️ **结果会被截断**（实测 240 行只回 180 行，`truncated: true`，
+> `truncation_reasons: ["byte_limit"]`）。必须按窄日期区间分批取，
+> 分钟线建议一次一天、标的 ≤ 50 只；`scripts/mcp_source.py` 在
+> `truncated=true` 或 `row_count < total_rows` 时抛 `truncated_result`。
+
+落盘与生成：
+
+```bash
+# agent 把每个方法的结果写到 <dir>/<date>/<method>.json
+python3 scripts/fetch_data.py --date 20261112 --from-mcp <dir>
+python3 scripts/build.py        # 之后全程离线
+```
+
 - JEV 日志：调用方提供的只读日志；缺失时由 `scripts/log_synth.py` 合成
-- 对齐与回放阶段（`replayer` / `aligner` / `attribution` / `metrics`）纯标准库，不访问任何外部服务
+- 对齐与回放阶段（`replayer` / `aligner` / `attribution` / `metrics`）
+  纯标准库，**不联网、不读凭证**
 - 详见 `references/data_access.md`
 
 ## 依赖
 - Python ≥ 3.10
-- `panda-data==1.0.6`：仅 `scripts/fetch_data.py` / `scripts/build_fixtures.py` 需要
+- 运行时零第三方依赖（纯标准库）
 - `pyyaml>=6.0`：可选，缺失时回退内置默认配置
 
 ## 验收要求
@@ -145,7 +238,7 @@ python3 scripts/validate.py       # 先检查日志契约，区分"字段缺失"
 - `python3 -m pytest tests/ -v` 全通过
 - `python3 scripts/validate.py` 对夹具返回 `ok: true`
 - 实测验证记录（`references/validation_evidence.md`）中的数字可用上述命令复现
-- 样本外复现：`python3 scripts/oos_check.py`（需凭证，约 5 分钟）
+- 样本外复现：`python3 scripts/oos_check.py --from-mcp <dir>`（需先用 MCP 取数落盘，约 5 分钟）
 - 报告字段稳定，`ledger.jsonl` 每行可追溯到 `symbol + time + axis`
 
 ## 已知局限

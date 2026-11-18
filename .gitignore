@@ -25,6 +25,6 @@ baselines/
 *.log
 
 # 注：fixtures/bars、fixtures/reference、fixtures/logs 随仓库发布。
-# 它们是确定性、无凭证的冻结夹具，保证 clone 后即可离线复现。
-# 需要重建时：
-#   python3 scripts/build_fixtures.py --date YYYYMMDD --universe 300
+# 它们是确定性的冻结夹具，保证 clone 后即可离线复现。
+# 需要重建时，先让 agent 通过 PandaData MCP 取数并落盘，再：
+#   python3 scripts/build_fixtures.py --date YYYYMMDD --from-mcp <dir> --universe 300

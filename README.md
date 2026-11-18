@@ -36,7 +36,7 @@
 ├── README.en.md                    ← English version
 ├── LICENSE                         ← GPL-3.0
 ├── INSTALL.md                      ← 多平台安装指南
-├── requirements.txt                ← 运行依赖（仅夹具生成需要）
+├── requirements.txt                ← 运行依赖（零第三方依赖）
 ├── requirements-dev.txt            ← 测试依赖
 ├── skill.json                      ← Skill 元数据
 ├── CHANGELOG.md                    ← 版本记录
@@ -62,11 +62,11 @@
 │   ├── knob_efficacy.py            ← 旋钮接线有效性核验
 │   ├── value_decomposition.py      ← T+1 等旋钮的收益拆解
 │   ├── compare_baseline.py         ← 冻结基线 freeze/compare/list
-│   ├── credentials.py              ← 凭证加载（唯一实现）
-│   ├── fetch_data.py               ← 拉取分钟 K 线（需凭证）
+│   ├── mcp_source.py               ← MCP 取数结果解析（信封/截断/缺列）
+│   ├── fetch_data.py               ← 由 MCP 落盘 JSON 生成 K 线夹具
 │   ├── build_fixtures.py           ← 生成发布用夹具
 │   ├── validate.py                 ← 日志契约校验
-│   ├── oos_check.py                ← 样本外复现（需凭证）
+│   ├── oos_check.py                ← 样本外复现（由 MCP 落盘 JSON 驱动）
 │   ├── data_quality_audit.py       ← 未建模状态占比
 │   ├── controls_check.py           ← 判定器区分度对照
 │   ├── verify_claims.py            ← 文档数字对账
@@ -90,13 +90,15 @@
 ## 快速开始
 
 ```bash
-# 1. 环境自检（无需凭证）
+# 0. 先过 SKILL.md 的「前置检查」：任一不过即停，只报告缺什么
+
+# 1. 环境自检（离线线路无需登录、无需网络）
 python3 scripts/env_check.py
 
 # 2. 检查夹具与日志契约
 python3 scripts/validate.py
 
-# 3. 完整对齐评测（无需凭证）
+# 3. 完整对齐评测（纯离线，只读 fixtures/）
 python3 scripts/build.py
 
 # 4. 单元测试
@@ -146,12 +148,46 @@ python3 -m pytest tests/ -v
 因此本 skill 把 `one_sided` 单列，不放进一致率分母。
 把它混进去会得到"一致率只有 2%"这种毫无意义、且会误导决策的数字。
 
-## 数据来源
+## 数据来源：PandaData MCP
 
-- 分钟 K 线与前收价：`panda_data` 的 `get_stock_min` / `get_stock_daily`，
-  **仅夹具生成阶段调用**，见 `references/data_access.md`
+需要重新生成夹具时，由**阅读本 skill 的 AI** 调 MCP 工具取数，而不是脚本联网：
+
+```
+mcp__pandadata__auth_status → mcp__pandadata__search_methods
+  → mcp__pandadata__get_method_doc → mcp__pandadata__call_pandadata
+```
+
+| 数据需求 | 方法 | 关键参数 |
+|---|---|---|
+| 分钟 K 线 | `get_stock_min` | `symbol`(list), `start_date`, `end_date`, `fields` |
+| 日线与前收 | `get_stock_daily` | `symbol`(list), `start_date`, `end_date`, `fields` |
+| 前一交易日 | `get_prev_trade_date` | `date`, `exchange='SH'`, `n=1` |
+| 当日标的池 | `get_trade_list` | `date`, `exchange='SH'` |
+| ST / 停牌名单 | `get_st_list` / `get_suspended_list` | `start_date`, `end_date` |
+
+```json
+{"method": "get_stock_min",
+ "params": {"symbol": ["600519.SH", "000001.SZ"],
+            "start_date": "20261112", "end_date": "20261112",
+            "fields": ["symbol", "datetime", "open", "high", "low",
+                       "close", "volume", "amount"]},
+ "preview_rows": 2000}
+```
+
+AI 把返回原样落到 `<dir>/<date>/get_stock_min.json` 等文件后：
+
+```bash
+python3 scripts/fetch_data.py --date 20261112 --from-mcp <dir>
+python3 scripts/build_fixtures.py --date 20261112 --from-mcp <dir> --universe 300
+```
+
+> ⚠️ **返回会被截断**（实测 240 行只回 180 行，`truncated: true`）。
+> 按窄日期区间分批取，分钟线一次一天、标的 ≤ 50 只。
+> `scripts/mcp_source.py` 遇到截断直接报 `truncated_result`，不会静默当完整数据。
+
 - JEV 日志：调用方提供的只读文件
-- 对齐与回放：纯标准库，不访问任何外部服务
+- 对齐与回放：纯标准库，**完全离线**，克隆后即可跑
+- 完整契约（信封形态、落盘目录、错误码）见 `references/data_access.md`
 
 ## 替换成真实 JEV 日志
 

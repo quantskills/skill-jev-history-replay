@@ -16,6 +16,10 @@ Alignment skill for JEV watch conditions. Turns every implicit interpretation ch
 
 ## Quick start
 
+Run the pre-flight checklist in `SKILL.md` (`## 前置检查`) first. If an item
+fails, stop and report what is missing -- do not switch data sources, do not
+silently fall back to synthetic logs.
+
 ```bash
 python3 scripts/env_check.py
 python3 scripts/validate.py
@@ -56,11 +60,41 @@ print(report["alignment_conclusion"])
 - `output/report.json` — provenance, comparability, ledger aggregate, attribution, conclusions, applicability
 - `output/ledger.jsonl` — one row per aligned item
 
+## Data access (fixture regeneration only)
+
+Fetch data through PandaData MCP tools, then let the scripts consume the JSON:
+
+```
+mcp__pandadata__auth_status → mcp__pandadata__search_methods
+  → mcp__pandadata__get_method_doc → mcp__pandadata__call_pandadata
+```
+
+| Need | Method | Key params |
+|---|---|---|
+| Minute bars | `get_stock_min` | `symbol`(list), `start_date`, `end_date`, `fields` |
+| Daily bars / previous close | `get_stock_daily` | `symbol`(list), `start_date`, `end_date`, `fields` |
+| Previous trading day | `get_prev_trade_date` | `date`, `exchange='SH'`, `n=1` |
+| Trading universe | `get_trade_list` | `date`, `exchange='SH'` |
+| ST / suspended | `get_st_list` / `get_suspended_list` | `start_date`, `end_date` |
+
+```json
+{"method": "get_stock_min",
+ "params": {"symbol": ["600519.SH"], "start_date": "20261112", "end_date": "20261112"},
+ "preview_rows": 2000}
+```
+
+```bash
+python3 scripts/fetch_data.py --date 20261112 --from-mcp <dir>
+```
+
+Results get truncated (240 rows may return as 180, `truncated: true`): fetch one
+day at a time with at most ~50 symbols. `scripts/mcp_source.py` raises
+`truncated_result` instead of accepting partial data.
+
 ## Dependencies
 
 - Python 3.10+
-- panda-data==1.0.6 (fixture generation only)
-- PyYAML (optional)
+- No third-party package at runtime; PyYAML optional (config override only)
 
 ## Notes
 

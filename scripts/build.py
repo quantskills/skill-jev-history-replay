@@ -62,7 +62,7 @@ def validate_input(input_data: Any) -> Dict[str, Any]:
         if not Path(bars_dir).exists():
             raise ReplayError(
                 "bars_dir_not_found", f"K线目录不存在：{bars_dir}",
-                hint="先运行 scripts/fetch_data.py，或指向 fixtures/bars",
+                hint="先运行 scripts/fetch_data.py --from-mcp <dir>，或指向 fixtures/bars",
             )
 
     logs_dir = params.get("logs_dir")

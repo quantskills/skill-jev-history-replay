@@ -52,8 +52,8 @@ Each of these changes the per-bar decision and fill price, and none of them is v
 │   ├── knob_efficacy.py            ← Knob wiring effectiveness check
 │   ├── value_decomposition.py      ← Return decomposition (e.g. T+1)
 │   ├── compare_baseline.py         ← freeze / compare / list
-│   ├── credentials.py              ← Credential loading (single implementation)
-│   ├── fetch_data.py               ← Minute bars (credentials required)
+│   ├── mcp_source.py               ← Parses MCP-fetched JSON (envelope/truncation/columns)
+│   ├── fetch_data.py               ← Minute bars from MCP-fetched JSON
 │   ├── build_fixtures.py           ← Published fixture builder
 │   ├── validate.py                 ← Log contract validator
 │   ├── oos_check.py                ← Out-of-sample reproduction
@@ -75,7 +75,10 @@ Each of these changes the per-bar decision and fill price, and none of them is v
 ## Quick Start
 
 ```bash
-python3 scripts/env_check.py     # no credentials needed
+# 0. Work through the pre-flight checklist (## 前置检查) in SKILL.md first;
+#    if any item fails, stop and report what is missing.
+
+python3 scripts/env_check.py     # offline path: no login, no network
 python3 scripts/validate.py      # check the fixture / log contract
 python3 scripts/build.py         # full alignment run
 python3 -m pytest tests/ -v      # unit tests
@@ -131,11 +134,48 @@ Log systems usually write a `condition` record **only when state flips**, while 
 
 This skill therefore reports `one_sided` separately and keeps it out of the match-rate denominator. Blending them in produces a "2% match rate" that is meaningless and would misdirect the investigation.
 
-## Data Access
+## Data Access: PandaData MCP
 
-- Bars and previous close: `panda_data` `get_stock_min` / `get_stock_daily`, **fixture generation only** — see `references/data_access.md`
+To regenerate fixtures, the **AI reading this skill** fetches data through MCP
+tools; the scripts never go online:
+
+```
+mcp__pandadata__auth_status → mcp__pandadata__search_methods
+  → mcp__pandadata__get_method_doc → mcp__pandadata__call_pandadata
+```
+
+| Data needed | Method | Key params |
+|---|---|---|
+| Minute bars | `get_stock_min` | `symbol` (list), `start_date`, `end_date`, `fields` |
+| Daily bars and previous close | `get_stock_daily` | `symbol` (list), `start_date`, `end_date`, `fields` |
+| Previous trading day | `get_prev_trade_date` | `date`, `exchange='SH'`, `n=1` |
+| Trading universe | `get_trade_list` | `date`, `exchange='SH'` |
+| ST / suspended lists | `get_st_list` / `get_suspended_list` | `start_date`, `end_date` |
+
+```json
+{"method": "get_stock_min",
+ "params": {"symbol": ["600519.SH", "000001.SZ"],
+            "start_date": "20261112", "end_date": "20261112",
+            "fields": ["symbol", "datetime", "open", "high", "low",
+                       "close", "volume", "amount"]},
+ "preview_rows": 2000}
+```
+
+After the AI writes the raw responses to `<dir>/<date>/get_stock_min.json` etc.:
+
+```bash
+python3 scripts/fetch_data.py --date 20261112 --from-mcp <dir>
+python3 scripts/build_fixtures.py --date 20261112 --from-mcp <dir> --universe 300
+```
+
+> ⚠️ **Responses get truncated** (measured: 240 rows returned as 180,
+> `truncated: true`). Fetch narrow date ranges: one day per call and at most
+> ~50 symbols. `scripts/mcp_source.py` raises `truncated_result` rather than
+> silently accepting a partial table.
+
 - JEV logs: read-only files supplied by the caller
-- Alignment and replay: pure standard library, no external service
+- Alignment and replay: pure standard library, **fully offline**; works right after clone
+- Full contract (envelope shape, on-disk layout, error codes): `references/data_access.md`
 
 ## Plugging In Real JEV Logs
 

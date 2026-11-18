@@ -26,7 +26,7 @@
 
 | 旋钮 | 允许取值 | 默认 | 含义 |
 |---|---|---|---|
-| `bar_timestamp` | `bar_end` | `bar_end` | 时间戳 = 该分钟结束时刻（panda_data 口径：09:31 覆盖 09:30–09:31） |
+| `bar_timestamp` | `bar_end` | `bar_end` | 时间戳 = 该分钟结束时刻（PandaData 分钟线口径：09:31 覆盖 09:30–09:31） |
 | | `bar_start` | | 时间戳 = 该分钟开始时刻（09:31 覆盖 09:31–09:32） |
 | `baseline_price` | `prev_close` | `prev_close` | 涨幅基准 = 前收盘价 |
 | | `day_open` | | 涨幅基准 = **分钟线首根（09:31）的 open**，不是日线接口的 `open` |

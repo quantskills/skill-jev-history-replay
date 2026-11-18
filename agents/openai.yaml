@@ -2,7 +2,7 @@ openapi: 3.1.0
 info:
   title: skill-jev-history-replay
   description: Align JEV's recorded watch conditions with a deterministic historical replayer and attribute every difference to one explicit interpretation knob (timestamp convention, baseline price, breakout field/window, persistence, wait bars, entry price, exit evaluation, T+1, cooldown). Emits a five-axis difference ledger plus single-knob ablation.
-  version: 0.16.3
+  version: 0.17.0
 
 x-skill-info:
   name: skill-jev-history-replay
@@ -30,7 +30,7 @@ x-steps:
 
   - id: self_check
     script: scripts/env_check.py
-    description: Report environment readiness as structured JSON; missing panda_data is a warning, not a blocker
+    description: Report environment readiness as structured JSON; no network or login is required
     args: "--json"
     auth_required: false
 
@@ -40,11 +40,46 @@ x-steps:
     args: "freeze output/report.json --name v1"
     auth_required: false
 
+  - id: fetch_data
+    script: scripts/fetch_data.py
+    description: Turn MCP-fetched JSON (get_stock_min / get_stock_daily / get_prev_trade_date) into bar fixtures
+    args: "--date 20261112 --from-mcp /tmp/mcp"
+    auth_required: false
+
   - id: build_fixtures
     script: scripts/build_fixtures.py
-    description: Regenerate bars, reference prices and synthetic logs (requires panda_data credentials)
-    args: "--date 20261112 --universe 300"
-    auth_required: true
+    description: Regenerate bars, reference prices and synthetic logs from an MCP-fetched JSON directory
+    args: "--date 20261112 --from-mcp /tmp/mcp --universe 300"
+    auth_required: false
+
+x-preflight:
+  # Mirror of the "## 前置检查" section in SKILL.md. Work through it in order and
+  # stop at the first failing item: report only what is missing, never switch data
+  # sources and never degrade silently.
+  host: QuantStudio
+  stop_on_failure: true
+  items:
+    - id: runtime
+      check: "QuantStudio host with Python >= 3.10 (scripts/env_check.py)"
+      on_fail: stop
+    - id: dependencies
+      check: "core path is standard-library only; tests need `import pytest`"
+      on_fail: stop
+    - id: mcp_session
+      check: "mcp__pandadata__auth_status -> ok: true and reauth_required: false"
+      blocking_when: "refetching bars or rebuilding fixtures"
+      on_fail: "stop; tell the user to log in via Settings -> PandaData; never ask the user for credentials"
+    - id: permission_probe
+      check: "one minimal get_prev_trade_date call; data_permission_required means stop"
+      blocking_when: "refetching bars or rebuilding fixtures"
+      on_fail: "relay the returned message and purchase entry point verbatim"
+    - id: offline_replay
+      check: "fixtures/bars non-empty; missing logs or reference prices stay warnings"
+      blocking_when: null
+      on_fail: "state the fixture landing date and that acquisition was not re-verified"
+    - id: jev_log_source
+      check: "actual JEV condition/judgement logs confirmed; otherwise synthetic mode"
+      on_fail: "alignment_conclusion must stay inconclusive"
 
 x-semantics-knobs:
   # 语义配置项全集，与 scripts/config.py 的 REFERENCE_SEMANTICS 一致（23 项）
@@ -105,10 +140,24 @@ x-evaluation-policy:
 x-requirements:
   runtime: python >= 3.10
   packages:
-    - panda-data==1.0.6 (fixture generation only)
+    - (no runtime third-party dependency)
     - pyyaml (optional)
     - pytest (dev)
-  env:
-    - PANDA_DATA_USERNAME
-    - PANDA_DATA_PASSWORD
-    - PANDA_DATA_BASE_URL
+  mcp:
+    server: pandadata
+    transport: streamable-http
+    auth: oauth
+    tools:
+      - mcp__pandadata__auth_status
+      - mcp__pandadata__search_methods
+      - mcp__pandadata__get_method_doc
+      - mcp__pandadata__call_pandadata
+    flow: auth_status -> search_methods -> get_method_doc -> call_pandadata
+    methods:
+      - get_stock_min
+      - get_stock_daily
+      - get_prev_trade_date
+      - get_trade_list
+      - get_st_list
+      - get_suspended_list
+    note: "结果按窄日期区间分批取；truncated=true 时 scripts/mcp_source.py 抛 truncated_result。落盘后用 fetch_data.py --from-mcp 生成夹具。" 

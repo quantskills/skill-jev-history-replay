@@ -18,7 +18,7 @@ from typing import Any, Dict, List
 # 每个旋钮的可选值及其含义。用于文档、校验与归因实验构造。
 KNOB_VALUES: Dict[str, Dict[str, str]] = {
     "bar_timestamp": {
-        "bar_end": "分钟线时间戳=该分钟结束时刻（panda_data 口径，09:31 覆盖 09:30–09:31）",
+        "bar_end": "分钟线时间戳=该分钟结束时刻（PandaData 分钟线口径，09:31 覆盖 09:30–09:31）",
         "bar_start": "分钟线时间戳=该分钟开始时刻（09:31 覆盖 09:31–09:32）",
     },
     "baseline_price": {

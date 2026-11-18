@@ -91,8 +91,8 @@ def test_scripts_are_importable():
 def test_readme_trees_list_every_script():
     """README（中/英）的 `scripts/` 目录树必须列全所有脚本。
 
-    来源：README 的树曾缺 7 个脚本（data_loader / adapt_logs / credentials /
-    trade_audit / knob_efficacy / value_decomposition），英文版缺失更多。
+    来源：README 的树曾缺 7 个脚本（data_loader / adapt_logs / trade_audit /
+    knob_efficacy / value_decomposition 等），英文版缺失更多。
     读者照树去找会找不到文件。
     """
     actual = {p.name for p in SCRIPTS.glob("*.py") if p.name != "__init__.py"}
@@ -185,12 +185,12 @@ def test_doc_counts_match_actual():
 
 
 def test_fetch_data_can_run_as_script():
-    """`scripts/fetch_data.py` 直接运行时必须能 import 到 `scripts.credentials`。
+    """`scripts/fetch_data.py` 直接运行时必须能 import 到 `scripts.mcp_source`。
 
     它曾漏了 `sys.path.insert(0, REPO_ROOT)`，直接运行时
-    `from scripts.credentials import ...` 抛 ModuleNotFoundError。
-    因为只在真正调用凭证时才触发，`--help` 与单元测试都发现不了，
-    直到按 §8 的复现命令手跑（`fetch_data.py --date ...`）才暴露。
+    `from scripts.<依赖> import ...` 抛 ModuleNotFoundError。
+    因为只在真正取数时才触发，`--help` 与单元测试都发现不了，
+    直到按复现命令手跑（`fetch_data.py --date ... --from-mcp ...`）才暴露。
     """
     import subprocess
     import sys
@@ -200,7 +200,7 @@ def test_fetch_data_can_run_as_script():
         "import importlib.util as u;"
         "spec = u.spec_from_file_location('fd', 'scripts/fetch_data.py');"
         "m = u.module_from_spec(spec); spec.loader.exec_module(m);"
-        "m._env('PANDA_DATA_USERNAME', 'DEFAULT_USERNAME');"  # 无凭证时返回空串
+        "assert m.MCPSource is not None;"
         "print('ok')"
     )
     proc = subprocess.run([sys.executable, "-c", code], cwd=REPO_ROOT,
@@ -270,38 +270,29 @@ def test_evidence_table_counts_match_collection():
     )
 
 
-def test_documented_pandata_apis_match_code_calls():
-    """`data_access.md` 列的 panda 接口必须与代码实际调用的一致。
+def test_documented_mcp_methods_match_code():
+    """`data_access.md` 列的 MCP 方法必须与 `scripts/mcp_source.py` 一致。
 
-    这张表是读者重新生成夹具的唯一依据。文档写了一个代码没用的接口，
-    或代码用了一个文档没列的接口，都会让读者困惑。
+    这张表是读者（以及阅读 skill 的 AI）取数的唯一依据。文档写了一个
+    代码不认的方法，或代码支持了文档没列的方法，都会让使用者困惑。
 
-    只做静态比对（不导入 panda_data），因此 CI 不装它也能跑。
+    纯静态比对，不联网。
     """
+    from scripts import mcp_source
+
     doc = (REPO_ROOT / "references" / "data_access.md").read_text(encoding="utf-8")
 
-    api_names = ("get_stock_min", "get_stock_daily", "get_prev_trade_date",
-                 "get_trade_list", "get_st_list", "get_suspended_list")
+    documented = {name for name in mcp_source.METHODS
+                  if re.search(rf"\| `{name}` \|", doc)}
+    assert documented, "data_access.md 的 MCP 方法表没解析到任何方法"
 
-    # 文档里以表格行形式列出的接口
-    documented = {name for name in api_names if re.search(rf"\| `{name}` \|", doc)}
-    assert documented, "data_access.md 的接口表没解析到任何接口"
-
-    # 代码里实际调用的接口
-    called = set()
-    for path in sorted((REPO_ROOT / "scripts").glob("*.py")):
-        src = path.read_text(encoding="utf-8")
-        for name in api_names:
-            if re.search(rf"\b{name}\s*\(", src):
-                called.add(name)
-
-    assert documented == called, (
-        f"文档列了但代码没调用：{sorted(documented - called)}；"
-        f"代码调用了但文档没列：{sorted(called - documented)}")
+    assert documented == set(mcp_source.METHODS), (
+        f"文档列了但代码不支持：{sorted(documented - set(mcp_source.METHODS))}；"
+        f"代码支持但文档没列：{sorted(set(mcp_source.METHODS) - documented)}")
 
 
 def test_data_access_signature_notes_match_code():
-    """文档里强调的两个签名坑必须与代码一致。
+    """文档里强调的参数坑必须与代码一致。
 
     - `get_prev_trade_date` 用 `date=` 而非 `nature_date=`
     - `get_trade_list` 的 exchange 用 `'SH'`（含深市）
@@ -310,40 +301,23 @@ def test_data_access_signature_notes_match_code():
     assert "date=" in doc and "nature_date=" in doc, "文档未说明 get_prev_trade_date 的参数名坑"
     assert "exchange='SH'" in doc or 'exchange="SH"' in doc
 
-    fetch = (REPO_ROOT / "scripts" / "fetch_data.py").read_text(encoding="utf-8")
-    assert "get_prev_trade_date(" in fetch
-    assert "nature_date=" not in fetch, "代码用了 nature_date，与 1.0.6 签名不符"
+    source = (REPO_ROOT / "scripts" / "mcp_source.py").read_text(encoding="utf-8")
+    assert "get_prev_trade_date" in source
+    assert "nature_date=" not in source, "代码用了 nature_date，与 MCP 契约不符"
 
 
-def test_fetch_network_error_becomes_structured(monkeypatch):
-    """SDK 的网络异常必须转成本 skill 的 `FetchError`。
+def test_fetch_without_mcp_dir_is_structured():
+    """没有 MCP 落盘目录时必须给结构化错误，而不是联网或抛 traceback。
 
-    真实缺陷：`base_url` 指到不可达主机时，`init_token` 抛出原始
-    `ServiceError("Network error: ...")`，`fetch_data.py` 没有兜住，
-    于是 CLI 直接吐几十行 traceback，读者拿不到可操作的提示。
-
-    文档 §7 承诺错误路径给出 `code` / `message` / `hint`，这条守住它。
+    取数已改为「agent 通过 MCP 取回 → 落盘 JSON → 脚本消费」。
+    脚本若在缺目录时静默返回空数据，读者会以为"今天没有行情"。
     """
-    import sys
-    import types
-
     import pytest as _pytest
 
-    fetch_data = _pytest.importorskip("scripts.fetch_data")
-
-    class BoomSDK:
-        def init_token(self, **kwargs):
-            raise RuntimeError("Network error: simulated unreachable host")
-
-        def is_authenticated(self):
-            return False
-
-    monkeypatch.setitem(sys.modules, "panda_data", BoomSDK())
-    monkeypatch.setenv("PANDA_DATA_USERNAME", "u")
-    monkeypatch.setenv("PANDA_DATA_PASSWORD", "p")
-    monkeypatch.setenv("PANDA_DATA_BASE_URL", "https://unreachable.invalid")
+    from scripts import fetch_data
 
     with _pytest.raises(fetch_data.FetchError) as exc:
-        fetch_data._client()
-    assert exc.value.code == "auth_request_failed"
+        fetch_data.fetch("20261112", None, Path("/tmp/jev-none"),
+                         Path("/tmp/jev-none-ref"), mcp_dir=None)
+    assert exc.value.code == "missing_mcp_dir"
     assert exc.value.hint, "结构化错误必须带可操作的 hint"

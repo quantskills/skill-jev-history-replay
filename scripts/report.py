@@ -10,6 +10,20 @@ from . import metrics
 from .aligner import PRIOR, aggregate_rows, first_divergence
 
 
+def logs_fingerprint(log_records: List[Dict[str, Any]]) -> str:
+    """日志内容的规范化指纹：与记录顺序、JSON 缩进、落盘布局无关，与内容有关。
+
+    做法是对每条记录做 `sort_keys` 序列化后整体排序再哈希——**全字段**参与，
+    不挑字段。挑字段就等于赌"我知道哪些字段重要"，而 `_synthetic` 标记、
+    `baseline`/`reference` 口径这类项一旦漏掉，换日志就换不出指纹，
+    这条守卫反而变成假绿。
+    """
+    rows = [json.dumps(rec, sort_keys=True, ensure_ascii=False, default=str)
+            for rec in log_records]
+    blob = "\n".join(sorted(rows))
+    return hashlib.sha256(blob.encode("utf-8")).hexdigest()[:16]
+
+
 def config_hash(payload: Dict[str, Any]) -> str:
     text = json.dumps(payload, sort_keys=True, ensure_ascii=False, default=str)
     return hashlib.sha256(text.encode("utf-8")).hexdigest()[:16]

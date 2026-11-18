@@ -1,5 +1,77 @@
 # CHANGELOG
 
+## 0.17.3 — 2026-11-19
+
+### Fixed
+- **解释器支持范围自相矛盾**：0.17.2 把 `skill.json` 的 `runtime` 放宽到 `python>=3.9`，
+  依据是「3.9.6 实跑 `build.py` 返回 0」。核对结果：3.9.6 下所有脚本 `py_compile` 通过、
+  模块可 import，**但** `scripts/env_check.py` 在 <3.10 判 `blocked`、`SKILL.md` 前置检查写
+  ≥3.10、CI 矩阵只有 3.10/3.11/3.12、本机 3.9.6 没有 pytest（全量验收套件在 3.9 上一条都跑不了；用例数以 `pytest --collect-only` 为准）。
+  「能 import」不等于「受支持」，所以统一回 `python>=3.10` —— 支持范围只能等于被验证过的范围。
+  这条**推翻了另一会话刚做的自我放宽**；若要真正确立 3.9 支持，必须三件一起改：
+  `env_check` 门槛下调 + CI 增加 3.9 矩阵项 + 该矩阵全绿。
+- 文档两处失真更正：`validation_evidence.md` §1.1 与 §8 不再声称「3.9.6 实测通过 / 数字相同」。
+
+### Added
+- `tests/test_comparability_fields.py`（7 例）+ `logs_fingerprint` 字段：
+  日志内容此前只在 `config_hash` 里以「来源 + 条数」出现，**条数不变、内容换了**
+  （典型：合成日志换成真实日志）谁也不看不说。现在 `comparability` 记录全字段规范化指纹，
+  `compare_baseline` 在 `changed_fields` 里点名；它刻意**不进** `config_hash`
+  （并进即属冻结基线契约变更，既有锚点会判不可比、需要重新 freeze，须单独发版决定）。
+- `test_runtime_floor_agrees_across_all_four_sites`：把 `skill.json` / `env_check.py` /
+  CI 矩阵 / SKILL.md 四处下限钉进同一条断言，改一处即红；`test_unverified_interpreter_is_not_claimed_as_supported`
+  以「可编译但无 pytest」的反例守住措辞。
+- 证据重建：`output/report.json` 现含 `logs_fingerprint`，随包 ledger 一并重生成。
+
+## 0.17.2 — 2026-11-19
+
+### Fixed
+- **文档自检数字长期过期**：`validation_evidence.md` 写「当前覆盖 71 项」而
+  `verify_claims.py` 实跑为 **84/84**；写「293 passed」而 `pytest --collect-only` 实收集
+  **309**。冷克隆验收数字是读者最常照抄的一节，过期即误导。
+- **`skill.json` 的 `runtime` 由 `python>=3.10` 放宽为 `python>=3.9`**：系统
+  Python 3.9.6 实跑 `scripts/build.py` 返回 0，原先的下限是无依据的自我设限，
+  会让只有系统 Python 的安装者误以为自己不受支持。
+
+### Added
+- `tests/test_doc_numbers_live.py`（3 例）：以**实测**为唯一真相锁住上述三处——
+  跑 `verify_claims.py` 取真实项数、跑 `--collect-only` 取真实用例数（**不数 `def test_`，
+  参数化会让两者不等**）、校验 runtime 下限不高于实测可运行版本。
+
+### Fixed（本轮补记，与上面同属未发布态）
+- **归因阈值是死配置**（缺陷 #70）：`explained_rate_threshold` / `min_comparable_retention`
+  只写在 `config.py` / YAML 顶层，`run_ablation` 却从 `semantics` 取值，改 YAML 静默无效。
+  现由 `run_eval.py` 显式传入，优先级为 显式参数 > `semantics` 键 > 默认值。
+- **welch p 用绝对容差核验**（缺陷 #71）：1e-5 量级的 p 配 `5e-3` 容差，偏差近 700 倍仍
+  判通过；改为 25% 相对容差，并把 `validation_claims.json` 的声称值从 `7e-06` 更正为
+  实测 `1.1e-05`。
+- 新增 `tests/test_attribution_wiring.py`（6 例）与 `test_validation_claims.py` 补 2 例：
+  阈值必须真的参与判定、p 声称值翻倍必须失败、声称值必须与随包报告一致。
+- `skill.json` 的 `anchor_check` 命令缺 `--against`（照原样执行 argparse 直接报错）。
+- SKILL.md 的 `consistent` 判据补齐代码实际强制的另外两条（真实冲突为 0、每轴都有可比项），
+  与 `references/api_guide.md` 对齐；此前 SKILL.md 偏松。
+- 台账 69 → 71 项；新增「拿不到 JEV 日志时怎么办」小节，正面回应「不能取到日志则先换题」
+  这条立项闸门，并写清当前处于合成链路、结论只能 `inconclusive`。
+
+## 0.17.1 — 2026-11-18
+
+### Changed
+- **随包发布运行证据与冻结锚点**：`.gitignore` 原先把 `output/` 与 `baselines/` 整目录排除，
+  导致交付要求里的「冻结基线对照」对 `git clone` 安装者**等于不存在**——包内有
+  `compare_baseline.py` 却没有任何可比对的锚点，第一次运行只能自己 freeze 自己。
+  现放行 `output/report.json`、`output/ledger.jsonl` 与 `baselines/*.json`，
+  其余运行产物仍不入库。
+- 新增锚点 `baselines/v0170-hosted.json`（由 v0.17.0 代码重新生成的报告冻结：
+  `ledger_match_rate 0.9912`、`divergence_items 319`、`alignment_verdict inconclusive`、
+  `value_verdict negative`、`attribution_verdict single_knob`）。
+- `skill.json` 新增 `outputs` 段：标明随包证据、锚点路径与 `compare_baseline` 核对命令。
+
+### Removed
+- `baselines/v0124check.json` 移入 `output/legacy/`（不入库）。它是 v0.12.4 时期的
+  本地草稿，`fixture_fingerprint` 仍是 gzip 头时间戳修复**之前**的 `250b7572`，
+  留在 `baselines/` 里会被误当成有效基线。
+
+
 ## 0.17.0 — 2026-11-18
 
 ### 新增「前置检查」小节，并把环境口径统一到 QuantStudio
@@ -71,25 +143,6 @@
 - 已发布夹具与 `output/` 的数字不变（样本仍是原来的 14 日 × 300 只）。
 
 ---
-
-## [0.17.1] — 2026-11-18
-
-### Changed
-- **随包发布运行证据与冻结锚点**：`.gitignore` 原先把 `output/` 与 `baselines/` 整目录排除，
-  导致交付要求里的「冻结基线对照」对 `git clone` 安装者**等于不存在**——包内有
-  `compare_baseline.py` 却没有任何可比对的锚点，第一次运行只能自己 freeze 自己。
-  现放行 `output/report.json`、`output/ledger.jsonl` 与 `baselines/*.json`，
-  其余运行产物仍不入库。
-- 新增锚点 `baselines/v0170-hosted.json`（由 v0.17.0 代码重新生成的报告冻结：
-  `ledger_match_rate 0.9912`、`divergence_items 319`、`alignment_verdict inconclusive`、
-  `value_verdict negative`、`attribution_verdict single_knob`）。
-- `skill.json` 新增 `outputs` 段：标明随包证据、锚点路径与 `compare_baseline` 核对命令。
-
-### Removed
-- `baselines/v0124check.json` 移入 `output/legacy/`（不入库）。它是 v0.12.4 时期的
-  本地草稿，`fixture_fingerprint` 仍是 gzip 头时间戳修复**之前**的 `250b7572`，
-  留在 `baselines/` 里会被误当成有效基线。
-
 
 ## 0.16.3 — 2026-11-13
 

@@ -37,6 +37,13 @@ report = run(input_data, config=None)
 | `logged_profile` | str | 合成日志所用档位，默认 `jev_assumed` |
 | `log_source` | str | `auto` / `actual` / `synthetic`，默认 `auto` |
 
+> 可比性块里另有 `logs_fingerprint`（日志内容全字段指纹）与 `fixture_fingerprint`
+> （14 天 bars + reference 逐字节）。`logs_fingerprint` **刻意不进** `config_hash`：
+> 并入即属冻结基线契约变更（既有锚点会判不可比、需要重新 freeze），须单独发版决定；
+> 它目前出现在 `comparability` 与 `compare_baseline` 的 `changed_fields` 里，
+> 作用是让"条数不变、内容变了"这类输入变化可见。旧锚点没有该键时按"未记录"处理，
+> 不计入 `changed_fields`——把键缺席当成漂移，会让每个历史锚点在升级后都谎报一次变化。
+
 优先级：`run(config=...)` > 环境变量 `JEV_*` > `config/replay_config.yaml` > 内置默认值。
 
 `config` 里的未知键与 `input_data` 口径一致，同样抛 `ConfigError(code="unknown_config")`。

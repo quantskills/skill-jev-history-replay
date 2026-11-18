@@ -20,7 +20,7 @@ python3 -m pytest tests/test_validation_claims.py -v
 ```
 
 任一项与 `output/report.json` 不符即失败，并打印 `actual` vs `claimed`。
-当前覆盖 **71 项**：
+当前覆盖 **84 项**：
 - 33 项关键指标
 - 28 项分日数字（14 天 × 可比/冲突）
 - **10 项内部自洽**（见下）
@@ -57,13 +57,13 @@ python3 -m pytest tests/test_validation_claims.py -v
 ## 1. 单元测试
 
 ```bash
-python3 -m pytest tests/ -q -m "not slow"   # 304 passed, 约 6 分钟
+python3 -m pytest tests/ -q -m "not slow"   # 324 passed, 约 6 分钟
 python3 -m pytest tests/ -q -m slow         # 区分度对照，约 2 分钟
 ```
 
 | 项 | 结果 |
 |---|---|
-| 用例总数 | 309（304 快测 + 5 慢测单独跑） |
+| 用例总数 | 329（324 快测 + 5 慢测单独跑） |
 | 失败 | 0 |
 | 环境 | Python 3.12.12 / 3.11.16 |
 | 全量耗时 | 快测约 6 分钟；慢测（区分度对照）另约 2 分钟 |
@@ -78,7 +78,9 @@ python3 -m pytest tests/ -q -m slow         # 区分度对照，约 2 分钟
 | `test_attribution.py` | 10 | 单旋钮解释率、视图一致性、**多旋钮漏报成因** |
 | `test_report.py` | 32 | verdict 判定、覆盖率门槛、零冲突门槛、Welch 检验、**p 值不得被舍入为 0**、**任一轴零可比不得判 consistent**、**reason 里的 p 值不得显示为 0**、**applicability 声明与能力一致** |
 | `test_end_to_end.py` | 13 | 输入校验、来源判定、产物落盘、确定性、**每根都写 vs 仅翻转两种记录习惯** |
-| `test_validation_claims.py` | 13 | **文档数字对账**、防漂移、区分度对照、**陈旧数字扫描** |
+| `test_validation_claims.py` | 15 | **文档数字对账**、防漂移、区分度对照、**陈旧数字扫描**、**p 值必须按相对容差核验** |
+| `test_comparability_fields.py` | 8 | 日志内容指纹：换顺序/换缩进不变、改一条命中必变、抹掉 `_synthetic` 标记必变、空日志稳定、内容漂移必须点名、内容相同不误报、**旧锚点缺该键按"未记录"处理而不谎报漂移** |
+| `test_attribution_wiring.py` | 6 | **归因阈值真的参与判定**（0.95/0.5/retention 三档改判）、**显式参数优先于 semantics 键**、**run_eval 必须把 config 阈值传进消融** |
 | `test_data_quality_audit.py` | 7 | 板块分类、涨跌停口径、**离线时上界必须为 unknown 而非部分值**、报告回显 |
 | `test_trade_audit.py` | 4 | **逐笔价格/算术反查**、跨日覆盖、故意改价必被抓 |
 | `test_doc_commands.py` | 12 | **文档引用的脚本必须存在 / 可解析**、**证据表格与实际测试文件一致**、**表格用例数 = pytest 收集数**、**README 目录树列全脚本**、**缺陷标题数 = 表行数**、**文档里的命令输出计数与实际一致** | **文档引用的脚本必须存在 / 可解析**、**证据表格与实际测试文件一致**、**表格用例数 = pytest 收集数**、**README 目录树列全脚本**、**缺陷标题数 = 表行数** |
@@ -99,6 +101,7 @@ python3 -m pytest tests/ -q -m slow         # 区分度对照，约 2 分钟
 | `test_conclusion_consistency.py` | 8 | **§9 的数字与报告对账**：总体/退出轴一致率、未建模上界、**不得再称容差结果不变**、ST 占比两处一致、**样本长度敏感性已声明**、**方向翻转可复现**（slow） |
 | `test_release_compliance.py` | 7 | **免责声明四点**、INSTALL 五平台、SPDX 许可证、三处 name 一致、无占位符、**无敏感值/内网/邮箱泄露**、entry 存在 |
 | `test_runtime_adapters.py` | 9 | **适配器文件齐备**、声明的脚本/entry 存在、**旋钮清单与代码一致**、版本与 skill.json 一致、**README 实例数字与报告一致** |
+| `test_doc_numbers_live.py` | 4 | **以实测为唯一真相**：`verify_claims` 项数、`--collect-only` 用例数（不数 `def test_`，参数化会让两者不等）、**`skill.json`/`env_check`/CI 矩阵/SKILL.md 四处解释器下限必须一致**、**未被验证过的解释器不得写成受支持** |
 | `test_preflight.py` | 4 | **前置检查小节存在且覆盖宿主四项前提**、**排在所有可执行流程之前**、**取新数据与离线回放两条线路的阻塞语义分明**、**文档不再描述取数组件与凭证通道** |
 
 ---
@@ -282,7 +285,7 @@ python3 scripts/env_check.py      # ok=true
 python3 scripts/validate.py       # ok=true, 0 issues
 python3 scripts/build.py          # 约 31 秒
 python3 scripts/verify_claims.py  # 84/84
-python3 -m pytest tests/ -q       # 309 passed, 0 skipped
+python3 -m pytest tests/ -q       # 329 passed, 0 skipped
 ```
 
 实测（v0.12.8，从 `origin/main` 全新 clone 到 /tmp）：各项全过，
@@ -291,7 +294,7 @@ python3 -m pytest tests/ -q       # 309 passed, 0 skipped
 
 ### 纯标准库可跑
 
-系统自带 Python 3.9.6 下 `python3 scripts/build.py` 跑通，数字完全相同
+系统自带 Python 3.9.6 下全部 `scripts/*.py` 可 `py_compile` 通过、模块可 import，但该解释器**没有 pytest**，329 例验收套件一条也跑不了，且 `env_check` 判 `python: blocked` —— 因此 3.9.6 **不是受支持运行环境**（早前此处写「跑通、数字完全相同」属于把可 import 当成受支持）
 （0.9912 / 0.8878）。再用 `python3 -S`（屏蔽 site-packages，等价于无任何
 三方包）复跑，仍得同一组数字，且报告正确回显降级原因：
 
@@ -1029,7 +1032,7 @@ python3 scripts/value_decomposition.py \
 
 ---
 
-## 6. 验证中发现并修复的缺陷（69 项）
+## 6. 验证中发现并修复的缺陷（71 项）
 
 以下都不是构造的测试用例，而是在真实数据上跑出来的：
 
@@ -1104,6 +1107,8 @@ python3 scripts/value_decomposition.py \
 | 67 | **`build_fixtures.py` 增量写入，混入新日期不会报错** | 为验证"陌生数据可用性"生成 2026-09-16/17/18 三天后，`fixtures/` 里同时存在 2026-09 与 2026-10/11 两段（该脚本只加不清）。若不核对，后续所有 run 都会基于混入样本 | `test_fixture_dates_are_contiguous_trading_days` 守"日期必须是单一连续区间"（实测注入 20260916 立刻报 40 天断档）；本次已还原夹具 |
 | 68 | **取数失败抛原始异常，CLI 吐几十行 traceback** | 早期取数路径（脚本直连数据源，已废弃）下，网络不可达会抛原始 `ServiceError`，`fetch_data.py` 没兜住 → 读者看到的是 traceback 而非 `code`/`message`/`hint`。**现已改为 MCP 落盘消费路径**：所有取数异常统一为 `MCPDataError`（含可操作 hint），由 `test_fetch_without_mcp_dir_is_structured` 与 `test_mcp_source.py` 守住 |
 | 69 | **文档说账本含 `match`，但默认 diff 模式根本不写** | `api_guide` 把 `status` 枚举写成含 `match`，实际默认配置下账本只有 `divergent` / `open_position`（本样本 393 行，而 match 有 35,767 条一条没写）。读者据此统计一致率会得到严重错误的分母 | api_guide 补 ⚠️ 说明「不能用 ledger 算一致率」+ 两条测试（实测 `full` 模式确实写入全部 35,767 条 match） |
+| 70 | **归因阈值是死配置** | `explained_rate_threshold` / `min_comparable_retention` 写在 `config.py` 与 `config/replay_config.yaml` 顶层，而 `attribution.run_ablation` 只从 `semantics` 字典 `.get()`：用户改 YAML 完全静默无效。原有的 `test_config_accepts_every_documented_key` 只断言「键在 `load_config` 结果里存活」，从不断言它到达消费者，所以默认值恰好相同时谁也看不出 | 阈值由 `run_eval.py` 显式传入消融（优先级：显式参数 > `semantics` 同名键 > 内置默认值，兼容旧调用方）；新增 `tests/test_attribution_wiring.py`（6 例）：受控场景解释率固定 0.6，阈值 0.95 → `multi_knob`、放到 0.5 → `single_knob`、retention 门槛提到 1.01 → 解释记 0 判 `unexplained`，并以源码断言守住「run_eval 必须把两个 config 键传进去」 |
+| 71 | **`verify_claims` 用绝对容差比 p 值** | welch p 量级 1e-5，容差却给 `5e-3`：偏差近 700 倍仍判通过。实际后果是 `validation_claims.json` 写 `7e-06`、随包报告实测 `1.1e-05`，而 `84/84 passed` 一路绿灯，把「声称值失真」伪装成「已核验」 | `_check` 增加 `rel_tol`（p 值按 25% 相对误差，绝对容差退到 1e-12 下限）；声称值更正为实测 `1.1e-05`；补 2 例守卫：p 声称值翻倍必须失败、声称值必须与随包报告在 25% 内一致 |
 
 ---
 
@@ -1129,11 +1134,11 @@ python3 scripts/value_decomposition.py \
 
 | 项 | 值 |
 |---|---|
-| Python | 3.12.12（主）、3.9.6（系统自带，实测通过） |
+| Python | 3.12.12 / 3.11.16（CI 矩阵 3.10–3.12）；3.9.6 可 import 但**不受支持**：无 pytest、`env_check` 判 blocked，支持范围只等于被验证过的范围 |
 | 运行时三方依赖 | 无（纯标准库） |
 | 三方依赖 | 无（对齐与回放为纯标准库；`python3 -S` 实测通过） |
 | 全量对齐 | 约 31 秒（4,200 序列 × 240 根，1,008,000 根） |
-| 单元测试 | 约 273 秒（293 passed, 0 skipped） |
+| 单元测试 | 约 355 秒（**329 passed**, 0 skipped） |
 
 ```bash
 git clone https://github.com/quantskills/skill-jev-history-replay

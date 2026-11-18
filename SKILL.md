@@ -40,6 +40,20 @@ license: GPL-3.0-only
 
 另需确认目标区间在 PandaData 侧确有已完成的历史 K 线；未收盘的当日数据不得进入对齐。
 
+### 拿不到 JEV 日志时怎么办（任务闸门的正面回应）
+
+本题的立项条件是「先确认 TypeSafe 权限与日志字段；**不能取到日志则先换题**」。这条确认
+发生在**取数侧**，只有宿主 agent 能做，本包无法代跑，也从未声称做过。当前仓库状态是：
+
+- `fixtures/logs/` 内每一条记录都带 `_synthetic: true`，`provenance.log_source = synthetic`；
+  合成器 `log_synth.py` 直接复用 `replayer.replay_all`，因此「JEV 侧记录」与重放器同源。
+- 在这种输入下，`report.py` 在所有可判分支**之前**强制 `alignment_conclusion = inconclusive`
+  （CI 里也断言这一点），归因「100% 解释」属于同义反复，只能证明链路与判定规则可复现，
+  **不能**用来回答「JEV 的语义与回放是否一致」。
+- 因此本包的正确用法是：把 `references/log_contract.md` 的字段契约交给有权限的一方，
+  取到 `actual` 日志后替换 `fixtures/logs/` 重跑；在那之前，任何「一致 / 不一致」的
+  对外结论都是越界的，题目本身应当按原文换题或挂起，而不是用合成日志续命。
+
 ## 工具定位
 - 工具类型：评测 / 对齐工具型
 - 工程形态：工程型（通用工具类）
@@ -145,7 +159,7 @@ python3 scripts/validate.py       # 先检查日志契约，区分"字段缺失"
 
 | verdict | 条件 |
 |---|---|
-| `consistent` | 日志为 `actual` 且可比项一致率 ≥ 0.98 |
+| `consistent` | 日志为 `actual`、可比项一致率 ≥ 0.98、**真实冲突（divergent）为 0**，**且五个轴都各有可比项**（任一轴零可比即不得判 consistent；与 `api_guide.md` 同口径） |
 | `minor_divergence` | `actual` 且 0.80 ≤ 一致率 < 0.98 |
 | `inconsistent` | `actual` 且一致率 < 0.80 |
 | `inconclusive` | 无可比项，**或**日志为 `synthetic` |
@@ -248,7 +262,7 @@ python3 scripts/build.py        # 之后全程离线
 - 若真实日志缺 `wait_bars` / `entry_price` 等字段，对应轴退化为不可比，不会编造一致
 - 跨日持仓的退出在日志侧通常没有独立记录（`plan` 写在入场日），
   因此这类周期的退出轴不可比，报告中标为 `replay_only` 单列，不进一致率分母
-- 实测验证记录见 `references/validation_evidence.md`，含 69 处已发现并修复的缺陷
+- 实测验证记录见 `references/validation_evidence.md`，含 71 处已发现并修复的缺陷
 
 ## 可被 Alpha 调用
 - 否

@@ -57,6 +57,29 @@ def test_claim_checker_catches_drift(report):
     assert any(r["check"] == "total.comparable" for r in result["failed"])
 
 
+def test_welch_p_drift_is_caught_by_relative_tolerance(report):
+    """p 值必须用**相对**容差比。
+
+    绝对容差 5e-3 配 1e-5 量级的 p 值，等于声称 7e-06、实测 1.1e-05 也判通过——
+    偏差近 700 倍无人报（缺陷 #71）。把声称值翻一倍必须失败。
+    """
+    claims = json.loads(CLAIMS.read_text(encoding="utf-8"))
+    actual = (report["value_assessment"]["effect_size"]["full_sample_welch"]["p"])
+    tampered = json.loads(json.dumps(claims))
+    tampered["value_assessment"]["welch_p"] = actual * 2
+    result = verify_claims.verify(report, tampered)
+    assert not result["ok"]
+    assert any(r["check"] == "value_assessment.welch_p" for r in result["failed"])
+
+
+def test_welch_p_claim_matches_the_shipped_report(report):
+    """声称值与实际值必须在 25% 相对误差内一致（防止改了报告不改 claims）。"""
+    claims = json.loads(CLAIMS.read_text(encoding="utf-8"))
+    actual = (report["value_assessment"]["effect_size"]["full_sample_welch"]["p"])
+    claimed = claims["value_assessment"]["welch_p"]
+    assert abs(actual - claimed) <= 0.25 * abs(claimed), (actual, claimed)
+
+
 def test_documented_evidence_quotes_match_claims():
     """证据文档里写的一致率数字，必须与 claims 文件一致。"""
     claims = json.loads(CLAIMS.read_text(encoding="utf-8"))

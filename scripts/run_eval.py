@@ -220,6 +220,10 @@ def evaluate(*, bars_dir: str | Path | None = None,
             log_groups_by_symbol=grouped,
             tol_minutes=tol,
             price_tolerance_bps=price_tol,
+            # 阈值必须显式传：以前只写在 config/YAML 顶层，函数从 semantics 取，
+            # 用户改了 YAML 毫无效果（缺陷 #70）。
+            explained_rate_threshold=float(config["explained_rate_threshold"]),
+            min_comparable_retention=float(config["min_comparable_retention"]),
         )
     else:
         attribution_result = {"verdict": "skipped", "ranked": [], "note": "run_attribution=False"}
@@ -240,6 +244,11 @@ def evaluate(*, bars_dir: str | Path | None = None,
         "fixture_fingerprint": (manifest or {}).get("fixture_fingerprint"),
         "symbol_count": len(bars),
         "log_record_count": len(log_records),
+        # 日志内容指纹。config_hash 里只有 log_source 与条数，所以「条数不变、内容换了」
+        # （典型场景：合成日志换成真实日志）过去谁也看不出来，而日志正是决定对齐结论的
+        # 那一半输入。这里显式记下，并让 compare_baseline 在 changed_fields 里点名。
+        # 注意：它刻意**不进** config_hash——并入即属冻结基线契约变更，须单独发版决定。
+        "logs_fingerprint": report.logs_fingerprint(log_records),
         "time_tolerance_minutes": tol,
         "price_tolerance_bps": price_tol,
         "max_inline_rows": int(config["max_inline_rows"]),

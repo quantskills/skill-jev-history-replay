@@ -15,6 +15,19 @@ from . import semantics as sem
 from .replayer import replay_all
 
 
+def _resolve(name: str, explicit: float | None, semantics: Dict[str, Any],
+             default: float) -> float:
+    """阈值优先级：显式参数 > semantics 同名键 > 内置默认值。
+
+    写成函数是为了让三档优先级在两个阈值上完全一致，不会一个改了另一个没改。
+    """
+    if explicit is not None:
+        return float(explicit)
+    if name in semantics:
+        return float(semantics[name])
+    return float(default)
+
+
 def run_ablation(bars_by_symbol: Dict[str, Dict[str, Any]],
                  semantics: Dict[str, Any],
                  prev_closes: Dict[str, float],
@@ -23,12 +36,20 @@ def run_ablation(bars_by_symbol: Dict[str, Dict[str, Any]],
                  log_groups_by_symbol: Dict[str, Dict[str, List[Dict[str, Any]]]],
                  tol_minutes: int,
                  price_tolerance_bps: float,
-                 knobs: List[str] | None = None) -> Dict[str, Any]:
+                 knobs: List[str] | None = None,
+                 explained_rate_threshold: float | None = None,
+                 min_comparable_retention: float | None = None) -> Dict[str, Any]:
     """对每个旋钮做单点替换，返回可解释率与不可解释残差。
 
     Args:
         baseline_divergences: 当前配置下的差异总数（来自账本汇总）
         log_groups_by_symbol: JEV 侧记录，两次比对完全相同，只变回放侧
+        explained_rate_threshold / min_comparable_retention:
+            判定阈值。**必须从 config 显式传进来**。这两个键曾经只写在
+            `config.py` / `replay_config.yaml` 顶层，而本函数早先只从 `semantics`
+            里 `.get()`，于是用户改 YAML 完全静默无效（缺陷 #70）。为兼容旧的
+            直接调用方，仍允许在 `semantics` 里给出同名键兜底，但优先级是
+            显式参数 > semantics 键 > 内置默认值。
     """
     from .aligner import aggregate_rows, align_symbol
 
@@ -83,7 +104,9 @@ def run_ablation(bars_by_symbol: Dict[str, Dict[str, Any]],
         # 仍达到基线的 min_comparable_retention 时，才承认这次解释。
         retention = (trial_comparable / baseline_comparable
                      if baseline_comparable else 0.0)
-        min_retention = float(semantics.get("min_comparable_retention", 0.05))
+        min_retention = float(
+            _resolve("min_comparable_retention", min_comparable_retention, semantics, 0.05)
+        )
         raw_explained = baseline_div - trial_div
         # 若 lost_comparable 本身就大于被"解释"掉的数量，说明下降主要来自
         # 配对消失而非冲突消失——不认。
@@ -117,7 +140,9 @@ def run_ablation(bars_by_symbol: Dict[str, Dict[str, Any]],
         key=lambda r: (-(r["explained"] or 0), r["knob"]),
     )
     top = ranked[0] if ranked else None
-    threshold = semantics.get("explained_rate_threshold", 0.95)
+    threshold = float(
+        _resolve("explained_rate_threshold", explained_rate_threshold, semantics, 0.95)
+    )
     if not ranked or baseline_div == 0:
         verdict = "no_divergence"
     elif top and (top["explained_rate"] or 0) >= threshold:

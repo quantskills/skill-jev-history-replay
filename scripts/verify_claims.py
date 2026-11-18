@@ -31,11 +31,20 @@ def _num(value: Any) -> float | None:
 
 
 def _check(results: List[Dict[str, Any]], name: str, actual: Any, claimed: Any,
-           tol: float = 1e-6) -> None:
-    """数值按容差比，非数值按完全相等比。"""
+           tol: float = 1e-6, rel_tol: float | None = None) -> None:
+    """数值按容差比，非数值按完全相等比。
+
+    `rel_tol` 给**小量级**的数字用（p 值、比率）：对 1e-5 量级的 p 值，
+    绝对容差 5e-3 等于允许偏差近 700 倍还判"通过"（缺陷 #71）。给了 rel_tol 时，
+    判定尺度取 `max(绝对容差, rel_tol × |声称值|)`，既不放过量级漂移，也不会因为
+    声称值恰好为 0 而退化成绝对比较。
+    """
     a, c = _num(actual), _num(claimed)
     if a is not None and c is not None:
-        ok = abs(a - c) <= tol
+        scale = tol
+        if rel_tol is not None:
+            scale = max(scale, rel_tol * abs(c))
+        ok = abs(a - c) <= scale
     else:
         ok = actual == claimed
     results.append({
@@ -202,7 +211,7 @@ def verify(report: Dict[str, Any], claims: Dict[str, Any]) -> Dict[str, Any]:
     if "welch_p" in claims_va:
         _check(results, "value_assessment.welch_p",
                va_block.get("effect_size", {}).get("full_sample_welch", {}).get("p"),
-               claims_va["welch_p"], tol=5e-3)
+               claims_va["welch_p"], tol=1e-12, rel_tol=0.25)
 
     per_day_claims = claims.get("per_day")
     if per_day_claims:

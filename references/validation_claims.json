@@ -51,7 +51,7 @@
   "value_assessment": {
     "verdict": "negative",
     "paired_coverage": 0.0437,
-    "welch_p": 7e-06
+    "welch_p": 1.1e-05
   },
   "provenance": {
     "log_source": "synthetic"

@@ -105,6 +105,14 @@ def compare(report_path: str | Path, baseline_path: str | Path) -> Dict[str, Any
         changed.append("fixture_fingerprint")
     if cur_cmp.get("log_source") != baseline.get("log_source"):
         changed.append("log_source")
+    # 日志内容变了必须让读者看到，即使 config_hash 没变（条数与来源相同）。
+    # 不参与 comparable 判定，只把「看不见的输入变化」变成看得见的字段。
+    # 但**旧锚点根本没有这个键**：那时它还没被记录。把"缺席"当成"漂移"会让每个
+    # 历史锚点都谎报一次变化，所以只在两侧都有值且不等时点名，缺席单独说明。
+    cur_logs_fp = cur_cmp.get("logs_fingerprint")
+    base_logs_fp = baseline.get("logs_fingerprint")
+    if cur_logs_fp and base_logs_fp and cur_logs_fp != base_logs_fp:
+        changed.append("logs_fingerprint")
 
     return {
         "ok": True,

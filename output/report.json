@@ -1,6 +1,6 @@
 {
-  "run_id": "jev-20261118T155802126998Z",
-  "generated_at": "2026-11-18T15:58:02.128032+00:00",
+  "run_id": "jev-20261118T172451148521Z",
+  "generated_at": "2026-11-18T17:24:51.148884+00:00",
   "provenance": {
     "log_source": "synthetic",
     "log_source_meaning": "日志由 log_synth 按显式档位生成，仅验证链路",
@@ -160,6 +160,7 @@
     "fixture_fingerprint": "8f140eb439982b7e",
     "symbol_count": 4200,
     "log_record_count": 34590,
+    "logs_fingerprint": "1af54880c7c031b7",
     "time_tolerance_minutes": 1,
     "price_tolerance_bps": 5.0,
     "max_inline_rows": 50,

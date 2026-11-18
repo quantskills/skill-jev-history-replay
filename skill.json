@@ -1,6 +1,6 @@
 {
   "name": "skill-jev-history-replay",
-  "version": "0.17.1",
+  "version": "0.17.3",
   "entrypoint": "SKILL.md",
   "runtime": "python>=3.10",
   "license": "GPL-3.0-only",
@@ -32,7 +32,7 @@
     ],
     "frozen_anchor": "baselines/v0170-hosted.json",
     "regenerated_on_run": "output/",
-    "anchor_check": "python3 scripts/compare_baseline.py compare output/report.json baselines/v0170-hosted.json",
+    "anchor_check": "python3 scripts/compare_baseline.py compare output/report.json --against baselines/v0170-hosted.json",
     "note": "v0.17.1 起随包发布一次真实运行的报告与账本，以及对应的冻结锚点；其余运行产物仍按机器本地处理。锚点 log_source=synthetic，alignment_conclusion.verdict 恒为 inconclusive，替换 fixtures/logs/ 后需重新 freeze。"
   }
 }

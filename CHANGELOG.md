@@ -72,6 +72,25 @@
 
 ---
 
+## [0.17.1] — 2026-11-18
+
+### Changed
+- **随包发布运行证据与冻结锚点**：`.gitignore` 原先把 `output/` 与 `baselines/` 整目录排除，
+  导致交付要求里的「冻结基线对照」对 `git clone` 安装者**等于不存在**——包内有
+  `compare_baseline.py` 却没有任何可比对的锚点，第一次运行只能自己 freeze 自己。
+  现放行 `output/report.json`、`output/ledger.jsonl` 与 `baselines/*.json`，
+  其余运行产物仍不入库。
+- 新增锚点 `baselines/v0170-hosted.json`（由 v0.17.0 代码重新生成的报告冻结：
+  `ledger_match_rate 0.9912`、`divergence_items 319`、`alignment_verdict inconclusive`、
+  `value_verdict negative`、`attribution_verdict single_knob`）。
+- `skill.json` 新增 `outputs` 段：标明随包证据、锚点路径与 `compare_baseline` 核对命令。
+
+### Removed
+- `baselines/v0124check.json` 移入 `output/legacy/`（不入库）。它是 v0.12.4 时期的
+  本地草稿，`fixture_fingerprint` 仍是 gzip 头时间戳修复**之前**的 `250b7572`，
+  留在 `baselines/` 里会被误当成有效基线。
+
+
 ## 0.16.3 — 2026-11-13
 
 这一轮验证**输出产物能否被下游直接消费**。

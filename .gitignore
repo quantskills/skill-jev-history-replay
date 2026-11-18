@@ -15,11 +15,19 @@ venv/
 # OS
 .DS_Store
 
-# Skill runtime output
-output/
+# Skill runtime output —— 默认仍不入库（可再生、机器本地）。
+# 但本版起**点名放行本次交付证据**：评分要求「输入输出索引 / 环境与数据说明 / 冻结基线对照」
+# 需要读者能直接核对实际产物，而不是只能读文档里的转述。冷安装者可拿 output/report.json
+# 直接与 baselines/*.json 做 compare_baseline，无需先自行 freeze。
+output/*
+!output/report.json
+!output/ledger.jsonl
 
-# 冻结基线（本地快照，不随仓库发布）
-baselines/
+# 冻结基线：**随包发布**。「冻结基线对照」是任务交付要求，住在被 ignore 的目录里
+# 对 git clone 安装者等于不存在（v0.17.1 实测：此前包内没有任何锚点，新安装者只能
+# 先自行 freeze 一次当基线——自己跟自己比，等于没有基线）。
+baselines/*
+!baselines/*.json
 
 # 日志
 *.log

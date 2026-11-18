@@ -1,0 +1,2087 @@
+{
+  "run_id": "jev-20261118T155802126998Z",
+  "generated_at": "2026-11-18T15:58:02.128032+00:00",
+  "provenance": {
+    "log_source": "synthetic",
+    "log_source_meaning": "日志由 log_synth 按显式档位生成，仅验证链路",
+    "logged_profile": "jev_assumed",
+    "fixture_manifest": {
+      "dates": [
+        "20261026",
+        "20261027",
+        "20261028",
+        "20261029",
+        "20261030",
+        "20261102",
+        "20261103",
+        "20261104",
+        "20261105",
+        "20261106",
+        "20261109",
+        "20261110",
+        "20261111",
+        "20261112"
+      ],
+      "symbol_count": 300,
+      "bar_count": 1008000,
+      "log_record_count": 34590,
+      "logged_profile": "jev_assumed",
+      "fixture_fingerprint": "8f140eb439982b7e",
+      "per_date": [
+        {
+          "date": "20261026",
+          "records": 1488
+        },
+        {
+          "date": "20261027",
+          "records": 1047
+        },
+        {
+          "date": "20261028",
+          "records": 3860
+        },
+        {
+          "date": "20261029",
+          "records": 1242
+        },
+        {
+          "date": "20261030",
+          "records": 1500
+        },
+        {
+          "date": "20261102",
+          "records": 4928
+        },
+        {
+          "date": "20261103",
+          "records": 2392
+        },
+        {
+          "date": "20261104",
+          "records": 3990
+        },
+        {
+          "date": "20261105",
+          "records": 4458
+        },
+        {
+          "date": "20261106",
+          "records": 988
+        },
+        {
+          "date": "20261109",
+          "records": 1483
+        },
+        {
+          "date": "20261110",
+          "records": 3051
+        },
+        {
+          "date": "20261111",
+          "records": 2745
+        },
+        {
+          "date": "20261112",
+          "records": 1418
+        }
+      ],
+      "logged_semantics_hash": "91fecace6d6c78b0",
+      "data_quality": {
+        "series_count": 4200,
+        "date_range": [
+          "20261026",
+          "20261112"
+        ],
+        "trading_days": 14,
+        "checks": {
+          "limit_up_touch": {
+            "count": 74,
+            "share": 0.0176,
+            "note": "当日最高价触及所在板块涨停价；重放仍会在该价位照常成交"
+          },
+          "limit_down_touch": {
+            "count": 27,
+            "share": 0.0064,
+            "note": "当日最低价触及跌停价；跌停时卖出可能实际无法成交"
+          },
+          "board_mix": {
+            "chinext": {
+              "count": 1134,
+              "share": 0.27
+            },
+            "default": {
+              "count": 2576,
+              "share": 0.6133
+            },
+            "star": {
+              "count": 490,
+              "share": 0.1167
+            }
+          },
+          "st": {
+            "count": 196,
+            "share": 0.0467,
+            "symbols": 14,
+            "note": "ST 标的有 5% 涨跌幅限制与特殊交易规则，本 skill 未做区分",
+            "source": "MCP get_st_list"
+          },
+          "suspended": {
+            "count": 0,
+            "share": 0.0,
+            "symbols": 0,
+            "note": "停牌日不应产生任何成交，本 skill 未做过滤",
+            "source": "MCP get_suspended_list"
+          }
+        },
+        "unmodeled_share": {
+          "st_or_suspended": 0.0467,
+          "limit_touch": 0.024
+        },
+        "caveat": "本 skill 不对这些状态做特殊处理：ST/停牌/涨跌停标的照常产生信号与成交。下面的占比就是结论的适用范围折扣——占比越高，结论越不能直接外推到实盘。",
+        "overall_unmodeled_upper_bound": 0.0467,
+        "unverified_components": [],
+        "known_components_max": 0.0467,
+        "verdict": {
+          "level": "moderate",
+          "reason": "未建模状态占比 4.67%，属可接受但需声明的范围"
+        }
+      },
+      "provenance": {
+        "bars": "PandaData MCP：mcp__pandadata__call_pandadata get_stock_min / get_stock_daily，仅生成阶段调用",
+        "logs": "synthetic：由 log_synth 按 logged_profile 生成，非 JEV 真实输出"
+      },
+      "universe_policy": "全期固定（14 日 trade_list 交集，按代码排序等距抽样）"
+    },
+    "config_warnings": []
+  },
+  "comparability": {
+    "semantics_hash": "50f2f5c194238ed6",
+    "logged_semantics_hash": "11c6a19bb8e03b19",
+    "fixture_fingerprint": "8f140eb439982b7e",
+    "symbol_count": 4200,
+    "log_record_count": 34590,
+    "time_tolerance_minutes": 1,
+    "price_tolerance_bps": 5.0,
+    "max_inline_rows": 50,
+    "min_cycles": 20,
+    "fixed_fields": [
+      "semantics_hash",
+      "fixture_fingerprint",
+      "time_tolerance_minutes",
+      "price_tolerance_bps",
+      "min_cycles",
+      "log_source"
+    ],
+    "log_source": "synthetic",
+    "missing_prev_close_symbols": [],
+    "config_warnings": [],
+    "config_hash": "2eeb96123b8b0cba"
+  },
+  "logged_semantics": {
+    "profile": "jev_assumed",
+    "hash": "11c6a19bb8e03b19",
+    "knobs": {
+      "bar_timestamp": "bar_end",
+      "baseline_price": "prev_close",
+      "breakout_field": "high",
+      "breakout_includes_current": false,
+      "persistence_bars": 2,
+      "wait_bars": 1,
+      "entry_price": "next_open",
+      "exit_eval": "bar_high_low",
+      "t_plus_1": true,
+      "cooldown_bars": 10,
+      "signal_gain_pct": 0.01,
+      "breakout_window": 20,
+      "warmup_bars": 20,
+      "stop_loss_pct": 0.005,
+      "take_profit_pct": 0.01,
+      "max_hold_bars": 30,
+      "no_entry_after": "14:45",
+      "force_exit_time": "14:45",
+      "fee_bps": 5,
+      "slippage_bps": 2,
+      "initial_capital": 1000000,
+      "lot_size": 100,
+      "position_pct": 0.1
+    },
+    "source": "disk (fixtures/logs 内含 _synthetic 标记)"
+  },
+  "ledger": {
+    "aggregate": {
+      "by_axis": {
+        "condition": {
+          "match": 28754,
+          "jev_missing": 979246,
+          "divergent": 0,
+          "one_sided": 979246,
+          "comparable": 28754,
+          "match_rate": 1.0
+        },
+        "signal": {
+          "match": 1496,
+          "divergent": 0,
+          "one_sided": 0,
+          "comparable": 1496,
+          "match_rate": 1.0
+        },
+        "wait": {
+          "match": 1496,
+          "divergent": 0,
+          "one_sided": 0,
+          "comparable": 1496,
+          "match_rate": 1.0
+        },
+        "entry": {
+          "match": 1496,
+          "divergent": 0,
+          "one_sided": 0,
+          "comparable": 1496,
+          "match_rate": 1.0
+        },
+        "exit": {
+          "match": 2525,
+          "divergent": 319,
+          "open_position": 74,
+          "one_sided": 74,
+          "comparable": 2844,
+          "match_rate": 0.8878
+        }
+      },
+      "total": {
+        "rows": 1015406,
+        "match": 35767,
+        "divergent": 319,
+        "one_sided": 979320,
+        "condition_coverage": 0.0285,
+        "comparable": 36086,
+        "match_rate": 0.9912,
+        "divergence_items": 319
+      }
+    },
+    "by_axis_prior": {
+      "condition": "日志侧未披露比较基准与窗口口径，差异归因需消融实验确认",
+      "signal": "信号时点差异主要由时间戳语义与连续性要求造成",
+      "wait": "等待根数差异由 wait_bars 与 bar_timestamp 共同决定",
+      "entry": "入场价差异由 entry_price 选择（当根收盘/下一根开盘）决定",
+      "exit": "退出差异由退出判定字段（收盘/高低价）与 T+1 约束决定"
+    },
+    "first_divergence": {
+      "axis": "exit",
+      "symbol": "000596.SZ@20261104",
+      "time": "09:31",
+      "field": "reason",
+      "jev": "stop_loss",
+      "replay": "max_hold",
+      "delta": null,
+      "status": "divergent",
+      "note": ""
+    },
+    "inline_rows": [
+      {
+        "axis": "condition",
+        "symbol": "000001.SZ@20261026",
+        "time": "09:31",
+        "field": "hit",
+        "jev": false,
+        "replay": false,
+        "delta": null,
+        "status": "match",
+        "note": ""
+      },
+      {
+        "axis": "condition",
+        "symbol": "000001.SZ@20261026",
+        "time": "09:32",
+        "field": "hit",
+        "jev": null,
+        "replay": false,
+        "delta": null,
+        "status": "jev_missing",
+        "note": "warmup"
+      },
+      {
+        "axis": "condition",
+        "symbol": "000001.SZ@20261026",
+        "time": "09:33",
+        "field": "hit",
+        "jev": null,
+        "replay": false,
+        "delta": null,
+        "status": "jev_missing",
+        "note": "warmup"
+      },
+      {
+        "axis": "condition",
+        "symbol": "000001.SZ@20261026",
+        "time": "09:34",
+        "field": "hit",
+        "jev": null,
+        "replay": false,
+        "delta": null,
+        "status": "jev_missing",
+        "note": "warmup"
+      },
+      {
+        "axis": "condition",
+        "symbol": "000001.SZ@20261026",
+        "time": "09:35",
+        "field": "hit",
+        "jev": null,
+        "replay": false,
+        "delta": null,
+        "status": "jev_missing",
+        "note": "warmup"
+      },
+      {
+        "axis": "condition",
+        "symbol": "000001.SZ@20261026",
+        "time": "09:36",
+        "field": "hit",
+        "jev": null,
+        "replay": false,
+        "delta": null,
+        "status": "jev_missing",
+        "note": "warmup"
+      },
+      {
+        "axis": "condition",
+        "symbol": "000001.SZ@20261026",
+        "time": "09:37",
+        "field": "hit",
+        "jev": null,
+        "replay": false,
+        "delta": null,
+        "status": "jev_missing",
+        "note": "warmup"
+      },
+      {
+        "axis": "condition",
+        "symbol": "000001.SZ@20261026",
+        "time": "09:38",
+        "field": "hit",
+        "jev": null,
+        "replay": false,
+        "delta": null,
+        "status": "jev_missing",
+        "note": "warmup"
+      },
+      {
+        "axis": "condition",
+        "symbol": "000001.SZ@20261026",
+        "time": "09:39",
+        "field": "hit",
+        "jev": null,
+        "replay": false,
+        "delta": null,
+        "status": "jev_missing",
+        "note": "warmup"
+      },
+      {
+        "axis": "condition",
+        "symbol": "000001.SZ@20261026",
+        "time": "09:40",
+        "field": "hit",
+        "jev": null,
+        "replay": false,
+        "delta": null,
+        "status": "jev_missing",
+        "note": "warmup"
+      },
+      {
+        "axis": "condition",
+        "symbol": "000001.SZ@20261026",
+        "time": "09:41",
+        "field": "hit",
+        "jev": null,
+        "replay": false,
+        "delta": null,
+        "status": "jev_missing",
+        "note": "warmup"
+      },
+      {
+        "axis": "condition",
+        "symbol": "000001.SZ@20261026",
+        "time": "09:42",
+        "field": "hit",
+        "jev": null,
+        "replay": false,
+        "delta": null,
+        "status": "jev_missing",
+        "note": "warmup"
+      },
+      {
+        "axis": "condition",
+        "symbol": "000001.SZ@20261026",
+        "time": "09:43",
+        "field": "hit",
+        "jev": null,
+        "replay": false,
+        "delta": null,
+        "status": "jev_missing",
+        "note": "warmup"
+      },
+      {
+        "axis": "condition",
+        "symbol": "000001.SZ@20261026",
+        "time": "09:44",
+        "field": "hit",
+        "jev": null,
+        "replay": false,
+        "delta": null,
+        "status": "jev_missing",
+        "note": "warmup"
+      },
+      {
+        "axis": "condition",
+        "symbol": "000001.SZ@20261026",
+        "time": "09:45",
+        "field": "hit",
+        "jev": null,
+        "replay": false,
+        "delta": null,
+        "status": "jev_missing",
+        "note": "warmup"
+      },
+      {
+        "axis": "condition",
+        "symbol": "000001.SZ@20261026",
+        "time": "09:46",
+        "field": "hit",
+        "jev": null,
+        "replay": false,
+        "delta": null,
+        "status": "jev_missing",
+        "note": "warmup"
+      },
+      {
+        "axis": "condition",
+        "symbol": "000001.SZ@20261026",
+        "time": "09:47",
+        "field": "hit",
+        "jev": null,
+        "replay": false,
+        "delta": null,
+        "status": "jev_missing",
+        "note": "warmup"
+      },
+      {
+        "axis": "condition",
+        "symbol": "000001.SZ@20261026",
+        "time": "09:48",
+        "field": "hit",
+        "jev": null,
+        "replay": false,
+        "delta": null,
+        "status": "jev_missing",
+        "note": "warmup"
+      },
+      {
+        "axis": "condition",
+        "symbol": "000001.SZ@20261026",
+        "time": "09:49",
+        "field": "hit",
+        "jev": null,
+        "replay": false,
+        "delta": null,
+        "status": "jev_missing",
+        "note": "warmup"
+      },
+      {
+        "axis": "condition",
+        "symbol": "000001.SZ@20261026",
+        "time": "09:50",
+        "field": "hit",
+        "jev": null,
+        "replay": false,
+        "delta": null,
+        "status": "jev_missing",
+        "note": "warmup"
+      },
+      {
+        "axis": "condition",
+        "symbol": "000001.SZ@20261026",
+        "time": "09:51",
+        "field": "hit",
+        "jev": null,
+        "replay": false,
+        "delta": null,
+        "status": "jev_missing",
+        "note": "breakout_failed"
+      },
+      {
+        "axis": "condition",
+        "symbol": "000001.SZ@20261026",
+        "time": "09:52",
+        "field": "hit",
+        "jev": null,
+        "replay": false,
+        "delta": null,
+        "status": "jev_missing",
+        "note": "breakout_failed"
+      },
+      {
+        "axis": "condition",
+        "symbol": "000001.SZ@20261026",
+        "time": "09:53",
+        "field": "hit",
+        "jev": null,
+        "replay": false,
+        "delta": null,
+        "status": "jev_missing",
+        "note": "gain_failed"
+      },
+      {
+        "axis": "condition",
+        "symbol": "000001.SZ@20261026",
+        "time": "09:54",
+        "field": "hit",
+        "jev": null,
+        "replay": false,
+        "delta": null,
+        "status": "jev_missing",
+        "note": "breakout_failed"
+      },
+      {
+        "axis": "condition",
+        "symbol": "000001.SZ@20261026",
+        "time": "09:55",
+        "field": "hit",
+        "jev": null,
+        "replay": false,
+        "delta": null,
+        "status": "jev_missing",
+        "note": "breakout_failed"
+      },
+      {
+        "axis": "condition",
+        "symbol": "000001.SZ@20261026",
+        "time": "09:56",
+        "field": "hit",
+        "jev": null,
+        "replay": false,
+        "delta": null,
+        "status": "jev_missing",
+        "note": "breakout_failed"
+      },
+      {
+        "axis": "condition",
+        "symbol": "000001.SZ@20261026",
+        "time": "09:57",
+        "field": "hit",
+        "jev": null,
+        "replay": false,
+        "delta": null,
+        "status": "jev_missing",
+        "note": "breakout_failed"
+      },
+      {
+        "axis": "condition",
+        "symbol": "000001.SZ@20261026",
+        "time": "09:58",
+        "field": "hit",
+        "jev": null,
+        "replay": false,
+        "delta": null,
+        "status": "jev_missing",
+        "note": "breakout_failed"
+      },
+      {
+        "axis": "condition",
+        "symbol": "000001.SZ@20261026",
+        "time": "09:59",
+        "field": "hit",
+        "jev": null,
+        "replay": false,
+        "delta": null,
+        "status": "jev_missing",
+        "note": "breakout_failed"
+      },
+      {
+        "axis": "condition",
+        "symbol": "000001.SZ@20261026",
+        "time": "10:00",
+        "field": "hit",
+        "jev": null,
+        "replay": false,
+        "delta": null,
+        "status": "jev_missing",
+        "note": "breakout_failed"
+      },
+      {
+        "axis": "condition",
+        "symbol": "000001.SZ@20261026",
+        "time": "10:01",
+        "field": "hit",
+        "jev": null,
+        "replay": false,
+        "delta": null,
+        "status": "jev_missing",
+        "note": "breakout_failed"
+      },
+      {
+        "axis": "condition",
+        "symbol": "000001.SZ@20261026",
+        "time": "10:02",
+        "field": "hit",
+        "jev": null,
+        "replay": false,
+        "delta": null,
+        "status": "jev_missing",
+        "note": "breakout_failed"
+      },
+      {
+        "axis": "condition",
+        "symbol": "000001.SZ@20261026",
+        "time": "10:03",
+        "field": "hit",
+        "jev": null,
+        "replay": false,
+        "delta": null,
+        "status": "jev_missing",
+        "note": "breakout_failed"
+      },
+      {
+        "axis": "condition",
+        "symbol": "000001.SZ@20261026",
+        "time": "10:04",
+        "field": "hit",
+        "jev": null,
+        "replay": false,
+        "delta": null,
+        "status": "jev_missing",
+        "note": "breakout_failed"
+      },
+      {
+        "axis": "condition",
+        "symbol": "000001.SZ@20261026",
+        "time": "10:05",
+        "field": "hit",
+        "jev": null,
+        "replay": false,
+        "delta": null,
+        "status": "jev_missing",
+        "note": "breakout_failed"
+      },
+      {
+        "axis": "condition",
+        "symbol": "000001.SZ@20261026",
+        "time": "10:06",
+        "field": "hit",
+        "jev": null,
+        "replay": false,
+        "delta": null,
+        "status": "jev_missing",
+        "note": "breakout_failed"
+      },
+      {
+        "axis": "condition",
+        "symbol": "000001.SZ@20261026",
+        "time": "10:07",
+        "field": "hit",
+        "jev": null,
+        "replay": false,
+        "delta": null,
+        "status": "jev_missing",
+        "note": "breakout_failed"
+      },
+      {
+        "axis": "condition",
+        "symbol": "000001.SZ@20261026",
+        "time": "10:08",
+        "field": "hit",
+        "jev": null,
+        "replay": false,
+        "delta": null,
+        "status": "jev_missing",
+        "note": "breakout_failed"
+      },
+      {
+        "axis": "condition",
+        "symbol": "000001.SZ@20261026",
+        "time": "10:09",
+        "field": "hit",
+        "jev": null,
+        "replay": false,
+        "delta": null,
+        "status": "jev_missing",
+        "note": "breakout_failed"
+      },
+      {
+        "axis": "condition",
+        "symbol": "000001.SZ@20261026",
+        "time": "10:10",
+        "field": "hit",
+        "jev": null,
+        "replay": false,
+        "delta": null,
+        "status": "jev_missing",
+        "note": "breakout_failed"
+      },
+      {
+        "axis": "condition",
+        "symbol": "000001.SZ@20261026",
+        "time": "10:11",
+        "field": "hit",
+        "jev": null,
+        "replay": false,
+        "delta": null,
+        "status": "jev_missing",
+        "note": "breakout_failed"
+      },
+      {
+        "axis": "condition",
+        "symbol": "000001.SZ@20261026",
+        "time": "10:12",
+        "field": "hit",
+        "jev": null,
+        "replay": false,
+        "delta": null,
+        "status": "jev_missing",
+        "note": "breakout_failed"
+      },
+      {
+        "axis": "condition",
+        "symbol": "000001.SZ@20261026",
+        "time": "10:13",
+        "field": "hit",
+        "jev": null,
+        "replay": false,
+        "delta": null,
+        "status": "jev_missing",
+        "note": "breakout_failed"
+      },
+      {
+        "axis": "condition",
+        "symbol": "000001.SZ@20261026",
+        "time": "10:14",
+        "field": "hit",
+        "jev": null,
+        "replay": false,
+        "delta": null,
+        "status": "jev_missing",
+        "note": "gain_failed"
+      },
+      {
+        "axis": "condition",
+        "symbol": "000001.SZ@20261026",
+        "time": "10:15",
+        "field": "hit",
+        "jev": null,
+        "replay": false,
+        "delta": null,
+        "status": "jev_missing",
+        "note": "breakout_failed"
+      },
+      {
+        "axis": "condition",
+        "symbol": "000001.SZ@20261026",
+        "time": "10:16",
+        "field": "hit",
+        "jev": null,
+        "replay": false,
+        "delta": null,
+        "status": "jev_missing",
+        "note": "breakout_failed"
+      },
+      {
+        "axis": "condition",
+        "symbol": "000001.SZ@20261026",
+        "time": "10:17",
+        "field": "hit",
+        "jev": null,
+        "replay": false,
+        "delta": null,
+        "status": "jev_missing",
+        "note": "breakout_failed"
+      },
+      {
+        "axis": "condition",
+        "symbol": "000001.SZ@20261026",
+        "time": "10:18",
+        "field": "hit",
+        "jev": null,
+        "replay": false,
+        "delta": null,
+        "status": "jev_missing",
+        "note": "breakout_failed"
+      },
+      {
+        "axis": "condition",
+        "symbol": "000001.SZ@20261026",
+        "time": "10:19",
+        "field": "hit",
+        "jev": null,
+        "replay": false,
+        "delta": null,
+        "status": "jev_missing",
+        "note": "breakout_failed"
+      },
+      {
+        "axis": "condition",
+        "symbol": "000001.SZ@20261026",
+        "time": "10:20",
+        "field": "hit",
+        "jev": null,
+        "replay": false,
+        "delta": null,
+        "status": "jev_missing",
+        "note": "breakout_failed"
+      }
+    ],
+    "inline_truncated": true,
+    "total_rows": 1015406,
+    "divergence_rows": 319,
+    "non_match_rows": 979639,
+    "divergence_breakdown": {
+      "condition": {
+        "jev_missing": 979246
+      },
+      "exit": {
+        "divergent": 319,
+        "open_position": 74
+      }
+    },
+    "decision_changes": [
+      {
+        "changes": [
+          "exit_reason_changed"
+        ],
+        "symbol": "000565.SZ@20261103",
+        "signal_time": "11:10",
+        "replay": {
+          "exit": "09:35",
+          "net_return_pct": 0.00219712
+        },
+        "jev": {
+          "exit": "09:31",
+          "net_return_pct": 0.0086
+        }
+      },
+      {
+        "changes": [
+          "exit_reason_changed"
+        ],
+        "symbol": "000596.SZ@20261104",
+        "signal_time": "13:32",
+        "replay": {
+          "exit": "09:31",
+          "net_return_pct": -0.0088314
+        },
+        "jev": {
+          "exit": "09:31",
+          "net_return_pct": -0.0064
+        }
+      },
+      {
+        "changes": [
+          "exit_reason_changed"
+        ],
+        "symbol": "000710.SZ@20261103",
+        "signal_time": "13:55",
+        "replay": {
+          "exit": "09:31",
+          "net_return_pct": -0.02260891
+        },
+        "jev": {
+          "exit": "09:31",
+          "net_return_pct": -0.0064
+        }
+      },
+      {
+        "changes": [
+          "exit_reason_changed"
+        ],
+        "symbol": "000710.SZ@20261111",
+        "signal_time": "13:24",
+        "replay": {
+          "exit": "09:31",
+          "net_return_pct": -0.01040901
+        },
+        "jev": {
+          "exit": "09:31",
+          "net_return_pct": -0.0064
+        }
+      },
+      {
+        "changes": [
+          "exit_reason_changed"
+        ],
+        "symbol": "000729.SZ@20261102",
+        "signal_time": "13:39",
+        "replay": {
+          "exit": "09:31",
+          "net_return_pct": 0.01085259
+        },
+        "jev": {
+          "exit": "09:31",
+          "net_return_pct": -0.0064
+        }
+      },
+      {
+        "changes": [
+          "exit_reason_changed"
+        ],
+        "symbol": "000762.SZ@20261104",
+        "signal_time": "09:56",
+        "replay": {
+          "exit": "09:31",
+          "net_return_pct": -0.01522243
+        },
+        "jev": {
+          "exit": "09:31",
+          "net_return_pct": -0.0064
+        }
+      },
+      {
+        "changes": [
+          "exit_reason_changed"
+        ],
+        "symbol": "000762.SZ@20261105",
+        "signal_time": "13:33",
+        "replay": {
+          "exit": "09:31",
+          "net_return_pct": -0.0014
+        },
+        "jev": {
+          "exit": "09:31",
+          "net_return_pct": 0.0086
+        }
+      },
+      {
+        "changes": [
+          "exit_reason_changed"
+        ],
+        "symbol": "000908.SZ@20261104",
+        "signal_time": "10:07",
+        "replay": {
+          "exit": "09:31",
+          "net_return_pct": -0.00329036
+        },
+        "jev": {
+          "exit": "09:31",
+          "net_return_pct": -0.0064
+        }
+      },
+      {
+        "changes": [
+          "exit_reason_changed"
+        ],
+        "symbol": "000985.SZ@20261111",
+        "signal_time": "14:11",
+        "replay": {
+          "exit": "09:58",
+          "net_return_pct": -0.00267226
+        },
+        "jev": {
+          "exit": "09:31",
+          "net_return_pct": -0.0064
+        }
+      },
+      {
+        "changes": [
+          "exit_reason_changed"
+        ],
+        "symbol": "001228.SZ@20261029",
+        "signal_time": "11:21",
+        "replay": {
+          "exit": "09:31",
+          "net_return_pct": 0.0231023
+        },
+        "jev": {
+          "exit": "09:31",
+          "net_return_pct": 0.0086
+        }
+      },
+      {
+        "changes": [
+          "exit_reason_changed"
+        ],
+        "symbol": "001323.SZ@20261028",
+        "signal_time": "10:35",
+        "replay": {
+          "exit": "09:31",
+          "net_return_pct": -0.02313913
+        },
+        "jev": {
+          "exit": "09:31",
+          "net_return_pct": -0.0064
+        }
+      },
+      {
+        "changes": [
+          "exit_reason_changed"
+        ],
+        "symbol": "001365.SZ@20261105",
+        "signal_time": "13:34",
+        "replay": {
+          "exit": "09:31",
+          "net_return_pct": 0.00435686
+        },
+        "jev": {
+          "exit": "09:31",
+          "net_return_pct": 0.0086
+        }
+      },
+      {
+        "changes": [
+          "exit_reason_changed"
+        ],
+        "symbol": "002082.SZ@20261111",
+        "signal_time": "10:32",
+        "replay": {
+          "exit": "09:41",
+          "net_return_pct": 0.01123362
+        },
+        "jev": {
+          "exit": "09:31",
+          "net_return_pct": -0.0064
+        }
+      },
+      {
+        "changes": [
+          "exit_reason_changed"
+        ],
+        "symbol": "002101.SZ@20261103",
+        "signal_time": "13:39",
+        "replay": {
+          "exit": "09:50",
+          "net_return_pct": 0.00865025
+        },
+        "jev": {
+          "exit": "09:37",
+          "net_return_pct": -0.0064
+        }
+      },
+      {
+        "changes": [
+          "exit_reason_changed"
+        ],
+        "symbol": "002139.SZ@20261103",
+        "signal_time": "11:18",
+        "replay": {
+          "exit": "09:43",
+          "net_return_pct": 0.0111261
+        },
+        "jev": {
+          "exit": "09:31",
+          "net_return_pct": -0.0064
+        }
+      },
+      {
+        "changes": [
+          "exit_reason_changed"
+        ],
+        "symbol": "002139.SZ@20261105",
+        "signal_time": "13:35",
+        "replay": {
+          "exit": "09:31",
+          "net_return_pct": -0.00644032
+        },
+        "jev": {
+          "exit": "09:31",
+          "net_return_pct": -0.0064
+        }
+      },
+      {
+        "changes": [
+          "exit_reason_changed"
+        ],
+        "symbol": "002158.SZ@20261110",
+        "signal_time": "13:24",
+        "replay": {
+          "exit": "09:31",
+          "net_return_pct": 0.01691846
+        },
+        "jev": {
+          "exit": "09:31",
+          "net_return_pct": 0.0086
+        }
+      },
+      {
+        "changes": [
+          "exit_reason_changed"
+        ],
+        "symbol": "002176.SZ@20261105",
+        "signal_time": "13:34",
+        "replay": {
+          "exit": "09:40",
+          "net_return_pct": 0.00911248
+        },
+        "jev": {
+          "exit": "09:31",
+          "net_return_pct": -0.0064
+        }
+      },
+      {
+        "changes": [
+          "exit_reason_changed"
+        ],
+        "symbol": "002193.SZ@20261111",
+        "signal_time": "14:15",
+        "replay": {
+          "exit": "09:31",
+          "net_return_pct": 0.00681918
+        },
+        "jev": {
+          "exit": "09:33",
+          "net_return_pct": -0.0064
+        }
+      },
+      {
+        "changes": [
+          "exit_reason_changed"
+        ],
+        "symbol": "002378.SZ@20261112",
+        "signal_time": "14:16",
+        "replay": {
+          "exit": "09:32",
+          "net_return_pct": -0.00355633
+        },
+        "jev": {
+          "exit": "09:31",
+          "net_return_pct": -0.0064
+        }
+      },
+      {
+        "changes": [
+          "exit_reason_changed"
+        ],
+        "symbol": "002432.SZ@20261106",
+        "signal_time": "10:09",
+        "replay": {
+          "exit": "09:31",
+          "net_return_pct": -0.06022353
+        },
+        "jev": {
+          "exit": "09:31",
+          "net_return_pct": -0.0064
+        }
+      },
+      {
+        "changes": [
+          "exit_reason_changed"
+        ],
+        "symbol": "002491.SZ@20261029",
+        "signal_time": "11:28",
+        "replay": {
+          "exit": "09:32",
+          "net_return_pct": 0.01502576
+        },
+        "jev": {
+          "exit": "09:31",
+          "net_return_pct": -0.0064
+        }
+      },
+      {
+        "changes": [
+          "exit_reason_changed"
+        ],
+        "symbol": "002491.SZ@20261110",
+        "signal_time": "10:05",
+        "replay": {
+          "exit": "09:37",
+          "net_return_pct": -0.00709801
+        },
+        "jev": {
+          "exit": "09:31",
+          "net_return_pct": 0.0086
+        }
+      },
+      {
+        "changes": [
+          "exit_reason_changed"
+        ],
+        "symbol": "002491.SZ@20261111",
+        "signal_time": "10:28",
+        "replay": {
+          "exit": "09:34",
+          "net_return_pct": 0.00935269
+        },
+        "jev": {
+          "exit": "09:31",
+          "net_return_pct": -0.0064
+        }
+      },
+      {
+        "changes": [
+          "exit_reason_changed"
+        ],
+        "symbol": "002514.SZ@20261105",
+        "signal_time": "14:45",
+        "replay": {
+          "exit": "09:32",
+          "net_return_pct": 0.01261869
+        },
+        "jev": {
+          "exit": "09:31",
+          "net_return_pct": -0.0064
+        }
+      },
+      {
+        "changes": [
+          "exit_reason_changed"
+        ],
+        "symbol": "002533.SZ@20261105",
+        "signal_time": "11:29",
+        "replay": {
+          "exit": "09:31",
+          "net_return_pct": -0.00711973
+        },
+        "jev": {
+          "exit": "09:31",
+          "net_return_pct": -0.0064
+        }
+      },
+      {
+        "changes": [
+          "exit_reason_changed"
+        ],
+        "symbol": "002602.SZ@20261030",
+        "signal_time": "10:59",
+        "replay": {
+          "exit": "09:31",
+          "net_return_pct": -0.00569185
+        },
+        "jev": {
+          "exit": "09:31",
+          "net_return_pct": -0.0064
+        }
+      },
+      {
+        "changes": [
+          "exit_reason_changed"
+        ],
+        "symbol": "002602.SZ@20261104",
+        "signal_time": "10:16",
+        "replay": {
+          "exit": "09:32",
+          "net_return_pct": 0.01027315
+        },
+        "jev": {
+          "exit": "09:31",
+          "net_return_pct": -0.0064
+        }
+      },
+      {
+        "changes": [
+          "exit_reason_changed"
+        ],
+        "symbol": "002625.SZ@20261103",
+        "signal_time": "13:36",
+        "replay": {
+          "exit": "09:38",
+          "net_return_pct": 0.01276579
+        },
+        "jev": {
+          "exit": "09:31",
+          "net_return_pct": -0.0064
+        }
+      },
+      {
+        "changes": [
+          "exit_reason_changed"
+        ],
+        "symbol": "002643.SZ@20261103",
+        "signal_time": "10:12",
+        "replay": {
+          "exit": "09:40",
+          "net_return_pct": 0.00649474
+        },
+        "jev": {
+          "exit": "09:31",
+          "net_return_pct": 0.0086
+        }
+      },
+      {
+        "changes": [
+          "exit_reason_changed"
+        ],
+        "symbol": "002660.SZ@20261027",
+        "signal_time": "13:08",
+        "replay": {
+          "exit": "09:31",
+          "net_return_pct": 0.00935269
+        },
+        "jev": {
+          "exit": "09:31",
+          "net_return_pct": -0.0064
+        }
+      },
+      {
+        "changes": [
+          "exit_reason_changed"
+        ],
+        "symbol": "002660.SZ@20261103",
+        "signal_time": "11:11",
+        "replay": {
+          "exit": "09:32",
+          "net_return_pct": 0.00445652
+        },
+        "jev": {
+          "exit": "09:31",
+          "net_return_pct": 0.0086
+        }
+      },
+      {
+        "changes": [
+          "exit_reason_changed"
+        ],
+        "symbol": "002660.SZ@20261112",
+        "signal_time": "09:55",
+        "replay": {
+          "exit": "09:31",
+          "net_return_pct": 0.0209152
+        },
+        "jev": {
+          "exit": "09:31",
+          "net_return_pct": 0.0086
+        }
+      },
+      {
+        "changes": [
+          "exit_reason_changed"
+        ],
+        "symbol": "002782.SZ@20261111",
+        "signal_time": "11:08",
+        "replay": {
+          "exit": "09:38",
+          "net_return_pct": -0.00059936
+        },
+        "jev": {
+          "exit": "09:31",
+          "net_return_pct": -0.0064
+        }
+      },
+      {
+        "changes": [
+          "exit_reason_changed"
+        ],
+        "symbol": "002879.SZ@20261029",
+        "signal_time": "10:36",
+        "replay": {
+          "exit": "09:31",
+          "net_return_pct": 0.08042476
+        },
+        "jev": {
+          "exit": "09:31",
+          "net_return_pct": 0.0086
+        }
+      },
+      {
+        "changes": [
+          "exit_reason_changed"
+        ],
+        "symbol": "002879.SZ@20261103",
+        "signal_time": "11:19",
+        "replay": {
+          "exit": "09:31",
+          "net_return_pct": 0.00376224
+        },
+        "jev": {
+          "exit": "09:31",
+          "net_return_pct": 0.0086
+        }
+      },
+      {
+        "changes": [
+          "exit_reason_changed"
+        ],
+        "symbol": "002879.SZ@20261111",
+        "signal_time": "11:07",
+        "replay": {
+          "exit": "09:31",
+          "net_return_pct": 0.00506552
+        },
+        "jev": {
+          "exit": "09:34",
+          "net_return_pct": 0.0086
+        }
+      },
+      {
+        "changes": [
+          "exit_reason_changed"
+        ],
+        "symbol": "002897.SZ@20261112",
+        "signal_time": "13:50",
+        "replay": {
+          "exit": "09:31",
+          "net_return_pct": 0.00244181
+        },
+        "jev": {
+          "exit": "09:31",
+          "net_return_pct": 0.0086
+        }
+      },
+      {
+        "changes": [
+          "exit_reason_changed"
+        ],
+        "symbol": "002918.SZ@20261105",
+        "signal_time": "14:04",
+        "replay": {
+          "exit": "09:32",
+          "net_return_pct": 0.01413829
+        },
+        "jev": {
+          "exit": "09:31",
+          "net_return_pct": -0.0064
+        }
+      },
+      {
+        "changes": [
+          "exit_reason_changed"
+        ],
+        "symbol": "300024.SZ@20261110",
+        "signal_time": "11:25",
+        "replay": {
+          "exit": "09:39",
+          "net_return_pct": 0.00967011
+        },
+        "jev": {
+          "exit": "09:31",
+          "net_return_pct": -0.0064
+        }
+      },
+      {
+        "changes": [
+          "exit_reason_changed"
+        ],
+        "symbol": "300081.SZ@20261106",
+        "signal_time": "13:19",
+        "replay": {
+          "exit": "09:31",
+          "net_return_pct": -0.00470033
+        },
+        "jev": {
+          "exit": "09:31",
+          "net_return_pct": -0.0064
+        }
+      },
+      {
+        "changes": [
+          "exit_reason_changed"
+        ],
+        "symbol": "300100.SZ@20261110",
+        "signal_time": "14:09",
+        "replay": {
+          "exit": "09:31",
+          "net_return_pct": 0.00669909
+        },
+        "jev": {
+          "exit": "09:31",
+          "net_return_pct": 0.0086
+        }
+      },
+      {
+        "changes": [
+          "exit_reason_changed"
+        ],
+        "symbol": "300100.SZ@20261112",
+        "signal_time": "10:35",
+        "replay": {
+          "exit": "09:41",
+          "net_return_pct": -0.00915547
+        },
+        "jev": {
+          "exit": "09:31",
+          "net_return_pct": 0.0086
+        }
+      },
+      {
+        "changes": [
+          "exit_reason_changed"
+        ],
+        "symbol": "300122.SZ@20261028",
+        "signal_time": "13:07",
+        "replay": {
+          "exit": "09:32",
+          "net_return_pct": -0.01123359
+        },
+        "jev": {
+          "exit": "09:31",
+          "net_return_pct": 0.0086
+        }
+      },
+      {
+        "changes": [
+          "exit_reason_changed"
+        ],
+        "symbol": "300122.SZ@20261105",
+        "signal_time": "11:25",
+        "replay": {
+          "exit": "09:38",
+          "net_return_pct": 0.00877639
+        },
+        "jev": {
+          "exit": "09:31",
+          "net_return_pct": -0.0064
+        }
+      },
+      {
+        "changes": [
+          "exit_reason_changed"
+        ],
+        "symbol": "300195.SZ@20261104",
+        "signal_time": "10:06",
+        "replay": {
+          "exit": "09:31",
+          "net_return_pct": -0.0199567
+        },
+        "jev": {
+          "exit": "09:31",
+          "net_return_pct": -0.0064
+        }
+      },
+      {
+        "changes": [
+          "exit_reason_changed"
+        ],
+        "symbol": "300195.SZ@20261105",
+        "signal_time": "14:07",
+        "replay": {
+          "exit": "09:40",
+          "net_return_pct": 0.00897344
+        },
+        "jev": {
+          "exit": "09:31",
+          "net_return_pct": -0.0064
+        }
+      },
+      {
+        "changes": [
+          "exit_reason_changed"
+        ],
+        "symbol": "300232.SZ@20261105",
+        "signal_time": "13:35",
+        "replay": {
+          "exit": "09:31",
+          "net_return_pct": -0.00347039
+        },
+        "jev": {
+          "exit": "09:31",
+          "net_return_pct": 0.0086
+        }
+      },
+      {
+        "changes": [
+          "exit_reason_changed"
+        ],
+        "symbol": "300290.SZ@20261102",
+        "signal_time": "13:04",
+        "replay": {
+          "exit": "09:31",
+          "net_return_pct": -0.0331757
+        },
+        "jev": {
+          "exit": "09:31",
+          "net_return_pct": -0.0064
+        }
+      },
+      {
+        "changes": [
+          "exit_reason_changed"
+        ],
+        "symbol": "300290.SZ@20261111",
+        "signal_time": "10:40",
+        "replay": {
+          "exit": "09:33",
+          "net_return_pct": 0.01156296
+        },
+        "jev": {
+          "exit": "09:31",
+          "net_return_pct": -0.0064
+        }
+      }
+    ],
+    "decision_change_count": 177
+  },
+  "attribution": {
+    "baseline_divergences": 319,
+    "knobs_tested": 11,
+    "ranked": [
+      {
+        "knob": "exit_eval",
+        "from": "bar_close",
+        "to": "bar_high_low",
+        "skipped": false,
+        "baseline_divergences": 319,
+        "baseline_comparable": 36086,
+        "trial_divergences": 0,
+        "lost_comparable": 0,
+        "comparable": 36086,
+        "comparable_retention": 1.0,
+        "alignment_preserved": true,
+        "explained": 319,
+        "explained_rate": 1.0
+      },
+      {
+        "knob": "bar_timestamp",
+        "from": "bar_end",
+        "to": "bar_start",
+        "skipped": false,
+        "baseline_divergences": 319,
+        "baseline_comparable": 36086,
+        "trial_divergences": 24665,
+        "lost_comparable": 4477,
+        "comparable": 31609,
+        "comparable_retention": 0.8759,
+        "alignment_preserved": true,
+        "explained": 0,
+        "explained_rate": 0.0
+      },
+      {
+        "knob": "baseline_price",
+        "from": "prev_close",
+        "to": "day_open",
+        "skipped": false,
+        "baseline_divergences": 319,
+        "baseline_comparable": 36086,
+        "trial_divergences": 3064,
+        "lost_comparable": 809,
+        "comparable": 35277,
+        "comparable_retention": 0.9776,
+        "alignment_preserved": true,
+        "explained": 0,
+        "explained_rate": 0.0
+      },
+      {
+        "knob": "breakout_field",
+        "from": "high",
+        "to": "close",
+        "skipped": false,
+        "baseline_divergences": 319,
+        "baseline_comparable": 36086,
+        "trial_divergences": 2549,
+        "lost_comparable": 0,
+        "comparable": 36158,
+        "comparable_retention": 1.002,
+        "alignment_preserved": true,
+        "explained": 0,
+        "explained_rate": 0.0
+      },
+      {
+        "knob": "breakout_includes_current",
+        "from": false,
+        "to": true,
+        "skipped": false,
+        "baseline_divergences": 319,
+        "baseline_comparable": 36086,
+        "trial_divergences": 12329,
+        "lost_comparable": 7332,
+        "comparable": 28754,
+        "comparable_retention": 0.7968,
+        "alignment_preserved": true,
+        "explained": 0,
+        "explained_rate": 0.0
+      },
+      {
+        "knob": "breakout_window",
+        "from": 20,
+        "to": 10,
+        "skipped": false,
+        "baseline_divergences": 319,
+        "baseline_comparable": 36086,
+        "trial_divergences": 1362,
+        "lost_comparable": 0,
+        "comparable": 36122,
+        "comparable_retention": 1.001,
+        "alignment_preserved": true,
+        "explained": 0,
+        "explained_rate": 0.0
+      },
+      {
+        "knob": "cooldown_bars",
+        "from": 10,
+        "to": 0,
+        "skipped": false,
+        "baseline_divergences": 319,
+        "baseline_comparable": 36086,
+        "trial_divergences": 319,
+        "lost_comparable": 0,
+        "comparable": 36086,
+        "comparable_retention": 1.0,
+        "alignment_preserved": true,
+        "explained": 0,
+        "explained_rate": 0.0
+      },
+      {
+        "knob": "entry_price",
+        "from": "next_open",
+        "to": "signal_close",
+        "skipped": false,
+        "baseline_divergences": 319,
+        "baseline_comparable": 36086,
+        "trial_divergences": 1644,
+        "lost_comparable": 0,
+        "comparable": 37292,
+        "comparable_retention": 1.0334,
+        "alignment_preserved": true,
+        "explained": 0,
+        "explained_rate": 0.0
+      },
+      {
+        "knob": "persistence_bars",
+        "from": 2,
+        "to": 1,
+        "skipped": false,
+        "baseline_divergences": 319,
+        "baseline_comparable": 36086,
+        "trial_divergences": 2913,
+        "lost_comparable": 0,
+        "comparable": 36535,
+        "comparable_retention": 1.0124,
+        "alignment_preserved": true,
+        "explained": 0,
+        "explained_rate": 0.0
+      },
+      {
+        "knob": "t_plus_1",
+        "from": true,
+        "to": false,
+        "skipped": false,
+        "baseline_divergences": 319,
+        "baseline_comparable": 36086,
+        "trial_divergences": 981,
+        "lost_comparable": 1622,
+        "comparable": 34464,
+        "comparable_retention": 0.9551,
+        "alignment_preserved": true,
+        "explained": 0,
+        "explained_rate": 0.0
+      },
+      {
+        "knob": "wait_bars",
+        "from": 1,
+        "to": 0,
+        "skipped": false,
+        "baseline_divergences": 319,
+        "baseline_comparable": 36086,
+        "trial_divergences": 3093,
+        "lost_comparable": 0,
+        "comparable": 37259,
+        "comparable_retention": 1.0325,
+        "alignment_preserved": true,
+        "explained": 0,
+        "explained_rate": 0.0
+      }
+    ],
+    "top_knob": "exit_eval",
+    "top_explained_rate": 1.0,
+    "verdict": "single_knob",
+    "joint_diagnosis": {
+      "applicable": true,
+      "explanation": "单旋钮消融在多个语义旋钮同时不同时不可解。若把最可能的那一个旋钮调到正确值，差异也不见明显下降，说明差异由多因素叠加，需要联合搜索而非逐个消融。",
+      "knobs_moving_opposite": 9,
+      "knobs_ranked": 11,
+      "diagnosis": "inconclusive_attribution"
+    },
+    "note": "explained_rate = (基线差异 - 换一个旋钮后的差异) / 基线差异；单旋钮达到阈值即认定该旋钮为主要成因。若多个旋钮同时不同，单旋钮消融不适用——见 joint_diagnosis。"
+  },
+  "alignment_conclusion": {
+    "verdict": "inconclusive",
+    "reason": "日志为合成数据，只能证明对齐链路可运行；对 JEV 实际语义的判定必须等真实日志到位后重跑",
+    "comparable_items": 36086,
+    "match_rate": 0.9912,
+    "divergence_items": 319,
+    "match_rate_ci95": [
+      0.9901405680518133,
+      0.992074881738357
+    ],
+    "divergent_abs": 319,
+    "divergent_ratio": 0.00884,
+    "consistent_gate": {
+      "min_rate": 0.98,
+      "max_divergent_abs": 0,
+      "max_divergent_ratio": 0.0,
+      "note": "consistent 需同时满足：一致率达门槛 且 真实冲突数可忽略（绝对值或占比任一达标）。只看比率会在样本量大时把真差异稀释成假一致。"
+    }
+  },
+  "value_assessment": {
+    "baseline": {
+      "profile": "naive_literal",
+      "description": "未做任何领域推断的字面直译（窗口含当前根、开盘价为基准、信号当根收盘入场、无 T+1）",
+      "signal_count": 29346,
+      "closed_cycles": 27987,
+      "total_net_pct": -51.764153
+    },
+    "current": {
+      "profile": "reference_semantics",
+      "signal_count": 1496,
+      "closed_cycles": 1422,
+      "total_net_pct": -7.859581
+    },
+    "decision_changes": {
+      "signals_added": -27850,
+      "signals_removed": 27850,
+      "cycles_added": -26565,
+      "cycles_removed": 26565,
+      "paired_cycle_count": 1223,
+      "paired_coverage": 0.0437,
+      "coverage_threshold": 0.1,
+      "coverage_sufficient": false,
+      "note": "配对覆盖率 = 配对周期 / 基线周期。覆盖率低说明两套语义选出的交易集合差异很大，配对检验只测重叠部分，结论不可外推到全样本。"
+    },
+    "effect_size": {
+      "paired_net_pct_delta": {
+        "n": 1223,
+        "mean": -0.00423427,
+        "ci95": [
+          -0.00603459,
+          -0.00243395
+        ]
+      },
+      "full_sample_welch": {
+        "n_a": 27987,
+        "n_b": 1422,
+        "mean_a": -0.00184958,
+        "mean_b": -0.00552712,
+        "diff": -0.00367755,
+        "se": 0.00083495,
+        "t": -4.4045,
+        "p": 1.1e-05,
+        "note": "Welch 检验，正态近似；不依赖配对，不受配对覆盖率影响"
+      },
+      "win_loss": {
+        "wins": 484,
+        "losses": 729,
+        "ties": 10
+      },
+      "sign_test_p": 2.076e-12,
+      "magnitude_note": "符号检验判断方向（多数周期是否改善），均值差判断幅度；两者可背离——少数大幅亏损能主导均值而多数周期只小赢",
+      "relative_change": 0.8482
+    },
+    "verdict": {
+      "verdict": "negative",
+      "reason": "配对覆盖率仅 4.37%，配对检验不可外推；改用不依赖配对的全样本 Welch 检验（27,987 vs 1,422），均值差 -0.3678%，p=1.1e-05 — 显著更差",
+      "rule": "优先用配对检验：配对周期数 >= min_cycles、覆盖率 >= 10% 且符号检验 p<0.05。若覆盖率不足但全样本 Welch 检验显著（p<0.05 且两侧样本 >= min_cycles），采用全样本结论——它不依赖配对，不受覆盖率影响。两者都不满足 → inconclusive"
+    }
+  },
+  "applicability": {
+    "in_scope": [
+      "A 股分钟级盯盘条件的语义还原与回放（单日与跨日均支持）",
+      "condition / signal / wait / entry / exit 五个对齐轴",
+      "由语义旋钮差异引起的判断、时点与成交差异归因",
+      "跨日持仓与 T+1 结算：仓位可从入场日带到后续交易日",
+      "只读对齐：不假设可访问 JEV 内部推理或自定义 API"
+    ],
+    "out_of_scope": [
+      "隔夜跳空的建模：回放按次日开盘价成交，不单列跳空损益",
+      "除权除息调整：K 线未复权对齐，pre_close 直接取数据源值",
+      "盘口级撮合、排队与部分成交建模",
+      "JEV 内部模型推理路径的复现",
+      "收益率、夏普等绩效评价结论",
+      "实盘对接：全程不连接任何交易通道"
+    ],
+    "coverage": {
+      "log_source": "synthetic",
+      "axes": [
+        "condition",
+        "signal",
+        "wait",
+        "entry",
+        "exit"
+      ],
+      "semantics_hash": "50f2f5c194238ed6",
+      "fixture_fingerprint": "8f140eb439982b7e",
+      "symbol_count": 300
+    },
+    "unmodeled_market_states": {
+      "series_count": 4200,
+      "date_range": [
+        "20261026",
+        "20261112"
+      ],
+      "trading_days": 14,
+      "checks": {
+        "limit_up_touch": {
+          "count": 74,
+          "share": 0.0176,
+          "note": "当日最高价触及所在板块涨停价；重放仍会在该价位照常成交"
+        },
+        "limit_down_touch": {
+          "count": 27,
+          "share": 0.0064,
+          "note": "当日最低价触及跌停价；跌停时卖出可能实际无法成交"
+        },
+        "board_mix": {
+          "chinext": {
+            "count": 1134,
+            "share": 0.27
+          },
+          "default": {
+            "count": 2576,
+            "share": 0.6133
+          },
+          "star": {
+            "count": 490,
+            "share": 0.1167
+          }
+        },
+        "st": {
+          "count": 196,
+          "share": 0.0467,
+          "symbols": 14,
+          "note": "ST 标的有 5% 涨跌幅限制与特殊交易规则，本 skill 未做区分",
+          "source": "MCP get_st_list"
+        },
+        "suspended": {
+          "count": 0,
+          "share": 0.0,
+          "symbols": 0,
+          "note": "停牌日不应产生任何成交，本 skill 未做过滤",
+          "source": "MCP get_suspended_list"
+        }
+      },
+      "unmodeled_share": {
+        "st_or_suspended": 0.0467,
+        "limit_touch": 0.024
+      },
+      "caveat": "本 skill 不对这些状态做特殊处理：ST/停牌/涨跌停标的照常产生信号与成交。下面的占比就是结论的适用范围折扣——占比越高，结论越不能直接外推到实盘。",
+      "overall_unmodeled_upper_bound": 0.0467,
+      "unverified_components": [],
+      "known_components_max": 0.0467,
+      "verdict": {
+        "level": "moderate",
+        "reason": "未建模状态占比 4.67%，属可接受但需声明的范围"
+      }
+    },
+    "unmodeled_market_states_note": "本 skill 不对 ST / 停牌 / 涨跌停做特殊处理。上面的占比是结论适用范围的折扣：占比越高，越不能把回放结果直接外推到实盘。未核验时为 null，不等于 0。",
+    "invalid_when": [
+      "标的处于停牌、ST 或涨跌停状态（未建模）",
+      "当日存在除权除息（K 线未复权对齐）",
+      "日志记录口径与 log_contract 不一致（缺 wait_bars / entry_price 等字段）",
+      "分钟线时间戳口径与 bar_timestamp 声明不符",
+      "样本交易日数不足导致只在单日成立"
+    ],
+    "requires": [
+      "同一份分钟 K 线与同源日志，且两者覆盖同一标的与同一交易日",
+      "语义旋钮全部显式声明并计入 semantics_hash",
+      "config_hash 一致才可跨 run 比对"
+    ]
+  },
+  "semantics": {
+    "bar_timestamp": "bar_end",
+    "baseline_price": "prev_close",
+    "breakout_field": "high",
+    "breakout_window": 20,
+    "breakout_includes_current": false,
+    "persistence_bars": 2,
+    "warmup_bars": 20,
+    "signal_gain_pct": 0.01,
+    "wait_bars": 1,
+    "entry_price": "next_open",
+    "exit_eval": "bar_close",
+    "stop_loss_pct": 0.005,
+    "take_profit_pct": 0.01,
+    "max_hold_bars": 30,
+    "cooldown_bars": 10,
+    "no_entry_after": "14:45",
+    "force_exit_time": "14:45",
+    "t_plus_1": true,
+    "fee_bps": 5,
+    "slippage_bps": 2,
+    "initial_capital": 1000000,
+    "position_pct": 0.1,
+    "lot_size": 100
+  },
+  "per_day": {
+    "20261026": {
+      "match": 1547,
+      "divergent": 0,
+      "one_sided": 70631,
+      "comparable": 1547
+    },
+    "20261027": {
+      "match": 1067,
+      "divergent": 27,
+      "one_sided": 71163,
+      "comparable": 1094
+    },
+    "20261028": {
+      "match": 4024,
+      "divergent": 8,
+      "one_sided": 68578,
+      "comparable": 4032
+    },
+    "20261029": {
+      "match": 1241,
+      "divergent": 38,
+      "one_sided": 71176,
+      "comparable": 1279
+    },
+    "20261030": {
+      "match": 1593,
+      "divergent": 4,
+      "one_sided": 70768,
+      "comparable": 1597
+    },
+    "20261102": {
+      "match": 5120,
+      "divergent": 7,
+      "one_sided": 67665,
+      "comparable": 5127
+    },
+    "20261103": {
+      "match": 2426,
+      "divergent": 68,
+      "one_sided": 70210,
+      "comparable": 2494
+    },
+    "20261104": {
+      "match": 4154,
+      "divergent": 16,
+      "one_sided": 68571,
+      "comparable": 4170
+    },
+    "20261105": {
+      "match": 4610,
+      "divergent": 41,
+      "one_sided": 68288,
+      "comparable": 4651
+    },
+    "20261106": {
+      "match": 996,
+      "divergent": 12,
+      "one_sided": 71434,
+      "comparable": 1008
+    },
+    "20261109": {
+      "match": 1548,
+      "divergent": 3,
+      "one_sided": 70695,
+      "comparable": 1551
+    },
+    "20261110": {
+      "match": 3178,
+      "divergent": 23,
+      "one_sided": 69383,
+      "comparable": 3201
+    },
+    "20261111": {
+      "match": 2807,
+      "divergent": 50,
+      "one_sided": 69778,
+      "comparable": 2857
+    },
+    "20261112": {
+      "match": 1456,
+      "divergent": 22,
+      "one_sided": 70980,
+      "comparable": 1478
+    }
+  },
+  "summary": {
+    "symbol_count": 4200,
+    "signal_count": 1496,
+    "closed_cycles": 1422,
+    "total_net_pct": -7.859581,
+    "ledger_match_rate": 0.9912,
+    "divergence_items": 319,
+    "one_sided_items": 979320,
+    "condition_coverage": 0.0285,
+    "alignment_verdict": "inconclusive",
+    "value_verdict": "negative",
+    "attribution_verdict": "single_knob"
+  }
+}

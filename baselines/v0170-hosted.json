@@ -1,0 +1,25 @@
+{
+  "frozen_at": "2026-11-18T15:58:02.642297+00:00",
+  "name": "v0170-hosted",
+  "run_id": "jev-20261118T155802126998Z",
+  "config_hash": "2eeb96123b8b0cba",
+  "semantics_hash": "50f2f5c194238ed6",
+  "log_source": "synthetic",
+  "fixture_fingerprint": "8f140eb439982b7e",
+  "summary": {
+    "symbol_count": 4200,
+    "signal_count": 1496,
+    "closed_cycles": 1422,
+    "total_net_pct": -7.859581,
+    "ledger_match_rate": 0.9912,
+    "divergence_items": 319,
+    "one_sided_items": 979320,
+    "condition_coverage": 0.0285,
+    "alignment_verdict": "inconclusive",
+    "value_verdict": "negative",
+    "attribution_verdict": "single_knob"
+  },
+  "alignment_verdict": "inconclusive",
+  "value_verdict": "negative",
+  "attribution_verdict": "single_knob"
+}

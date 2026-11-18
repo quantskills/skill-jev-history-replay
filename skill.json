@@ -1,6 +1,6 @@
 {
   "name": "skill-jev-history-replay",
-  "version": "0.17.0",
+  "version": "0.17.1",
   "entrypoint": "SKILL.md",
   "runtime": "python>=3.10",
   "license": "GPL-3.0-only",
@@ -24,5 +24,15 @@
     "group_by": "model_id",
     "comparability_policy": "跨 run 比对必须保持 semantics_hash、夹具指纹、容差与日志来源一致，四者计入 config_hash；不一致时明确标记不可比。"
   },
-  "data_source_note": "数据获取 = 调用 MCP 工具 mcp__pandadata__call_pandadata（auth_status → search_methods → get_method_doc → call_pandadata）取回并落盘；对齐与回放阶段完全离线，只读本地 fixture，无凭证需求"
+  "data_source_note": "数据获取 = 调用 MCP 工具 mcp__pandadata__call_pandadata（auth_status → search_methods → get_method_doc → call_pandadata）取回并落盘；对齐与回放阶段完全离线，只读本地 fixture，无凭证需求",
+  "outputs": {
+    "shipped_evidence": [
+      "output/report.json",
+      "output/ledger.jsonl"
+    ],
+    "frozen_anchor": "baselines/v0170-hosted.json",
+    "regenerated_on_run": "output/",
+    "anchor_check": "python3 scripts/compare_baseline.py compare output/report.json baselines/v0170-hosted.json",
+    "note": "v0.17.1 起随包发布一次真实运行的报告与账本，以及对应的冻结锚点；其余运行产物仍按机器本地处理。锚点 log_source=synthetic，alignment_conclusion.verdict 恒为 inconclusive，替换 fixtures/logs/ 后需重新 freeze。"
+  }
 }

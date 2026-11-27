@@ -1,5 +1,7 @@
 # JEV Watch-Condition / History-Replay Semantic Alignment
 
+QuantSkills release maintainer: [abgyjaguo](https://github.com/abgyjaguo).
+
 Check whether JEV's recorded watch conditions and a reproducible historical replayer mean the same thing, and attribute every difference to a specific interpretation choice.
 
 ## ⚠️ Disclaimer

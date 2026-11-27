@@ -3,6 +3,14 @@ name: skill-jev-history-replay
 description: 当需要核对 JEV 盯盘条件与历史回放是否语义一致时，使用此 skill。取实际条件/判断日志与已完成 K 线，用显式声明的语义重建盯盘条件与重放器，逐项输出条件判断、信号时点、等待、入场、退出的差异账本，并对差异做单旋钮消融归因。
 tags: [quant, build, engineered, 语义对齐, 历史回放, 差异账本]
 license: GPL-3.0-only
+metadata:
+  license: GPL-3.0-only
+  organization: QuantSkills
+  organization_url: https://github.com/quantskills
+  repository: skill-jev-history-replay
+  repository_url: https://github.com/quantskills/skill-jev-history-replay
+  project_type: skill
+  collection: replay-audit
 ---
 
 # JEV 盯盘条件与历史回放语义对齐

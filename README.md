@@ -1,5 +1,7 @@
 # JEV 盯盘条件与历史回放语义对齐
 
+QuantSkills 社区发布维护者：[abgyjaguo](https://github.com/abgyjaguo)。
+
 核对 JEV 记录的盯盘判断与一个可复现的历史回放器是否语义一致，并把差异逐项归因。
 
 ## ⚠️ 免责声明
